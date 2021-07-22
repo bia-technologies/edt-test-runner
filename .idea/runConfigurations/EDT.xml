@@ -1,0 +1,15 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="EDT" type="Application" factoryName="Application" show_console_on_std_err="true" show_console_on_std_out="true">
+    <option name="MAIN_CLASS_NAME" value="org.eclipse.equinox.launcher.Main" />
+    <module name="ru.biatech.edt.xtest" />
+    <option name="PROGRAM_PARAMETERS" value="-XstartOnFirstThread" />
+    <selectedOptions>
+      <option name="environmentVariables" visible="false" />
+    </selectedOptions>
+    <shortenClasspath name="ARGS_FILE" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/edt_workspace" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

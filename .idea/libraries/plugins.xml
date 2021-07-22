@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="plugins">
+    <CLASSES>
+      <root url="file://$EDT_PATH$/plugins" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="file://$EDT_PATH$/plugins" />
+    </SOURCES>
+    <jarDirectory url="file://$EDT_PATH$/plugins" recursive="false" />
+    <jarDirectory url="file://$EDT_PATH$/plugins" recursive="false" type="SOURCES" />
+  </library>
+</component>

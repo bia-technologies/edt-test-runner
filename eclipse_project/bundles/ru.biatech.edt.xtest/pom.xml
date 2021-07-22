@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2020,2021 1C-Soft LLC
+    Copyright 2021-2022 BIA-Technologies Limited Liability Company
+
+    This program and the accompanying materials are made available under
+    the terms of the Eclipse Public License 2.0 which is available at
+    https://www.eclipse.org/legal/epl-2.0/, or the Apache License, Version 2.0
+    which is available at https://www.apache.org/licenses/LICENSE-2.0.
+
+    SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+    Contributors:
+       1C-Soft LLC - initial API and implementation
+       BIA-Technologies LLC - Using a Template
+
+-->
+<project
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+  xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>ru.biatech.edt.xtest</groupId>
+    <artifactId>bundles</artifactId>
+    <version>{version}-SNAPSHOT</version>
+  </parent>
+  <artifactId>ru.biatech.edt.xtest</artifactId>
+  <packaging>eclipse-plugin</packaging>
+</project>

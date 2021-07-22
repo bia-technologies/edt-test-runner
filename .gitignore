@@ -1,0 +1,16 @@
+/out
+/edt_workspace/*
+/.idea/*
+!/.idea/modules.xml
+!/.idea/libraries/
+!/.idea/runConfigurations/
+*.prefs
+/eclipse_project/workspace/
+target/
+bin/
+build/
+/.gradle/*
+/gradle*
+!gradle.properties
+*.hprof
+/gradle.properties

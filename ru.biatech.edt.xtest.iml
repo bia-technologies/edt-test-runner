@@ -20,7 +20,6 @@
       <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/main/resources" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/META-INF" type="java-resource" />
-      <excludeFolder url="file://$MODULE_DIR$/eclipse_project" />
       <excludeFolder url="file://$MODULE_DIR$/edt_workspace" />
       <excludeFolder url="file://$MODULE_DIR$/build" />
     </content>

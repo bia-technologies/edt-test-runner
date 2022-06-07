@@ -73,24 +73,22 @@ tasks.named("licenseFormat") {
 val pluginBuildPath = layout.buildDirectory.dir("buildPlugin").get().asFile
 
 tasks.register<Copy>("buildPlugin-copyFiles") {
-    from("eclipse_project") {
-        filter { line -> line.replace("{version}", version.toString()) }
-    }
+    // TODO: Добавить очистку каталога сборки
+    from("templates/eclipse_project")
 
     into(pluginBuildPath)
 
     from(layout.projectDirectory.dir("src/main/java")) {
-        into("bundles/ru.biatech.edt.xtest/src")
+        into("bundles/test_runner/src")
     }
     from(layout.projectDirectory.dir("src/main/resources")) {
-        into("bundles/ru.biatech.edt.xtest/resources")
+        into("bundles/test_runner/resources")
     }
     from(layout.projectDirectory.dir("META-INF")) {
-        into("bundles/ru.biatech.edt.xtest/META-INF")
-        filter { line -> line.replace(Regex("Bundle-Version.*"), "Bundle-Version: $version.qualifier") }
+        into("bundles/test_runner/META-INF")
     }
     from(layout.projectDirectory.dir("plugin.xml")) {
-        into("bundles/ru.biatech.edt.xtest")
+        into("bundles/test_runner")
     }
     group = "build"
 }

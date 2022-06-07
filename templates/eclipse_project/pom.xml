@@ -24,7 +24,7 @@
     <groupId>ru.biatech.edt.xtest</groupId>
     <artifactId>bom</artifactId>
     <version>{version}-SNAPSHOT</version>
-    <relativePath>./bom/pom.xml</relativePath>
+    <relativePath>bom/pom.xml</relativePath>
   </parent>
 
   <artifactId>parent</artifactId>

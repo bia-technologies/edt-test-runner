@@ -30,7 +30,7 @@
   <name>Bundles</name>
   
   <modules>
-    <module>ru.biatech.edt.xtest</module>
+    <module>test_runner</module>
   </modules>
   
   <build>

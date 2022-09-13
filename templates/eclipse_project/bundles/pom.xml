@@ -21,16 +21,15 @@
   <parent>
     <groupId>ru.biatech.edt.xtest</groupId>
     <artifactId>parent</artifactId>
-    <version>{version}-SNAPSHOT</version>
+    <version>0.3.1-SNAPSHOT</version>
   </parent>
   
-  <groupId>ru.biatech.edt.xtest</groupId>
   <artifactId>bundles</artifactId>
   <packaging>pom</packaging>
-  <name>Bundles</name>
+  <name>bundles</name>
   
   <modules>
-    <module>test_runner</module>
+    <module>viewer</module>
   </modules>
   
   <build>

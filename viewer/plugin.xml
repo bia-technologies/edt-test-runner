@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Copyright (c) 2022 BIA-Technologies Limited Liability Company.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<plugin>
+
+    <extension-point id="ru.biatech.edt.junit.testKinds" name="%testKinds.name"
+                     schema="schema/testKinds.exsd"/>
+    <extension-point id="ru.biatech.edt.junit.testRunListeners" name="Test Run Listeners" schema="schema/testRunListeners.exsd"/>
+
+    <!-- JUnit Launcher -->
+    <extension
+            point="org.eclipse.debug.core.launchConfigurationTypes">
+        <launchConfigurationType
+                delegate="ru.biatech.edt.junit.launcher.v8.LaunchConfigurationDelegate"
+                id="ru.biatech.edt.junit.launcher.v8.launchConfigurationType"
+                modes="run, debug"
+                name="%junitLaunchConfigs.name">
+        </launchConfigurationType>
+    </extension>
+    <extension
+            point="org.eclipse.debug.ui.launchConfigurationTypeImages">
+        <launchConfigurationTypeImage
+                configTypeID="ru.biatech.edt.junit.launcher.v8.launchConfigurationType"
+                icon="$nl$/icons/full/eview16/junit.png"
+                id="ru.biatech.edt.junit.launcher.v8.launchConfigurationTypeImage">
+        </launchConfigurationTypeImage>
+    </extension>
+    <extension
+            point="org.eclipse.debug.ui.launchConfigurationTabGroups">
+        <launchConfigurationTabGroup
+                class="ru.biatech.edt.junit.launcher.ui.LaunchConfigurationTabGroup"
+                id="ru.biatech.edt.junit.launcher.v8.launchConfigurationTabGroup"
+                type="ru.biatech.edt.junit.launcher.v8.launchConfigurationType">
+        </launchConfigurationTabGroup>
+    </extension>
+
+    <extension
+            point="org.eclipse.core.runtime.preferences">
+        <initializer class="ru.biatech.edt.junit.JunitPreferenceInitializer"/>
+    </extension>
+
+    <!-- JUnit Container -->
+
+
+    <extension
+            point="ru.biatech.edt.junit.testKinds">
+        <kind
+                id="ru.biatech.edt.junit.loader.yaxunit"
+                displayName="%testKind.yaxunit"
+                finderClass="ru.biatech.edt.junit.yaxunit.TestFinder"
+                launcherClass="ru.biatech.edt.junit.yaxunit.Launcher">
+        </kind>
+    </extension>
+
+    <extension
+            point="org.eclipse.ui.views">
+        <view
+                name="%View.label"
+                icon="$nl$/icons/full/eview16/junit.png"
+                category="com._1c.g5.v8.dt.ui.v8category"
+                fastViewWidthRatio="0.40"
+                class="ru.biatech.edt.junit.ui.view.TestRunnerViewPart"
+                id="ru.biatech.edt.junit.ResultView">
+        </view>
+    </extension>
+    <extension
+            point="org.eclipse.ui.perspectiveExtensions">
+        <perspectiveExtension
+                targetID="com._1c.g5.v8.dt.ui2.perspective">
+            <view
+                    relative="com._1c.g5.v8.dt.team.ui.development.view"
+                    visible="true"
+                    id="ru.biatech.edt.junit.ResultView"
+                    relationship="stack">
+            </view>
+            <newWizardShortcut
+                    id="ru.biatech.edt.junit.wizards.NewTestCaseCreationWizard">
+            </newWizardShortcut>
+        </perspectiveExtension>
+        <perspectiveExtension
+                targetID="com._1c.g5.v8.dt.ui2.perspective">
+            <actionSet
+                    id="ru.biatech.edt.junit.JUnitActionSet">
+            </actionSet>
+        </perspectiveExtension>
+        <perspectiveExtension
+                targetID="org.eclipse.jdt.ui.JavaBrowsingPerspective">
+            <actionSet
+                    id="ru.biatech.edt.junit.JUnitActionSet">
+            </actionSet>
+            <newWizardShortcut
+                    id="ru.biatech.edt.junit.wizards.NewTestCaseCreationWizard">
+            </newWizardShortcut>
+        </perspectiveExtension>
+        <perspectiveExtension
+                targetID="org.eclipse.debug.ui.DebugPerspective">
+            <view
+                    relative="org.eclipse.debug.ui.DebugView"
+                    visible="false"
+                    id="ru.biatech.edt.junit.ResultView"
+                    relationship="stack">
+            </view>
+            <viewShortcut
+                    id="ru.biatech.edt.junit.ResultView">
+            </viewShortcut>
+        </perspectiveExtension>
+    </extension>
+    <extension
+            point="org.eclipse.ui.preferencePages">
+        <page
+                name="%PreferencePage.label"
+                category="com._1c.g5.v8.dt.ui.V8"
+                class="ru.biatech.edt.junit.ui.JUnitPreferencePage"
+                id="ru.biatech.edt.junit.preferences">
+            <keywordReference id="ru.biatech.edt.junit.JUnit"/>
+        </page>
+    </extension>
+    <extension
+            point="org.eclipse.ui.keywords">
+        <keyword
+                id="ru.biatech.edt.junit.JUnit"
+                label="%preferenceKeywords.general"/>
+        <keyword
+                id="ru.biatech.edt.junit.wizards.java"
+                label="%preferenceKeywords.wizards.java"/>
+    </extension>
+    <extension
+            point="org.eclipse.ui.newWizards">
+        <category
+                name="%WizardCategory.name"
+                parentCategory="com._1c.g5.v8.dt.ui.v8category"
+                id="ru.biatech.edt.junit">
+        </category>
+        <wizard
+                name="%TestCaseWizard.name"
+                icon="$nl$/icons/full/etool16/new_testcase.png"
+                category="org.eclipse.jdt.ui.java/org.eclipse.jdt.junit"
+                id="ru.biatech.edt.junit.wizards.NewTestCaseCreationWizard">
+            <class
+                    class="org.eclipse.jdt.internal.junit.wizards.NewTestCaseCreationWizard">
+                <parameter
+                        name="javatype"
+                        value="true">
+                </parameter>
+            </class>
+            <!-- see bug 48164 for wrong pde compiler warnings -->
+            <description>
+                %TestWizard.description
+            </description>
+            <keywordReference id="ru.biatech.edt.junit.wizards.java"/>
+        </wizard>
+        <wizard
+                name="%TestSuiteWizard.name"
+                icon="$nl$/icons/full/etool16/new_testsuite.png"
+                category="org.eclipse.jdt.ui.java/org.eclipse.jdt.junit"
+                class="org.eclipse.jdt.internal.junit.wizards.NewTestSuiteCreationWizard"
+                id="ru.biatech.edt.junit.wizards.NewTestSuiteCreationWizard">
+            <description>
+                %SuiteWizard.description
+            </description>
+            <keywordReference id="ru.biatech.edt.junit.wizards.java"/>
+        </wizard>
+    </extension>
+    <extension
+            point="org.eclipse.ui.popupMenus">
+        <objectContribution
+                objectClass="org.eclipse.jdt.core.ICompilationUnit"
+                nameFilter="*.bsl"
+                id="ru.biatech.edt.junit.wizards.UpdateTestSuite">
+            <action
+                    label="%UpdateSuiteAction.label"
+                    class="org.eclipse.jdt.internal.junit.wizards.UpdateTestSuite"
+                    tooltip="%UpdateSuiteAction.tooltip"
+                    enablesFor="1"
+                    id="updateTestSuite">
+            </action>
+        </objectContribution>
+    </extension>
+    <extension
+            point="org.eclipse.ui.actionSets">
+        <actionSet
+                label="%JUnitActionSet.label"
+                visible="false"
+                id="ru.biatech.edt.junit.JUnitActionSet">
+            <menu
+                    label="%searchMenu.label"
+                    path="navigate"
+                    id="org.eclipse.search.menu">
+                <groupMarker name="internalDialogGroup"/>   <!-- not to be used by clients  -->
+                <groupMarker name="dialogGroup"/>           <!-- to be used by clients      -->
+                <separator name="fileSearchContextMenuActionsGroup"/> <!-- to be used by clients      -->
+                <separator name="contextMenuActionsGroup"/> <!-- to be used by clients -->
+                <separator name="occurencesActionsGroup"/> <!-- to be used by clients -->
+                <separator name="extraSearchGroup"/> <!-- to be used by clients -->
+            </menu>
+            <action
+                    definitionId="ru.biatech.edt.junit.gotoTest"
+                    label="%GotoTestAction.label"
+                    helpContextId="ru.biatech.edt.junit.goto_referenced_test_action_context"
+                    class="ru.biatech.edt.junit.ui.GotoReferencedTestAction"
+                    tooltip="%GotoTestAction.tooltip"
+                    menubarPath="org.eclipse.search.menu/extraSearchGroup"
+                    id="junit.actions.GotoTestAction">
+            </action>
+        </actionSet>
+    </extension>
+    <extension
+            point="org.eclipse.ui.actionSetPartAssociations">
+        <actionSetPartAssociation
+                targetID="ru.biatech.edt.junit.JUnitActionSet">
+            <part
+                    id="org.eclipse.jdt.ui.PackageExplorer">
+            </part>
+            <part
+                    id="org.eclipse.jdt.ui.TypeHierarchy">
+            </part>
+            <part
+                    id="org.eclipse.jdt.ui.CompilationUnitEditor">
+            </part>
+            <part
+                    id="org.eclipse.jdt.ui.ClassFileEditor">
+            </part>
+            <part
+                    id="org.eclipse.jdt.ui.ProjectsView">
+            </part>
+            <part
+                    id="org.eclipse.jdt.ui.PackagesView">
+            </part>
+            <part
+                    id="org.eclipse.jdt.ui.TypesView">
+            </part>
+            <part
+                    id="org.eclipse.jdt.ui.MembersView">
+            </part>
+            <part
+                    id="org.eclipse.search.SearchResultView">
+            </part>
+        </actionSetPartAssociation>
+        <actionSetPartAssociation
+                targetID="com._1c.g5.v8.dt.debug.ui.actionSet">
+            <part
+                    id="ru.biatech.edt.junit.ResultView">
+            </part>
+        </actionSetPartAssociation>
+    </extension>
+    <extension
+            point="org.eclipse.ui.commands">
+        <command
+                name="%GotoTestCommand.name"
+                description="%GotoTestCommand.description"
+                categoryId="org.eclipse.search.ui.category.search"
+                id="ru.biatech.edt.junit.gotoTest">
+        </command>
+        <command
+                name="%JUnitShortcut.description.run"
+                description="%JUnitShortcut.description.run"
+                categoryId="org.eclipse.debug.ui.category.run"
+                id="ru.biatech.edt.junit.junitShortcut.run">
+        </command>
+        <command
+                name="%JUnitShortcut.description.debug"
+                description="%JUnitShortcut.description.debug"
+                categoryId="org.eclipse.debug.ui.category.run"
+                id="ru.biatech.edt.junit.junitShortcut.debug">
+        </command>
+        <command
+                name="%JUnitShortcut.description.rerunLast"
+                description="%JUnitShortcut.description.rerunLast"
+                categoryId="org.eclipse.debug.ui.category.run"
+                id="ru.biatech.edt.junit.junitShortcut.rerunLast">
+        </command>
+        <command
+                name="%JUnitShortcut.description.rerunFailedFirst"
+                description="%JUnitShortcut.description.rerunFailedFirst"
+                categoryId="org.eclipse.debug.ui.category.run"
+                id="ru.biatech.edt.junit.junitShortcut.rerunFailedFirst">
+        </command>
+    </extension>
+
+    <!-- JUnit Container -->
+    <extension
+            point="org.eclipse.ui.themes">
+        <fontDefinition
+                categoryId="org.eclipse.jdt.ui.presentation"
+                id="ru.biatech.edt.junit.failurePaneFont"
+                label="%FailureTraceFont.label">
+            <description>
+                %FailureTraceFont.description
+            </description>
+        </fontDefinition>
+    </extension>
+    <extension
+            id="testMethodMarker"
+            name="Test method"
+            point="org.eclipse.core.resources.markers">
+        <super
+                type="org.eclipse.core.resources.textmarker">
+        </super>
+    </extension>
+    <extension
+            point="org.eclipse.ui.editors.annotationTypes">
+        <type
+                markerSeverity="1"
+                markerType="ru.biatech.edt.junit.testMethodMarker"
+                name="ru.biatech.edt.junit.testMethodAnnotation"
+                super="org.eclipse.ui.workbench.texteditor.task">
+        </type>
+    </extension>
+    <extension
+            point="org.eclipse.ui.editors.markerAnnotationSpecification">
+        <specification
+                annotationType="ru.biatech.edt.junit.testMethodAnnotation"
+                label="Тестовый метод"
+                includeOnPreferencePage="true"
+                colorPreferenceKey="30,200,150"
+                textStylePreferenceValue="BOX"
+                textPreferenceValue="true"
+                highlightPreferenceValue="true"
+                icon="icons/full/etool16/run_exc.png"
+                verticalRulerPreferenceValue="true">
+        </specification>
+    </extension>
+    <extension
+            point="com._1c.g5.v8.dt.bsl.externalBslValidator">
+        <externalValidator
+                class="ru.biatech.edt.junit.ruler.TestMethodMarker">
+        </externalValidator>
+    </extension>
+    <extension
+            point="org.eclipse.ui.editorActions">
+        <editorContribution
+                id="ru.biatech.edt.junit.ruler.test"
+                targetID="com._1c.g5.v8.dt.bsl.Bsl">
+            <action
+                    actionID="RulerClick"
+                    class="ru.biatech.edt.junit.ruler.TestMethodActionDelegate"
+                    id="ru.biatech.edt.junit.makers.testAction"
+                    label="Run test method"
+                    state="true"
+                    style="push">
+            </action>
+        </editorContribution>
+    </extension>
+    <extension
+            point="org.eclipse.ui.popupMenus">
+        <viewerContribution
+                id="ru.biatech.edt.junit.ruler.popup"
+                targetID="#TextRulerContext">
+            <action
+                    class="ru.biatech.edt.junit.ruler.TestMethodActionDelegate"
+                    icon="icons/full/etool16/run_exc.png"
+                    id="ru.biatech.edt.junit.ruler.test.run"
+                    label="Run test method"
+                    menubarPath="debug">
+            </action>
+        </viewerContribution>
+    </extension>
+    <extension
+            point="ru.biatech.edt.junit.testRunListeners">
+        <testRunListener
+                class="ru.biatech.edt.junit.ui.UITestRunListener">
+        </testRunListener>
+    </extension>
+</plugin>

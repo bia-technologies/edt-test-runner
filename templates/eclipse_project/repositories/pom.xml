@@ -23,17 +23,16 @@
   <parent>
     <groupId>ru.biatech.edt.xtest</groupId>
     <artifactId>parent</artifactId>
-    <version>{version}-SNAPSHOT</version>
+    <version>0.3.1-SNAPSHOT</version>
   </parent>
 
-  <groupId>ru.biatech.edt.xtest</groupId>
   <artifactId>repositories</artifactId>
   <packaging>pom</packaging>
 
   <name>Update Sites</name>
 
   <modules>
-    <module>ru.biatech.edt.xtest.repository</module>
+    <module>repository</module>
   </modules>
 
   <properties>

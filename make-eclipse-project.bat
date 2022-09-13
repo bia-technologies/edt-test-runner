@@ -5,17 +5,14 @@ ECHO Clear project catalog
 del .\dev\eclipse_project\* /S /Q /F
 ECHO Copy project template
 xcopy .\templates\eclipse_project .\dev\eclipse_project /Y /S /E
+ECHO Make source symlinks
+cd .\dev\eclipse_project\bundles\
+for %%s in ("launcher" "viewer") do (
+    ECHO ============%%s============
+    ECHO %tab%remove %%s
+    RMDIR %%s /S /Q
+    ECHO %TAB%make link %%s
+    mklink /D %%s ..\..\..\%%s
+)
 
-cd .\dev\eclipse_project\bundles\test_runner
-
-RMDIR src /S /Q
-RMDIR resources /S /Q
-RMDIR META-INF /S /Q
-del plugin.xml
-
-mklink /D src ..\..\..\..\src\main\java
-mklink /D resources ..\..\..\..\src\main\resources
-mklink /D META-INF ..\..\..\..\META-INF
-mklink plugin.xml ..\..\..\..\plugin.xml
-
-cd ..\..\..\..
+cd ..\..\..

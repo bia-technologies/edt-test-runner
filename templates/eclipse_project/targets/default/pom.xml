@@ -23,13 +23,11 @@
   <parent>
     <groupId>ru.biatech.edt.xtest</groupId>
     <artifactId>targets</artifactId>
-    <version>{version}-SNAPSHOT</version>
+    <version>0.3.1-SNAPSHOT</version>
   </parent>
 
-  <groupId>ru.biatech.edt.xtest</groupId>
   <artifactId>default</artifactId>
-  <version>{version}-SNAPSHOT</version>
-  
+
   <packaging>eclipse-target-definition</packaging>
 
   <name>Target Platform</name>

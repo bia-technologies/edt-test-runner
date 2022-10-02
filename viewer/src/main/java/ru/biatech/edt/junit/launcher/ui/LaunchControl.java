@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import ru.biatech.edt.junit.launcher.v8.LaunchHelper;
 import ru.biatech.edt.junit.ui.JUnitMessages;
+import org.eclipse.swt.widgets.Group;
 
 import java.util.stream.Collectors;
 
@@ -48,29 +49,20 @@ public class LaunchControl extends Composite {
 
     setLayout(new GridLayout(2, false));
 
-    Label label = new Label(this, SWT.NONE);
-    label.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-    label.setText(JUnitMessages.JUnitLaunchConfigurationTab_basic_launch_configuration);
+    appendLabel(this, JUnitMessages.LaunchConfigurationTab_basic_launch_configuration);
+    usedLaunchConfigurationControl = appendAutoCompleteComboViewer(this);
+    usedLaunchConfigurationControl.getCombo().setToolTipText(JUnitMessages.LaunchConfigurationTab_basic_launch_configuration_tooltip);
 
-    usedLaunchConfigurationControl = new AutoCompleteComboViewer(this, SWT.NONE);
-    Combo combo = usedLaunchConfigurationControl.getCombo();
-    combo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+    Group grpFilter = new Group(this, SWT.NONE);
+    grpFilter.setText(JUnitMessages.LaunchConfigurationTab_filter_group);
+    grpFilter.setLayout(new GridLayout(2, false));
+    grpFilter.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 2));
 
-    label = new Label(this, SWT.NONE);
-    label.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-    label.setText(JUnitMessages.JUnitLaunchConfigurationTab_filter_test_extension);
+    appendLabel(grpFilter, JUnitMessages.LaunchConfigurationTab_filter_test_extension);
+    testExtensionControl = appendAutoCompleteComboViewer(grpFilter);
 
-    testExtensionControl = new AutoCompleteComboViewer(this, SWT.NONE);
-    combo = testExtensionControl.getCombo();
-    combo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-
-    label = new Label(this, SWT.NONE);
-    label.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-    label.setText(JUnitMessages.JUnitLaunchConfigurationTab_filter_test_module);
-
-    testModuleControl = new AutoCompleteComboViewer(this, SWT.NONE);
-    combo = testModuleControl.getCombo();
-    combo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+    appendLabel(grpFilter, JUnitMessages.LaunchConfigurationTab_filter_test_module);
+    testModuleControl = appendAutoCompleteComboViewer(grpFilter);
   }
 
   @Override
@@ -81,5 +73,19 @@ public class LaunchControl extends Composite {
     UtilsUI.setValueSource(usedLaunchConfigurationControl, LaunchHelper.getOnecLaunchConfigurations().collect(Collectors.toList()));
     LabelProvider provider = LabelProvider.createTextProvider(e -> e == null ? "" : ((IExtensionProject) e).getDtProject().getName());
     UtilsUI.setValueSource(testExtensionControl, LaunchHelper.getExtensions(), provider);
+  }
+
+  void appendLabel(Composite parent, String text){
+    Label label = new Label(parent, SWT.NONE);
+    label.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+    label.setText(text);
+  }
+
+  AutoCompleteComboViewer appendAutoCompleteComboViewer(Composite parent){
+    AutoCompleteComboViewer auto = new AutoCompleteComboViewer(parent, SWT.NONE);
+    Combo combo = auto.getCombo();
+    combo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+
+    return auto;
   }
 }

@@ -45,6 +45,7 @@ import javax.xml.parsers.SAXParserFactory;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -316,8 +317,8 @@ public final class JUnitModel {
 
       TestViewerPlugin.ui().asyncShowTestRunnerViewPart();
 
-//      Files.deleteIfExists(file.toPath()); TODO Файлы отчета не удаляем для отладки
-    } catch (CoreException e) {
+      Files.deleteIfExists(file.toPath());
+    } catch (CoreException|IOException e) {
       TestViewerPlugin.log().logError(JUnitMessages.JUnitModel_UnknownErrorOnReportLoad, e);
     }
   }

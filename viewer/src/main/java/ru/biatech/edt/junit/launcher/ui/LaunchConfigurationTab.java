@@ -29,6 +29,7 @@ import org.eclipse.ui.PlatformUI;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.launcher.v8.LaunchConfigurationAttributes;
 import ru.biatech.edt.junit.launcher.v8.LaunchHelper;
+import ru.biatech.edt.junit.ui.JUnitMessages;
 
 public class LaunchConfigurationTab extends AbstractLaunchConfigurationTab {
 
@@ -85,7 +86,7 @@ public class LaunchConfigurationTab extends AbstractLaunchConfigurationTab {
 
   @Override
   public String getName() {
-    return "TestRunner";
+    return JUnitMessages.LaunchConfigurationTab_tab_label;
   }
 
   @Override
@@ -112,7 +113,7 @@ public class LaunchConfigurationTab extends AbstractLaunchConfigurationTab {
       UtilsUI.setSelection(control.testExtensionControl, project);
       UtilsUI.setSelection(control.testModuleControl, moduleName);
     } catch (CoreException e) {
-      TestViewerPlugin.log().logError("Не удалось восстановить настройки конфигурации", e);
+      TestViewerPlugin.log().logError(JUnitMessages.LaunchConfigurationTab_failedRestoreSettings, e);
     }
   }
 

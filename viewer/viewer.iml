@@ -2,7 +2,7 @@
 <module type="JAVA_MODULE" version="4">
   <component name="FacetManager">
     <facet type="Osmorc" name="OSGi">
-      <configuration manifestGenerationMode="Manually" manifestLocation="META-INF/MANIFEST.MF" jarfileLocation="$EDT_PATH$\dropins\xUnitViewer.jar" outputPathType="SpecificOutputPath" bndFileLocation="" bundlorFileLocation="" bundleActivator="ru.biatech.edt.xtest.TestRunnerPlugin" bundleSymbolicName="ru.biatech.edt.xtest;singleton=true" bundleVersion="0.3.1" ignoreFilePattern="" useProjectDefaultManifestFileLocation="false" alwaysRebuildBundleJAR="true" doNotSynchronizeWithMaven="false">
+      <configuration manifestGenerationMode="Manually" manifestLocation="META-INF/MANIFEST.MF" jarfileLocation="$EDT_PATH$/dropins/xUnitViewer.jar" outputPathType="SpecificOutputPath" bndFileLocation="" bundlorFileLocation="" bundleActivator="ru.biatech.edt.xtest.TestRunnerPlugin" bundleSymbolicName="ru.biatech.edt.xtest;singleton=true" bundleVersion="0.3.1" ignoreFilePattern="" useProjectDefaultManifestFileLocation="false" alwaysRebuildBundleJAR="true" doNotSynchronizeWithMaven="false">
         <additionalProperties />
         <additionalJARContents>
           <entry source="$MODULE_DIR$/META-INF" dest="META-INF" />

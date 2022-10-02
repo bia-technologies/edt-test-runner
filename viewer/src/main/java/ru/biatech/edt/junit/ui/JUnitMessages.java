@@ -27,6 +27,16 @@ public final class JUnitMessages extends NLS {
 
   private static final String BUNDLE_NAME = "ru.biatech.edt.junit.ui.JUnitMessages";//$NON-NLS-1$
 
+  public static String LaunchConfigurationName;
+
+  public static String LaunchConfigurationTab_tab_label;
+  public static String LaunchConfigurationTab_basic_launch_configuration;
+  public static String LaunchConfigurationTab_basic_launch_configuration_tooltip;
+  public static String LaunchConfigurationTab_filter_group;
+  public static String LaunchConfigurationTab_filter_test_extension;
+  public static String LaunchConfigurationTab_filter_test_module;
+  public static String LaunchConfigurationTab_failedRestoreSettings;
+
   public static String CompareResultDialog_actualLabel;
   public static String CompareResultDialog_expectedLabel;
   public static String CompareResultDialog_labelOK;
@@ -108,7 +118,6 @@ public final class JUnitMessages extends NLS {
   public static String JUnitLaunchConfigurationTab_label_test;
   public static String JUnitLaunchConfigurationTab_projectdialog_message;
   public static String JUnitLaunchConfigurationTab_projectdialog_title;
-  public static String JUnitLaunchConfigurationTab_tab_label;
   public static String JUnitLaunchConfigurationTab_Test_Loader;
   public static String JUnitLaunchConfigurationTab_testdialog_message;
   public static String JUnitLaunchConfigurationTab_testdialog_title;
@@ -121,9 +130,6 @@ public final class JUnitMessages extends NLS {
   public static String JUnitLaunchConfigurationTab_addincludeexcludetagdialog_title;
   public static String JUnitLaunchConfigurationTab_includetag_empty_error;
   public static String JUnitLaunchConfigurationTab_excludetag_empty_error;
-  public static String JUnitLaunchConfigurationTab_basic_launch_configuration;
-  public static String JUnitLaunchConfigurationTab_filter_test_extension;
-  public static String JUnitLaunchConfigurationTab_filter_test_module;
 
   // Shortcut
   public static String JUnitLaunchShortcut_dialog_title;
@@ -258,6 +264,7 @@ public final class JUnitMessages extends NLS {
   public static String TestRunSession_unrootedTests;
 
   public static String LaunchConfigurationDelegate_Launching;
+
   public static String LaunchHelper_LaunchConfigurationNotFound;
   public static String LaunchHelper_LaunchConfigurationNotSpecified;
   public static String JUnitModel_LoadReport;
@@ -278,7 +285,6 @@ public final class JUnitMessages extends NLS {
   public static String TestMethodMarker_LaunchTest;
   public static String TestMethodMarker_MarkerCreationError;
   public static String TestMethodMarker_MarkersCleanError;
-  public static String TestMethodMarker_MarkersHandling;
   public static String JUnitLaunchListener_ProcessError;
   public static String JUnitModel_ReportIsEmpty;
 

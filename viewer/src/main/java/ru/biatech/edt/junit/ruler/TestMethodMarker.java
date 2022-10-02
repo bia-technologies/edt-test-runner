@@ -57,7 +57,6 @@ public class TestMethodMarker implements IExternalBslValidator {
     }
 
     Module module = (Module) object;
-    TestViewerPlugin.log().debug(JUnitMessages.TestMethodMarker_MarkersHandling, module.getUniqueName());
     IResource resource = MdUtils.getResource(object);
     try {
       resource.deleteMarkers(RulerAttributes.MARKER_ID, false, 0);

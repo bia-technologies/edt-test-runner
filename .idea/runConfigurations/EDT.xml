@@ -2,7 +2,7 @@
   <configuration default="false" name="EDT" type="Application" factoryName="Application" show_console_on_std_err="true" show_console_on_std_out="true">
     <option name="MAIN_CLASS_NAME" value="org.eclipse.equinox.launcher.Main" />
     <module name="viewer" />
-    <option name="PROGRAM_PARAMETERS" value="-XstartOnFirstThread -data $ProjectFileDir$\edt_workspace -consoleLog" />
+    <option name="PROGRAM_PARAMETERS" value="-XstartOnFirstThread -data $ProjectFileDir$/edt_workspace -consoleLog -clean" />
     <selectedOptions>
       <option name="environmentVariables" visible="false" />
     </selectedOptions>

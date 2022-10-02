@@ -47,7 +47,11 @@ public class TestFinder implements ITestFinder {
   static final Set<String> TEST_REGISTRATION_METHOD_NAMES = Set.of(
           "Тест".toLowerCase(),
           "ТестКлиент".toLowerCase(),
-          "ТестСервер".toLowerCase());
+          "ТестСервер".toLowerCase(),
+          "ДобавитьТест".toLowerCase(),
+          "ДобавитьКлиентскийТест".toLowerCase(),
+          "ДобавитьСерверныйТест".toLowerCase()
+  );
 
   @Override
   public boolean isTestModule(Module module) {
@@ -91,7 +95,6 @@ public class TestFinder implements ITestFinder {
             .map(st -> st.getLeft() instanceof Invocation ? st.getLeft() : st.getRight())
             .filter(Invocation.class::isInstance)
             .map(Invocation.class::cast)
-            .filter(invocation -> TEST_REGISTRATION_METHOD_NAMES.contains(invocation.getMethodAccess().getName().toLowerCase()))
             .forEach(invocation -> names.addAll(fill(invocation)));
 
     List<Method> result = names.stream()

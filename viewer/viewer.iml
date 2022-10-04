@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module org.jetbrains.idea.maven.project.MavenProjectsManager.isMavenModule="true" type="JAVA_MODULE" version="4">
+  <component name="FacetManager">
+    <facet type="Osmorc" name="OSGi">
+      <configuration manifestGenerationMode="Manually" manifestLocation="META-INF/MANIFEST.MF" jarfileLocation="$EDT_PATH$/dropins/xUnitViewer.jar" outputPathType="SpecificOutputPath" bndFileLocation="" bundlorFileLocation="" bundleActivator="ru.biatech.edt.xtest.TestRunnerPlugin" bundleSymbolicName="ru.biatech.edt.xtest;singleton=true" bundleVersion="0.3.1" ignoreFilePattern="" useProjectDefaultManifestFileLocation="false" alwaysRebuildBundleJAR="true" doNotSynchronizeWithMaven="false">
+        <additionalProperties />
+        <additionalJARContents>
+          <entry source="$MODULE_DIR$/META-INF" dest="META-INF" />
+          <entry source="$MODULE_DIR$/plugin.xml" dest="plugin.xml" />
+          <entry source="$MODULE_DIR$/icons" dest="icons" />
+          <entry source="$MODULE_DIR$/plugin.properties" dest="plugin.properties" />
+          <entry source="$MODULE_DIR$/META-INF" dest="META-INF" />
+          <entry source="$MODULE_DIR$/plugin.xml" dest="plugin.xml" />
+          <entry source="$MODULE_DIR$/icons" dest="icons" />
+          <entry source="$MODULE_DIR$/plugin.properties" dest="plugin.properties" />
+          <entry source="$MODULE_DIR$/META-INF" dest="META-INF" />
+          <entry source="$MODULE_DIR$/plugin.xml" dest="plugin.xml" />
+          <entry source="$MODULE_DIR$/icons" dest="icons" />
+          <entry source="$MODULE_DIR$/plugin.properties" dest="plugin.properties" />
+        </additionalJARContents>
+      </configuration>
+    </facet>
+  </component>
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_5">
+    <output url="file://$MODULE_DIR$/target/classes" />
+    <output-test url="file://$MODULE_DIR$/target/test-classes" />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/main/resources" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/META-INF" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/icons" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/schema" type="java-resource" />
+      <excludeFolder url="file://$MODULE_DIR$/bin" />
+      <excludeFolder url="file://$MODULE_DIR$/target" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="plugins" level="project" />
+  </component>
+</module>

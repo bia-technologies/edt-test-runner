@@ -2,7 +2,10 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/ru.biatech.edt.xtest.iml" filepath="$PROJECT_DIR$/ru.biatech.edt.xtest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/viewer/viewer.iml" filepath="$PROJECT_DIR$/viewer/viewer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/xTestRunner.iml" filepath="$PROJECT_DIR$/.idea/modules/xTestRunner.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/xTestRunner.main.iml" filepath="$PROJECT_DIR$/.idea/modules/xTestRunner.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/xTestRunner.test.iml" filepath="$PROJECT_DIR$/.idea/modules/xTestRunner.test.iml" />
     </modules>
   </component>
 </project>

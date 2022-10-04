@@ -4,6 +4,7 @@
 !/.idea/modules.xml
 !/.idea/libraries/
 !/.idea/runConfigurations/
+!/.idea/copyright/
 *.prefs
 /eclipse_project/workspace/
 target/
@@ -11,6 +12,9 @@ bin/
 build/
 /.gradle/*
 /gradle*
-!gradle.properties
+!/gradlew*
 *.hprof
-/gradle.properties
+*.orig
+/dev/*
+.project
+.classpath

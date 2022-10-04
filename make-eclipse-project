@@ -1,0 +1,14 @@
+#!/bin/bash
+
+PROJECT_PATH=./dev/eclipse_project
+TEMPLATE_PATH=./templates/eclipse_project
+
+mkdir ./dev/eclipse_project -p
+rm $PROJECT_PATH/* -frd
+cp -r $TEMPLATE_PATH/* $PROJECT_PATH
+
+cd $PROJECT_PATH/bundles/
+
+foreach BUNDLE_NAME ("viewer")
+  ln -rsf ../../../$BUNDLE_NAME $BUNDLE_NAME
+end

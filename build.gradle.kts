@@ -9,7 +9,17 @@ plugins {
 }
 
 group = "ru.biatech.edt.xtest"
-version = "0.2.6"
+version = "22.10.0"
+val vendor = "BIA-Technologies Limited Liability Company"
+val createProjectYear = 2021
+val licenseYear = if (Calendar.getInstance().get(Calendar.YEAR) == createProjectYear) "$createProjectYear"
+else "$createProjectYear-${Calendar.getInstance().get(Calendar.YEAR)}"
+val edtLocation = findProperty("edtLocation") ?: ""
+val pluginBuildPath = layout.buildDirectory.dir("buildPlugin").get().asFile
+val publishTo = (findProperty("publishTo") ?: "").toString()
+
+var subProjects = arrayOf("viewer")
+
 repositories {
     mavenCentral()
 }
@@ -29,17 +39,11 @@ tasks.withType<Copy>() {
 
 sourceSets {
     main {
-        java.srcDirs("src/main/java")
-        resources.srcDirs("src/main/resources")
-        resources.srcDirs("META-INF")
-    }
-    test {
-        java.srcDirs("src/test/java")
-        resources.srcDirs("src/test/resources")
+        java.srcDirs(subProjects.map { "$it/src/main/java" })
+        resources.srcDirs(subProjects.map { "$it/src/main/resources" })
+        resources.srcDirs(subProjects.map { "$it/META-INF" })
     }
 }
-
-val edtLocation = findProperty("edtLocation") ?: ""
 
 dependencies {
     implementation(fileTree(edtLocation) { include("*.jar") })
@@ -47,19 +51,20 @@ dependencies {
 
 license {
     header = rootProject.file("templates/HEADER.txt")
-    ext["year"] = "2021-" + Calendar.getInstance().get(Calendar.YEAR)
-    ext["owner"] = "BIA-Technologies Limited Liability Company"
+    ext["year"] = licenseYear
+    ext["owner"] = vendor
     useDefaultMappings = false
-    includes(listOf("**/*.java", "**/*.properties", "**/*.gradle.kts"))
+    includes(listOf("**/*.java", "**/*.properties", "**/*.gradle.kts", "**/*.xml"))
     strictCheck = true
+    mapping("xml", "XML_STYLE")
     mapping("java", "SLASHSTAR_STYLE")
 }
 
 tasks.register<com.hierynomus.gradle.license.tasks.LicenseFormat>("licenseEclipseProject") {
     header = rootProject.file("templates/HEADER_FOR_PLUGIN_TEMPLATE.txt")
-    ext["year"] = "2021-" + Calendar.getInstance().get(Calendar.YEAR)
-    ext["owner"] = "BIA-Technologies Limited Liability Company"
-    source = fileTree("eclipse_project")
+    ext["year"] = licenseYear
+    ext["owner"] = vendor
+    source = fileTree("templates/eclipse_project")
     useDefaultMappings = true
     strictCheck = true
     setIncludes(listOf("**/*.properties", "**/*.xml"))
@@ -70,28 +75,19 @@ tasks.named("licenseFormat") {
     dependsOn(tasks.named("licenseEclipseProject"))
 }
 
-val pluginBuildPath = layout.buildDirectory.dir("buildPlugin").get().asFile
-
 tasks.register<Copy>("buildPlugin-copyFiles") {
-    from("eclipse_project") {
-        filter { line -> line.replace("{version}", version.toString()) }
-    }
+    // TODO: Добавить очистку каталога сборки
+    from("templates/eclipse_project")
 
     into(pluginBuildPath)
 
-    from(layout.projectDirectory.dir("src/main/java")) {
-        into("bundles/ru.biatech.edt.xtest/src")
+    subProjects.forEach {
+        var sourceDir = layout.projectDirectory.dir(it)
+        from(sourceDir) {
+            into("bundles/$it")
+        }
     }
-    from(layout.projectDirectory.dir("src/main/resources")) {
-        into("bundles/ru.biatech.edt.xtest/resources")
-    }
-    from(layout.projectDirectory.dir("META-INF")) {
-        into("bundles/ru.biatech.edt.xtest/META-INF")
-        filter { line -> line.replace(Regex("Bundle-Version.*"), "Bundle-Version: $version.qualifier") }
-    }
-    from(layout.projectDirectory.dir("plugin.xml")) {
-        into("bundles/ru.biatech.edt.xtest")
-    }
+
     group = "build"
 }
 
@@ -103,16 +99,14 @@ tasks.register<Exec>("buildPlugin") {
     environment("MAVEN_OPTS", "-Dhttps.protocols=TLSv1.2")
 
     if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-        commandLine("mvn.cmd", "package")
+        commandLine("mvn.cmd", "dependency:resolve", "package")
     } else {
-        commandLine("mvn", "package")
+        commandLine("mvn", "dependency:resolve", "package")
     }
 
     dependsOn(tasks.named("buildPlugin-copyFiles"))
     group = "build"
 }
-
-var publishTo = (findProperty("publishTo") ?: "").toString()
 
 tasks.register<Copy>("publishToPath") {
     doFirst{
@@ -120,11 +114,11 @@ tasks.register<Copy>("publishToPath") {
             throw GradleException("You must specify a property 'publishTo' for the publish task is 'gradle.properties'")
         }
     }
-    from("$pluginBuildPath/repositories/ru.biatech.edt.xtest.repository/target/repository"){
+    from("$pluginBuildPath/repositories/repository/target/repository"){
         into("$version")
         into("latest")
     }
-    from("$pluginBuildPath/repositories/ru.biatech.edt.xtest.repository/target/ru.biatech.edt.xtest.repository.zip"){
+    from("$pluginBuildPath/repositories/repository/target/repository.zip"){
         into("$version")
         into("latest")
     }

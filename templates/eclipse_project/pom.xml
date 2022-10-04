@@ -23,7 +23,7 @@
   <parent>
     <groupId>ru.biatech.edt.xtest</groupId>
     <artifactId>bom</artifactId>
-    <version>0.3.1-SNAPSHOT</version>
+    <version>22.10.0-SNAPSHOT</version>
     <relativePath>bom/pom.xml</relativePath>
   </parent>
 
@@ -33,8 +33,7 @@
   <name>Tycho Build Example</name>
 
   <scm>
-<!--    TODO Обновить ссылку-->
-    <connection>scm:git:git@gitlab.dellin.ru:orais/tools/ru.biatech.edt.testrunner.git</connection>
+    <connection>scm:git:git@github.com:bia-technologies/edt-test-runner.git</connection>
   </scm>
 
   <modules>

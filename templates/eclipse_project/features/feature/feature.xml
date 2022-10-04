@@ -18,7 +18,7 @@
 <feature
       id="ru.biatech.edt.xtest.feature"
       label="Запуск модульных тестов"
-      version="0.3.1.qualifier"
+      version="22.10.0.qualifier"
       provider-name="BIA-Technologies Limited Liability Company">
 
    <description>

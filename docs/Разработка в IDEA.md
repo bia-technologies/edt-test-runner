@@ -10,7 +10,7 @@
 1. Настроить [переменную пути](https://www.jetbrains.com/help/idea/absolute-path-variables.html#ignored-path-variables) указывающую на установленную версию EDT
    1. Открываем настройки IDEA: File → Settings.
    2. Переходим к настройкам переменных пути: Appearance & Behavior → Path Variables.
-   3. Создаем переменную `EDT_PATH` в которой прописываем путь до установленной версии EDT
+   3. Создаем переменную `EDT_PATH`, в которой прописываем путь до установленной версии EDT
 
       ![Переменные пути](images/settings-path-variables.png)
 2. Перезапустить IDEA
@@ -28,7 +28,7 @@
 * Заполнение лицензий
 * Публикация плагина в каталог
 
-Для настройки необходимо, в файле параметров `gradle.properties` указать:
+Для настройки необходимо в файле параметров `gradle.properties` указать:
 
 ```properties
 edtLocation=<Путь к установленной EDT>

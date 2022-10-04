@@ -23,7 +23,7 @@
   <parent>
     <groupId>ru.biatech.edt.xtest</groupId>
     <artifactId>targets</artifactId>
-    <version>0.3.1-SNAPSHOT</version>
+    <version>22.10.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>dev</artifactId>

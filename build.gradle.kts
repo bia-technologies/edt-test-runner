@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "ru.biatech.edt.xtest"
-version = "0.3.1"
+version = "22.10.0"
 val vendor = "BIA-Technologies Limited Liability Company"
 val createProjectYear = 2021
 val licenseYear = if (Calendar.getInstance().get(Calendar.YEAR) == createProjectYear) "$createProjectYear"

@@ -1,0 +1,43 @@
+name: Publish documentation
+on:
+  push:
+    branches:
+    - master
+    - develop
+    paths:
+    - 'docs/**'
+    - 'README.md'
+    - '.github/workflows/publish-documentation.yaml'
+jobs:
+  publish:
+    name: Publish documentation to GitHub Pages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Get latest GitHub Pages
+        run: |
+          wget https://github.com/${{ github.repository }}/archive/gh-pages.zip
+          unzip gh-pages.zip
+          mkdir public -p
+          cp -R ${GITHUB_REPOSITORY#*/}-gh-pages/. public
+
+      - name: Copy master documentation
+        if: github.ref == 'refs/heads/master'
+        run: |
+          cp README.md public/
+          cp -R docs public/
+      - name: Copy develop documentation
+        if: github.ref == 'refs/heads/develop'
+        run: |
+          cp README.md public/dev/
+          cp -R docs public/dev/
+          
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3.9.0
+        with:
+          deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+          publish_branch: gh-pages
+          publish_dir: ./public
+          enable_jekyll: true

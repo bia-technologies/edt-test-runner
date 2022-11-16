@@ -41,6 +41,7 @@
     <module>bundles</module>
     <module>features</module>
     <module>repositories</module>
+    <module>update-site</module>
   </modules>
 
   <build>

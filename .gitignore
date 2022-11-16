@@ -11,7 +11,7 @@ target/
 bin/
 build/
 /.gradle/*
-/gradle*
+gradle.properties
 !/gradlew*
 *.hprof
 *.orig

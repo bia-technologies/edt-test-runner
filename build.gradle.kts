@@ -109,16 +109,16 @@ tasks.register<Exec>("buildPlugin") {
 }
 
 tasks.register<Copy>("publishToPath") {
-    doFirst{
-        if(publishTo==""){
+    doFirst {
+        if (publishTo == "") {
             throw GradleException("You must specify a property 'publishTo' for the publish task is 'gradle.properties'")
         }
     }
-    from("$pluginBuildPath/repositories/repository/target/repository"){
+    from("$pluginBuildPath/repositories/repository/target/repository") {
         into("$version")
         into("latest")
     }
-    from("$pluginBuildPath/repositories/repository/target/repository.zip"){
+    from("$pluginBuildPath/repositories/repository/target/repository.zip") {
         into("$version")
         into("latest")
     }
@@ -126,9 +126,24 @@ tasks.register<Copy>("publishToPath") {
     group = "publish"
     dependsOn(tasks.named("buildPlugin"))
 
-    doLast{
+    doLast {
         print("Published to: $publishTo")
     }
+}
+
+tasks.register<Exec>("publishPlugin") {
+    isIgnoreExitValue = true
+    workingDir = pluginBuildPath
+    standardOutput = System.out
+
+    val ghPagesPath = layout.buildDirectory.dir("buildPlugin").get().asFile
+    environment("MAVEN_OPTS", "-Dhttps.protocols=TLSv1.2")
+    var command = if (Os.isFamily(Os.FAMILY_WINDOWS)) "mvn.cmd" else "mvn"
+    var cliArgs = arrayOf(command, "dependency:resolve", "deploy", "-Prelease-composite")
+    commandLine(*cliArgs)
+
+    dependsOn(tasks.named("buildPlugin-copyFiles"))
+    group = "build"
 }
 
 tasks.wrapper {

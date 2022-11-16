@@ -1,0 +1,56 @@
+name: Publish update-site
+on:
+  push:
+    branches:
+    - master
+    - develop
+    paths:
+    - 'viewer/**'
+    - 'templates/eclipse_project/**'
+    - '.github/workflows/publish-update-site.yaml'
+jobs:
+  publish:
+    name: Publish update-site to GitHub Pages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'liberica'
+          java-package: jdk+fx # нужен FX
+          architecture: x64
+          cache: 'maven'
+          server-id: dt_repository # реджестри пакетов 1С
+          server-username: ${{ secrets.MAVEN_USERNAME }} # храниться в секретах
+          server-password: ${{ secrets.MAVEN_CENTRAL_TOKEN }} # храниться в секретах в открытом виде
+      
+      - name: Get latest GitHub Pages
+        run: |
+          wget https://github.com/${{ github.repository }}/archive/gh-pages.zip
+          unzip gh-pages.zip
+          mkdir public -p
+          cp -R ${GITHUB_REPOSITORY#*/}-gh-pages/. public
+          
+      - name: Build master update site
+        if: github.ref == 'refs/heads/master'
+        run: |
+          export publication_location=../../../public/repository
+          ./gradlew publishPlugin
+      - name: Build develop update site
+        if: github.ref == 'refs/heads/develop'
+        run: |
+          export publication_location=../../../public/dev/repository
+          export site_label_suffix='DEV. '
+          ./gradlew publishPlugin
+
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3.9.0
+        with:
+          deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+          publish_branch: gh-pages
+          publish_dir: ./public
+          enable_jekyll: true

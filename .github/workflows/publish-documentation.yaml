@@ -31,6 +31,7 @@ jobs:
       - name: Copy develop documentation
         if: github.ref == 'refs/heads/develop'
         run: |
+          mkdir public/dev -p
           cp README.md public/dev/
           cp -R docs public/dev/
           

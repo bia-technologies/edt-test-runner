@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<?compositeMetadataRepository version='1.0.0'?>
+<repository name='DEV. EDT Test Runner Repository. All Versions' type='org.eclipse.equinox.internal.p2.metadata.repository.CompositeMetadataRepository' version='1'>
+  <properties size='2'>
+    <property name='p2.timestamp' value='1673437494240'/>
+    <property name='p2.atomic.composite.loading' value='false'/>
+  </properties>
+  <children size='1'>
+    <child location='updates/22.x'/>
+  </children>
+</repository>

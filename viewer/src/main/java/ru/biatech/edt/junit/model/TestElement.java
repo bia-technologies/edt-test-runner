@@ -44,15 +44,15 @@ public abstract class TestElement implements ITestElement {
   /**
    * Running time in seconds. Contents depend on the current {@link #getProgressState()}:
    * <ul>
-   * <li>{@link ru.biatech.edt.junit.model.ITestElement.ProgressState#NOT_STARTED}: {@link Double#NaN}</li>
-   * <li>{@link ru.biatech.edt.junit.model.ITestElement.ProgressState#RUNNING}: negated start time</li>
-   * <li>{@link ru.biatech.edt.junit.model.ITestElement.ProgressState#STOPPED}: elapsed time</li>
-   * <li>{@link ru.biatech.edt.junit.model.ITestElement.ProgressState#COMPLETED}: elapsed time</li>
+   * <li>{@link ProgressState#NOT_STARTED}: {@link Double#NaN}</li>
+   * <li>{@link ProgressState#RUNNING}: negated start time</li>
+   * <li>{@link ProgressState#STOPPED}: elapsed time</li>
+   * <li>{@link ProgressState#COMPLETED}: elapsed time</li>
    * </ul>
    */
   /* default */ double fTime = Double.NaN;
   private String fTestName;
-  private Status fStatus;
+  private TestStatus fStatus;
   private String fTrace;
   private String fExpected;
   private String fActual;
@@ -77,7 +77,7 @@ public abstract class TestElement implements ITestElement {
     fDisplayName = displayName;
     fParameterTypes = parameterTypes;
     fUniqueId = uniqueId;
-    fStatus = Status.NOT_RUN;
+    fStatus = TestStatus.NOT_RUN;
     fContext = context;
     if (parent != null) parent.addChild(this);
   }
@@ -88,9 +88,9 @@ public abstract class TestElement implements ITestElement {
   }
 
   @Override
-  public Result getTestResult(boolean includeChildren) {
+  public TestResult getTestResult(boolean includeChildren) {
     if (fAssumptionFailed) {
-      return Result.IGNORED;
+      return TestResult.IGNORED;
     }
     return getStatus().convertToResult();
   }
@@ -108,15 +108,6 @@ public abstract class TestElement implements ITestElement {
     return fParent;
   }
 
-  @Override
-  public FailureTrace getFailureTrace() {
-    Result testResult = getTestResult(false);
-    if (testResult == Result.ERROR || testResult == Result.FAILURE || (testResult == Result.IGNORED && fTrace != null)) {
-      return new FailureTrace(fTrace, fMessage, fExpected, fActual);
-    }
-    return null;
-  }
-
   /**
    * @return the parent suite, or <code>null</code> for the root
    */
@@ -128,6 +119,10 @@ public abstract class TestElement implements ITestElement {
     return fTestName;
   }
 
+  /**
+   * Возращает имя контекста исполнения теста
+   * @return имя контекста исполнения теста
+   */
   public String getContext() {
     return fContext;
   }
@@ -136,7 +131,7 @@ public abstract class TestElement implements ITestElement {
     fTestName = name;
   }
 
-  public void setStatus(Status status, String message, String trace, String expected, String actual) {
+  public void setStatus(TestStatus status, String message, String trace, String expected, String actual) {
     fTrace = concat(fTrace, trace);
     fExpected = concat(fExpected, expected);
     fActual = concat(fActual, actual);
@@ -144,12 +139,12 @@ public abstract class TestElement implements ITestElement {
     setStatus(status);
   }
 
-  public Status getStatus() {
+  public TestStatus getStatus() {
     return fStatus;
   }
 
-  public void setStatus(Status status) {
-    if (status == Status.RUNNING) {
+  public void setStatus(TestStatus status) {
+    if (status == TestStatus.RUNNING) {
       fTime = -System.currentTimeMillis() / 1000d;
     } else if (status.convertToProgressState() == ProgressState.COMPLETED) {
       if (fTime < 0) { // assert ! Double.isNaN(fTime)
@@ -253,115 +248,6 @@ public abstract class TestElement implements ITestElement {
       return s1;
     } else {
       return s2;
-    }
-  }
-
-  public final static class Status {
-    public static final Status RUNNING_ERROR = new Status("RUNNING_ERROR"); //$NON-NLS-1$
-    public static final Status RUNNING_FAILURE = new Status("RUNNING_FAILURE"); //$NON-NLS-1$
-    public static final Status RUNNING = new Status("RUNNING"); //$NON-NLS-1$
-
-    public static final Status ERROR = new Status("ERROR"); //$NON-NLS-1$
-    public static final Status FAILURE = new Status("FAILURE"); //$NON-NLS-1$
-    public static final Status OK = new Status("OK"); //$NON-NLS-1$
-    public static final Status NOT_RUN = new Status("NOT_RUN"); //$NON-NLS-1$
-
-    private final String fName;
-
-    private Status(String name) {
-      fName = name;
-    }
-
-    public static Status combineStatus(Status one, Status two) {
-      Status progress = combineProgress(one, two);
-      Status error = combineError(one, two);
-      return combineProgressAndErrorStatus(progress, error);
-    }
-
-    /* error state predicates */
-
-    private static Status combineProgress(Status one, Status two) {
-      if (one.isNotRun() && two.isNotRun()) return NOT_RUN;
-      else if ((one.isDone() && two.isDone()) || (!one.isRunning() && !two.isRunning())) { // One done, one not-run -> a parent failed and its children are not run
-        return OK;
-      } else return RUNNING;
-    }
-
-    private static Status combineError(Status one, Status two) {
-      if (one.isError() || two.isError()) return ERROR;
-      else if (one.isFailure() || two.isFailure()) return FAILURE;
-      else return OK;
-    }
-
-    private static Status combineProgressAndErrorStatus(Status progress, Status error) {
-      if (progress.isDone()) {
-        if (error.isError()) return ERROR;
-        if (error.isFailure()) return FAILURE;
-        return OK;
-      }
-
-      if (progress.isNotRun()) {
-        return NOT_RUN;
-      }
-
-      if (error.isError()) return RUNNING_ERROR;
-      if (error.isFailure()) return RUNNING_FAILURE;
-      return RUNNING;
-    }
-
-    @Override
-    public String toString() {
-      return fName;
-    }
-
-    /* progress state predicates */
-
-    public boolean isOK() {
-      return this == OK || this == RUNNING || this == NOT_RUN;
-    }
-
-    public boolean isFailure() {
-      return this == FAILURE || this == RUNNING_FAILURE;
-    }
-
-    public boolean isError() {
-      return this == ERROR || this == RUNNING_ERROR;
-    }
-
-    public boolean isErrorOrFailure() {
-      return isError() || isFailure();
-    }
-
-    public boolean isNotRun() {
-      return this == NOT_RUN;
-    }
-
-    public boolean isRunning() {
-      return this == RUNNING || this == RUNNING_FAILURE || this == RUNNING_ERROR;
-    }
-
-    public boolean isDone() {
-      return this == OK || this == FAILURE || this == ERROR;
-    }
-
-    public Result convertToResult() {
-      if (isNotRun()) return Result.UNDEFINED;
-      if (isError()) return Result.ERROR;
-      if (isFailure()) return Result.FAILURE;
-      if (isRunning()) {
-        return Result.UNDEFINED;
-      }
-      return Result.OK;
-    }
-
-    public ProgressState convertToProgressState() {
-      if (isRunning()) {
-        return ProgressState.RUNNING;
-      }
-      if (isDone()) {
-        return ProgressState.COMPLETED;
-      }
-      return ProgressState.NOT_STARTED;
     }
   }
 

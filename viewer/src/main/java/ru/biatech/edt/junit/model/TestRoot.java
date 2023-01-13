@@ -21,7 +21,7 @@ public class TestRoot extends TestSuiteElement {
   private final ITestRunSession fSession;
 
   public TestRoot(ITestRunSession session) {
-    super(null, session.getTestRunName(), 1, session.getTestRunName(), null, null, null); //$NON-NLS-1$
+    super(null, session.getTestRunName(), session.getTestRunName(), null, null, null); //$NON-NLS-1$
     fSession = session;
   }
 

@@ -36,8 +36,6 @@ public class JUnitUIPreferencesConstants {
 
   public static final boolean SHOW_IN_ALL_VIEWS_DEFAULT = false; // would need a PreferenceInitializer if this was changed to true!
 
-  private static final String CODEASSIST_FAVORITE_STATIC_MEMBERS_MIGRATED = JUnitUI.PLUGIN_ID + ".content_assist_favorite_static_members_migrated"; //$NON-NLS-1$
-
   private JUnitUIPreferencesConstants() {
     // no instance
   }

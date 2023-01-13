@@ -19,6 +19,7 @@ package ru.biatech.edt.junit;
 import com._1c.g5.v8.dt.bm.index.emf.IBmEmfIndexManager;
 import com._1c.g5.v8.dt.core.platform.IResourceLookup;
 import com._1c.g5.v8.dt.core.platform.IV8ProjectManager;
+import com._1c.g5.v8.dt.stacktraces.model.IStacktraceParser;
 import com._1c.g5.wiring.AbstractServiceAwareModule;
 import com._1c.g5.wiring.InjectorAwareServiceRegistrator;
 import com.google.inject.Guice;
@@ -165,6 +166,7 @@ public class TestViewerPlugin extends AbstractUIPlugin {
           bind(IV8ProjectManager.class).toService();
           bind(IBmEmfIndexManager.class).toService();
           bind(IResourceLookup.class).toService();
+          bind(IStacktraceParser.class).toService();
         }
       });
     } catch (Exception e) {

@@ -28,7 +28,6 @@ import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.kinds.ITestKind;
 import ru.biatech.edt.junit.launcher.v8.LaunchConfigurationAttributes;
 import ru.biatech.edt.junit.launcher.v8.LaunchHelper;
-import ru.biatech.edt.junit.model.TestElement.Status;
 
 import java.io.File;
 import java.text.DateFormat;
@@ -96,7 +95,7 @@ public class TestRunSession implements ITestRunSession {
   /**
    * The test run session's cached result, or <code>null</code> if <code>fTestRoot != null</code>.
    */
-  private Result fTestResult;
+  private TestResult fTestResult;
   /**
    * Tags included in this test run.
    */
@@ -123,7 +122,7 @@ public class TestRunSession implements ITestRunSession {
     fTestRunName = testRunName;
     fTestRunnerKind = ITestKind.NULL; //TODO
 
-    fTestRoot = new TestRoot(this);
+    fTestRoot = Factory.createRoot(this);
 
     fSessionListeners = new ListenerList<>();
   }
@@ -136,7 +135,7 @@ public class TestRunSession implements ITestRunSession {
     fIgnoredCount = 0;
     fTotalCount = 0;
 
-    fTestRoot = new TestRoot(this);
+    fTestRoot = Factory.createRoot(this);
     fTestResult = null;
   }
 
@@ -152,7 +151,7 @@ public class TestRunSession implements ITestRunSession {
   }
 
   @Override
-  public Result getTestResult(boolean includeChildren) {
+  public TestResult getTestResult(boolean includeChildren) {
     if (fTestRoot != null) {
       return fTestRoot.getTestResult(true);
     } else {
@@ -163,11 +162,6 @@ public class TestRunSession implements ITestRunSession {
   @Override
   public ITestElement[] getChildren() {
     return getTestRoot().getChildren();
-  }
-
-  @Override
-  public FailureTrace getFailureTrace() {
-    return null;
   }
 
   @Override
@@ -302,8 +296,9 @@ public class TestRunSession implements ITestRunSession {
 
   public void removeSwapFile() {
     File swapFile = getSwapFile();
-    if (swapFile.exists())
+    if (swapFile.exists()) {
       swapFile.delete();
+    }
   }
 
 //	public synchronized void swapIn() {// TODO Не ясно, нужно или нет
@@ -314,7 +309,7 @@ public class TestRunSession implements ITestRunSession {
 //			JUnitModel.importIntoTestRunSession(getSwapFile(), this);
 //		} catch (IllegalStateException | CoreException e) {
 //			JUnitCorePlugin.log(e);
-//			fTestRoot= new TestRoot(this);
+//			fTestRoot= Factory.createRoot(this);
 //			fTestResult= null;
 //		}
 //	}
@@ -327,8 +322,9 @@ public class TestRunSession implements ITestRunSession {
   }
 
   public void stopTestRun() {
-    if (isRunning() || !isKeptAlive())
+    if (isRunning() || !isKeptAlive()) {
       fIsStopped = true;
+    }
   }
 
   /**
@@ -365,8 +361,9 @@ public class TestRunSession implements ITestRunSession {
       if (((TestCaseElement) testElement).isIgnored()) {
         fIgnoredCount++;
       }
-      if (!testElement.getStatus().isErrorOrFailure())
-        setStatus(testElement, Status.OK);
+      if (!testElement.getStatus().isErrorOrFailure()) {
+        setStatus(testElement, TestStatus.OK);
+      }
     }
 
     if (testElement.isAssumptionFailure()) {
@@ -374,25 +371,24 @@ public class TestRunSession implements ITestRunSession {
     }
   }
 
-  private void setStatus(TestElement testElement, Status status) {
+  private void setStatus(TestElement testElement, TestStatus status) {
     testElement.setStatus(status);
   }
 
-  public TestElement[] getAllFailedTestElements() {
-    ArrayList<ITestElement> failures = new ArrayList<>();
+  public ITestCaseElement[] getAllFailedTestElements() {
+    ArrayList<ITestCaseElement> failures = new ArrayList<>();
     addFailures(failures, getTestRoot());
-    return failures.toArray(new TestElement[failures.size()]);
+    return failures.toArray(ITestCaseElement[]::new);
   }
 
-  private void addFailures(ArrayList<ITestElement> failures, ITestElement testElement) {
-    Result testResult = testElement.getTestResult(true);
-    if (testResult == Result.ERROR || testResult == Result.FAILURE) {
-      failures.add(testElement);
+  private void addFailures(ArrayList<ITestCaseElement> failures, ITestElement testElement) {
+    var testResult = testElement.getTestResult(true);
+    if (testElement instanceof ITestCaseElement && (testResult == TestResult.ERROR || testResult == TestResult.FAILURE)) {
+      failures.add((ITestCaseElement) testElement);
     }
-    if (testElement instanceof TestSuiteElement) {
-      TestSuiteElement testSuiteElement = (TestSuiteElement) testElement;
-      ITestElement[] children = testSuiteElement.getChildren();
-      for (ITestElement child : children) {
+    if (testElement instanceof ITestElementContainer) {
+      var children = ((ITestElementContainer) testElement).getChildren();
+      for (var child : children) {
         addFailures(failures, child);
       }
     }
@@ -400,10 +396,12 @@ public class TestRunSession implements ITestRunSession {
 
   @Override
   public double getElapsedTimeInSeconds() {
-    if (fTestRoot == null)
-      return Double.NaN;
+    return fTestRoot == null ? Double.NaN : fTestRoot.getElapsedTimeInSeconds();
+  }
 
-    return fTestRoot.getElapsedTimeInSeconds();
+  @Override
+  public String getTestName() {
+    return "Test session";
   }
 
   public String getIncludeTags() {
@@ -416,8 +414,7 @@ public class TestRunSession implements ITestRunSession {
             return launchConfig.getAttribute(LaunchConfigurationAttributes.ATTR_TEST_INCLUDE_TAGS, EMPTY_STRING);
           }
         }
-      } catch (CoreException e) {
-        //ignore
+      } catch (CoreException ignore) {
       }
       return EMPTY_STRING;
     }

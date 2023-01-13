@@ -36,7 +36,6 @@ import ru.biatech.edt.junit.JUnitPreferencesConstants;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.launcher.v8.LaunchConfigurationAttributes;
 import ru.biatech.edt.junit.launcher.v8.LaunchHelper;
-import ru.biatech.edt.junit.model.TestElement.Status;
 import ru.biatech.edt.junit.ui.JUnitMessages;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -379,7 +378,7 @@ public final class JUnitModel {
         }
 
         @Override
-        public void testFailed(TestElement testElement, Status status, String trace, String expected, String actual) {
+        public void testFailed(TestElement testElement, TestStatus status, String trace, String expected, String actual) {
           // not fire
 //          TestViewerPlugin.core().getNewTestRunListeners().forEach(it->it.testCaseFinished(testElement));
         }
@@ -391,7 +390,7 @@ public final class JUnitModel {
         }
 
         @Override
-        public void testReran(TestCaseElement testCaseElement, Status status, String trace, String expectedResult, String actualResult) {
+        public void testRerun(TestCaseElement testCaseElement, TestStatus status, String trace, String expectedResult, String actualResult) {
           // not fire
 //          TestViewerPlugin.core().getNewTestRunListeners().forEach(it->it.testCaseRerun(testCaseElement));
         }

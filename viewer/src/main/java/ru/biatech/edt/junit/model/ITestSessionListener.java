@@ -17,12 +17,11 @@
 
 package ru.biatech.edt.junit.model;
 
-import ru.biatech.edt.junit.model.TestElement.Status;
-
 /**
  * A listener interface for observing the execution of a test session (initial run and reruns).
  */
 public interface ITestSessionListener {
+  // TODO Удалить неиспользуемые события
   /**
    * A test run has started.
    */
@@ -78,26 +77,26 @@ public interface ITestSessionListener {
    *
    * @param testElement the test
    * @param status      the outcome of the test; one of
-   *                    {@link TestElement.Status#ERROR} or
-   *                    {@link TestElement.Status#FAILURE}
+   *                    {@link TestStatus#ERROR} or
+   *                    {@link TestStatus#FAILURE}
    * @param trace       the stack trace
    * @param expected    expected value
    * @param actual      actual value
    */
-  void testFailed(TestElement testElement, Status status, String trace, String expected, String actual);
+  void testFailed(TestElement testElement, TestStatus status, String trace, String expected, String actual);
 
   /**
    * An individual test has been rerun.
    *
    * @param testCaseElement the test
    * @param status          the outcome of the test that was rerun; one of
-   *                        {@link TestElement.Status#OK}, {@link TestElement.Status#ERROR}, or {@link TestElement.Status#FAILURE}
+   *                        {@link TestStatus#OK}, {@link TestStatus#ERROR}, or {@link TestStatus#FAILURE}
    * @param trace           the stack trace in the case of abnormal termination,
    *                        or the empty string if none
    * @param expectedResult  expected value
    * @param actualResult    actual value
    */
-  void testReran(TestCaseElement testCaseElement, Status status, String trace, String expectedResult, String actualResult);
+  void testRerun(TestCaseElement testCaseElement, TestStatus status, String trace, String expectedResult, String actualResult);
 
   /**
    * @return <code>true</code> if the test run session can be swapped to disk although

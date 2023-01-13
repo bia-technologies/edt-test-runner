@@ -19,7 +19,6 @@ package ru.biatech.edt.junit.model;
 import org.eclipse.core.runtime.ListenerList;
 import ru.biatech.edt.junit.TestRunListener;
 import ru.biatech.edt.junit.TestViewerPlugin;
-import ru.biatech.edt.junit.model.TestElement.Status;
 
 
 /**
@@ -105,12 +104,12 @@ public class TestRunListenerAdapter implements ITestSessionListener {
   }
 
   @Override
-  public void testFailed(TestElement testElement, Status status, String trace, String expected, String actual) {
+  public void testFailed(TestElement testElement, TestStatus status, String trace, String expected, String actual) {
     // ignore
   }
 
   @Override
-  public void testReran(TestCaseElement testCaseElement, Status status, String trace, String expectedResult, String actualResult) {
+  public void testRerun(TestCaseElement testCaseElement, TestStatus status, String trace, String expectedResult, String actualResult) {
     // ignore
   }
 

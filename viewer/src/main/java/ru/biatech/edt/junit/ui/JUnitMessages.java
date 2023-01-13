@@ -58,9 +58,6 @@ public final class JUnitMessages extends NLS {
   public static String CounterPanel_runcount_ignored;
   public static String CounterPanel_runcount_skipped;
   public static String CounterPanel_runcount_ignored_assumptionsFailed;
-  public static String EnableStackFilterAction_action_description;
-  public static String EnableStackFilterAction_action_label;
-  public static String EnableStackFilterAction_action_tooltip;
   public static String ExpandAllAction_text;
   public static String ExpandAllAction_tooltip;
   public static String CollapseAllAction_text;
@@ -213,9 +210,6 @@ public final class JUnitMessages extends NLS {
   public static String TestRunnerViewPart_ImportTestRunSessionAction_error_title;
   public static String TestRunnerViewPart_ImportTestRunSessionAction_name;
   public static String TestRunnerViewPart_ImportTestRunSessionAction_title;
-  public static String TestRunnerViewPart_ImportTestRunSessionFromURLAction_import_from_url;
-  public static String TestRunnerViewPart_ImportTestRunSessionFromURLAction_invalid_url;
-  public static String TestRunnerViewPart_ImportTestRunSessionFromURLAction_url;
   public static String TestRunnerViewPart_jobName;
   public static String TestRunnerViewPart_label_failure;
   public static String TestRunnerViewPart_Launching;
@@ -253,9 +247,6 @@ public final class JUnitMessages extends NLS {
   public static String TestRunnerViewPart_toggle_execution_time_label;
   public static String TestRunnerViewPart_message_stopping;
   public static String TestRunnerViewPart_clear_history_label;
-  public static String TestRunnerViewPart_JUnitPasteAction_cannotpaste_message;
-  public static String TestRunnerViewPart_JUnitPasteAction_cannotpaste_title;
-  public static String TestRunnerViewPart_JUnitPasteAction_label;
   public static String TestRunnerViewPart_layout_menu;
 
   public static String TestSessionLabelProvider_testName_elapsedTimeInSeconds;

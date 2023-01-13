@@ -74,7 +74,7 @@
                 icon="$nl$/icons/full/eview16/junit.png"
                 category="com._1c.g5.v8.dt.ui.v8category"
                 fastViewWidthRatio="0.40"
-                class="ru.biatech.edt.junit.ui.view.TestRunnerViewPart"
+                class="ru.biatech.edt.junit.ui.report.TestRunnerViewPart"
                 id="ru.biatech.edt.junit.ResultView">
         </view>
     </extension>

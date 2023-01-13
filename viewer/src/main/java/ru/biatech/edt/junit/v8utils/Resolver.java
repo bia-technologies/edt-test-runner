@@ -16,8 +16,7 @@
 
 package ru.biatech.edt.junit.v8utils;
 
-import com._1c.g5.v8.dt.bm.index.emf.IBmEmfIndexManager;
-import com._1c.g5.v8.dt.bm.index.emf.IBmEmfIndexProvider;
+import com._1c.g5.v8.dt.core.platform.IExtensionProject;
 import com._1c.g5.v8.dt.core.platform.IV8Project;
 import com._1c.g5.v8.dt.metadata.mdclass.MdObject;
 import com._1c.g5.v8.dt.metadata.mdclass.Method;
@@ -25,27 +24,31 @@ import org.eclipse.emf.ecore.EClass;
 
 public class Resolver {
 
-  private static Resolver instance;
-  final IBmEmfIndexManager bmEmfIndexManager = Services.getBmEmfIndexManager();
-
-  private static Resolver getInstance() {
-    if (instance == null) {
-      instance = new Resolver();
-    }
-    return instance;
-  }
-
   public static MdObject findModule(IV8Project project, EClass moduleClass, String moduleName) {
 
-    IBmEmfIndexProvider bmEmfIndexProvider = getInstance().bmEmfIndexManager.getEmfIndexProvider(project.getProject());
+    if (project == null) {
+      return null;
+    }
+    var bmEmfIndexProvider = Services.getBmEmfIndexManager().getEmfIndexProvider(project.getProject());
 
     return MdUtils.getConfigurationObject(moduleClass, moduleName, bmEmfIndexProvider);
   }
 
   public static IV8Project getProject(String name) {
-    if (name == null || name.isEmpty())
+    if (name == null || name.isEmpty()) {
       return null;
-    return Services.getProjectManager().getProject(name);
+    }
+
+    var project = Services.getProjectManager().getProject(name);
+
+    if (project == null) {
+      project = Services.getProjectManager().getProjects(IExtensionProject.class)
+          .stream()
+          .filter(it -> it.getConfiguration().getName().equals(name))
+          .findFirst()
+          .orElse(null);
+    }
+    return project;
   }
 
 

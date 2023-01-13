@@ -30,7 +30,6 @@ import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
-import ru.biatech.edt.junit.model.TestElement.Status;
 import ru.biatech.edt.junit.ui.JUnitMessages;
 import ru.biatech.edt.junit.v8utils.Resolver;
 
@@ -49,7 +48,7 @@ public class TestRunHandler extends DefaultHandler {
   private TestSuiteElement fTestSuite;
   private TestCaseElement fTestCase;
   private Locator fLocator;
-  private Status fStatus;
+  private TestStatus fStatus;
   private IProgressMonitor fMonitor;
   private int fLastReportedLine;
 
@@ -111,14 +110,14 @@ public class TestRunHandler extends DefaultHandler {
       }
       case IXMLTags.NODE_ERROR:
         //TODO: multiple failures: https://bugs.eclipse.org/bugs/show_bug.cgi?id=125296
-        fStatus = Status.ERROR;
+        fStatus = TestStatus.ERROR;
         errorInfo.clean(true);
         errorInfo.message = attributes.getValue(IXMLTags.ATTR_MESSAGE);
         errorInfo.type = attributes.getValue(IXMLTags.ATTR_TYPE);
         break;
       case IXMLTags.NODE_FAILURE:
         //TODO: multiple failures: https://bugs.eclipse.org/bugs/show_bug.cgi?id=125296
-        fStatus = Status.FAILURE;
+        fStatus = TestStatus.FAILURE;
         errorInfo.clean(true);
         errorInfo.message = attributes.getValue(IXMLTags.ATTR_MESSAGE);
         break;
@@ -135,7 +134,7 @@ public class TestRunHandler extends DefaultHandler {
       case IXMLTags.NODE_SKIPPED:
         // before Ant 1.9.0: not an Ant JUnit tag, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=276068
         // later: child of <suite> or <test>, see https://issues.apache.org/bugzilla/show_bug.cgi?id=43969
-        fStatus = Status.OK;
+        fStatus = TestStatus.OK;
         errorInfo.clean(true);
         errorInfo.message = attributes.getValue(IXMLTags.ATTR_MESSAGE);
         if (errorInfo.message != null) {

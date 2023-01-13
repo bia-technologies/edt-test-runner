@@ -43,6 +43,15 @@ public interface ITestCaseElement extends ITestElement {
    */
   String getTestClassName();
 
+  /**
+   * Возвращает имя контекста исполнения теста
+   * @return имя контекста исполнения теста
+   */
   String getContext();
 
+  /**
+   * Возвращает стек ошибок
+   * @return стек ошибок
+   */
+  String getTrace();
 }

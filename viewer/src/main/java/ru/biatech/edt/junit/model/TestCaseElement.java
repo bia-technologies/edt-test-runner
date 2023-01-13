@@ -26,7 +26,7 @@ public class TestCaseElement extends TestElement implements ITestCaseElement {
   private boolean fIgnored;
   private final boolean fIsDynamicTest;
 
-  public TestCaseElement(TestSuiteElement parent,  String testName, String displayName, boolean isDynamicTest, String[] parameterTypes, String uniqueId, String context) {
+  public TestCaseElement(TestSuiteElement parent, String testName, String displayName, boolean isDynamicTest, String[] parameterTypes, String uniqueId, String context) {
     super(parent, testName, displayName, parameterTypes, uniqueId, context);
     Assert.isNotNull(parent);
     fIsDynamicTest = isDynamicTest;
@@ -59,11 +59,12 @@ public class TestCaseElement extends TestElement implements ITestCaseElement {
    * @since 3.6
    */
   @Override
-  public Result getTestResult(boolean includeChildren) {
-    if (fIgnored)
-      return Result.IGNORED;
-    else
+  public TestResult getTestResult(boolean includeChildren) {
+    if (fIgnored) {
+      return TestResult.IGNORED;
+    } else {
       return super.getTestResult(includeChildren);
+    }
   }
 
   public void setIgnored(boolean ignored) {

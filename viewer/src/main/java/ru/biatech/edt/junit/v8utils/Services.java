@@ -17,11 +17,17 @@
 package ru.biatech.edt.junit.v8utils;
 
 import com._1c.g5.v8.dt.bm.index.emf.IBmEmfIndexManager;
+import com._1c.g5.v8.dt.bsl.model.resource.owner.IBslOwnerComputerService;
+import com._1c.g5.v8.dt.core.filesystem.IQualifiedNameFilePathConverter;
 import com._1c.g5.v8.dt.core.platform.IResourceLookup;
 import com._1c.g5.v8.dt.core.platform.IV8ProjectManager;
+import com._1c.g5.v8.dt.stacktraces.model.IStacktraceParser;
+import com._1c.g5.v8.dt.ui.util.OpenHelper;
 import ru.biatech.edt.junit.TestViewerPlugin;
 
 public class Services {
+  private static OpenHelper openHelper;
+
   public static IV8ProjectManager getProjectManager() {
     return TestViewerPlugin.getService(IV8ProjectManager.class);
   }
@@ -32,5 +38,25 @@ public class Services {
 
   public static IResourceLookup getResourceLookup() {
     return TestViewerPlugin.getService(IResourceLookup.class);
+  }
+
+  public synchronized static OpenHelper getOpenHelper() {
+    if (openHelper != null) {
+      return openHelper;
+    } else {
+      return openHelper = new OpenHelper();
+    }
+  }
+
+  public static IStacktraceParser getStacktraceParser() {
+    return TestViewerPlugin.getService(IStacktraceParser.class);
+  }
+
+  public static IQualifiedNameFilePathConverter getQualifiedNameFilePathConverter() {
+    return TestViewerPlugin.getService(IQualifiedNameFilePathConverter.class);
+  }
+
+  public static IBslOwnerComputerService getBslOwnerComputerService() {
+    return TestViewerPlugin.getService(IBslOwnerComputerService.class);
   }
 }

@@ -7,7 +7,7 @@ ECHO Copy project template
 xcopy .\templates\eclipse_project .\dev\eclipse_project /Y /S /E
 ECHO Make source symlinks
 cd .\dev\eclipse_project\bundles\
-for %%s in ("launcher" "viewer") do (
+for %%s in ("viewer") do (
     ECHO ============%%s============
     ECHO %tab%remove %%s
     RMDIR %%s /S /Q

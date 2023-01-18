@@ -40,7 +40,6 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Composite;
@@ -51,21 +50,22 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.part.PageBook;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.model.ITestElement;
-import ru.biatech.edt.junit.model.TestResult;
 import ru.biatech.edt.junit.model.TestCaseElement;
 import ru.biatech.edt.junit.model.TestElement;
-import ru.biatech.edt.junit.model.TestStatus;
+import ru.biatech.edt.junit.model.TestResult;
 import ru.biatech.edt.junit.model.TestRoot;
 import ru.biatech.edt.junit.model.TestRunSession;
+import ru.biatech.edt.junit.model.TestStatus;
 import ru.biatech.edt.junit.model.TestSuiteElement;
 import ru.biatech.edt.junit.ui.JUnitMessages;
-import ru.biatech.edt.junit.ui.report.contentProviders.TestSessionLabelProvider;
-import ru.biatech.edt.junit.ui.report.contentProviders.TestSessionTableContentProvider;
-import ru.biatech.edt.junit.ui.report.contentProviders.TestSessionTreeContentProvider;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart.SortingCriterion;
 import ru.biatech.edt.junit.ui.report.actions.CopyFailureListAction;
 import ru.biatech.edt.junit.ui.report.actions.OpenTestAction;
 import ru.biatech.edt.junit.ui.report.actions.RerunAction;
+import ru.biatech.edt.junit.ui.report.contentProviders.TestSessionLabelProvider;
+import ru.biatech.edt.junit.ui.report.contentProviders.TestSessionTableContentProvider;
+import ru.biatech.edt.junit.ui.report.contentProviders.TestSessionTreeContentProvider;
+import ru.biatech.edt.junit.ui.stacktrace.actions.CopyTraceAction;
 import ru.biatech.edt.junit.ui.viewsupport.ColoringLabelProvider;
 import ru.biatech.edt.junit.ui.viewsupport.SelectionProviderMediator;
 
@@ -78,7 +78,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 
-
 /**
  * Класс-помощник для отображения отчета о тестировании
  */
@@ -87,7 +86,6 @@ public class TestViewer {
   private final IgnoredOnlyFilter fIgnoredOnlyFilter = new IgnoredOnlyFilter();
 
   private final TestRunnerViewPart fTestRunnerPart;
-  private final Clipboard fClipboard;
 
   private PageBook fViewerBook;
   private TreeViewer fTreeViewer;
@@ -112,9 +110,8 @@ public class TestViewer {
   private LinkedList<TestSuiteElement> fAutoClose;
   private HashSet<TestSuiteElement> fAutoExpand;
 
-  public TestViewer(Composite parent, Clipboard clipboard, TestRunnerViewPart runner) {
+  public TestViewer(Composite parent, TestRunnerViewPart runner) {
     fTestRunnerPart = runner;
-    fClipboard = clipboard;
 
     fLayoutMode = TestRunnerViewPart.LAYOUT_HIERARCHICAL;
 
@@ -369,8 +366,9 @@ public class TestViewer {
 
   synchronized void registerFailedForAutoScroll(TestElement testElement) {
     TestSuiteElement parent = (TestSuiteElement) fTreeContentProvider.getParent(testElement);
-    if (parent != null)
+    if (parent != null) {
       fAutoExpand.add(parent);
+    }
   }
 
   void expandFirstLevel() {
@@ -438,13 +436,14 @@ public class TestViewer {
         manager.add(new ExpandAllAction());
         manager.add(new CollapseAllAction());
       }
-
+      manager.add(new Separator());
+      var action = new CopyTraceAction();
+      action.handleTestSelected(testElement);
+      manager.add(action);
     }
+
     if (fTestRunSession != null && fTestRunSession.getFailureCount() + fTestRunSession.getErrorCount() > 0) {
-      if (fLayoutMode != TestRunnerViewPart.LAYOUT_HIERARCHICAL) {
-        manager.add(new Separator());
-      }
-      manager.add(new CopyFailureListAction(fTestRunnerPart, fClipboard));
+      manager.add(new CopyFailureListAction(fTestRunnerPart));
     }
     manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
     manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS + "-end")); //$NON-NLS-1$

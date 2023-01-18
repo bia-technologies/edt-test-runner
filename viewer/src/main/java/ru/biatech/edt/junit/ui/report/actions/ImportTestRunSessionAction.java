@@ -19,10 +19,8 @@ package ru.biatech.edt.junit.ui.report.actions;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.FileDialog;
-import org.eclipse.swt.widgets.Shell;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.model.JUnitModel;
 import ru.biatech.edt.junit.ui.JUnitMessages;
@@ -33,25 +31,24 @@ import java.io.File;
 /**
  * Команда загрузки отчета о тестировании из файла
  */
-public class ImportTestRunSessionAction extends Action {
-  private final Shell fShell;
-
-  public ImportTestRunSessionAction(Shell shell) {
+ public class ImportTestRunSessionAction extends Action {
+  public ImportTestRunSessionAction() {
     super(JUnitMessages.TestRunnerViewPart_ImportTestRunSessionAction_name);
-    fShell = shell;
-  }
+   }
 
   @Override
   public void run() {
-    FileDialog importDialog = new FileDialog(fShell, SWT.OPEN | SWT.SHEET);
+    var shell = TestViewerPlugin.ui().getShell();
+
+    var importDialog = new FileDialog(shell, SWT.OPEN | SWT.SHEET);
     importDialog.setText(JUnitMessages.TestRunnerViewPart_ImportTestRunSessionAction_title);
-    IDialogSettings dialogSettings = TestViewerPlugin.getDefault().getDialogSettings();
-    String lastPath = dialogSettings.get(TestRunnerViewPart.PREF_LAST_PATH);
+    var dialogSettings = TestViewerPlugin.getDefault().getDialogSettings();
+    var lastPath = dialogSettings.get(TestRunnerViewPart.PREF_LAST_PATH);
     if (lastPath != null) {
       importDialog.setFilterPath(lastPath);
     }
     importDialog.setFilterExtensions(new String[]{"*.xml", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
-    String path = importDialog.open();
+    var path = importDialog.open();
     if (path == null) {
       return;
     }
@@ -63,7 +60,7 @@ public class ImportTestRunSessionAction extends Action {
       JUnitModel.importTestRunSession(file, null);
     } catch (CoreException e) {
       TestViewerPlugin.log().logError(e);
-      ErrorDialog.openError(fShell, JUnitMessages.TestRunnerViewPart_ImportTestRunSessionAction_error_title, e.getStatus().getMessage(), e.getStatus());
+      ErrorDialog.openError(shell, JUnitMessages.TestRunnerViewPart_ImportTestRunSessionAction_error_title, e.getStatus().getMessage(), e.getStatus());
     }
   }
 }

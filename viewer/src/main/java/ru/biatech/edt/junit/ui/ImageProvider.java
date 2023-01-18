@@ -16,8 +16,10 @@
 
 package ru.biatech.edt.junit.ui;
 
+import lombok.Getter;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 import ru.biatech.edt.junit.TestViewerPlugin;
@@ -54,31 +56,82 @@ public class ImageProvider {
   public static final String EXCEPTION_ICON = "obj16/exc_catch.png"; //$NON-NLS-1$
   public static final String STACK_ICON = "obj16/stkfrm_obj.png"; //$NON-NLS-1$
   public static final String ERROR_ICON = "obj16/error.png"; //$NON-NLS-1$
-  public static final String TARGET_ICON = "obj16/error.png"; //$NON-NLS-1$
+  public static final String TARGET_ICON = "obj16/target.png"; //$NON-NLS-1$
   public static final String GOTO_ICON = "obj16/goto.png"; //$NON-NLS-1$
 
-  private final Image fStackViewIcon;
-  private final Image fTestRunOKIcon;
-  private final Image fTestRunFailIcon;
-  private final Image fTestIcon;
-  private final Image fTestOkIcon;
-  private final Image fTestErrorIcon;
-  private final Image fTestFailIcon;
-  private final Image fTestAssumptionFailureIcon;
-  private final Image fTestRunningIcon;
-  private final Image fTestIgnoredIcon;
-  private final Image fSuiteIcon;
-  private final Image fSuiteOkIcon;
-  private final Image fSuiteErrorIcon;
-  private final Image fSuiteFailIcon;
-  private final Image fSuiteRunningIcon;
+  @Getter
+  private final ImageDescriptor suiteIconDescriptor = getImageDescriptor(SUITE_ICON);
 
-  private final ImageDescriptor fSuiteIconDescriptor = getImageDescriptor(SUITE_ICON);
-  private final ImageDescriptor fSuiteOkIconDescriptor = getImageDescriptor(SUITE_OK_ICON);
-  private final ImageDescriptor fSuiteErrorIconDescriptor = getImageDescriptor(SUITE_ERROR_ICON);
-  private final ImageDescriptor fSuiteFailIconDescriptor = getImageDescriptor(SUITE_FAIL_ICON);
-  private final ImageDescriptor fSuiteRunningIconDescriptor = getImageDescriptor(SUITE_RUNNING_ICON);
-  private final List<Image> fImagesToDispose;
+  @Getter
+  private final ImageDescriptor suiteOkIconDescriptor = getImageDescriptor(SUITE_OK_ICON);
+
+  @Getter
+  private final ImageDescriptor suiteErrorIconDescriptor = getImageDescriptor(SUITE_ERROR_ICON);
+
+  @Getter
+  private final ImageDescriptor suiteFailIconDescriptor = getImageDescriptor(SUITE_FAIL_ICON);
+
+  @Getter
+  private final ImageDescriptor suiteRunningIconDescriptor = getImageDescriptor(SUITE_RUNNING_ICON);
+
+  @Getter(lazy = true)
+  private final Image stackViewIcon = createManagedImage(STACK_ICON);
+
+  @Getter(lazy = true)
+  private final Image testRunOKIcon = createManagedImage(TEST_RUN_OK_ICON);
+
+  @Getter(lazy = true)
+  private final Image testRunFailIcon = createManagedImage(TEST_RUN_FAIL_ICON);
+
+  @Getter(lazy = true)
+  private final Image testIcon = createManagedImage(TEST_ICON);
+
+  @Getter(lazy = true)
+  private final Image testOkIcon = createManagedImage(TEST_OK_ICON);
+
+  @Getter(lazy = true)
+  private final Image testErrorIcon = createManagedImage(TEST_ERROR_ICON);
+
+  @Getter(lazy = true)
+  private final Image testFailIcon = createManagedImage(TEST_FAIL_ICON);
+
+  @Getter(lazy = true)
+  private final Image testAssumptionFailureIcon = createManagedImage(TEST_ASSUMPTION_FAILURE_ICON);
+
+  @Getter(lazy = true)
+  private final Image testRunningIcon = createManagedImage(TEST_RUNNING_ICON);
+
+  @Getter(lazy = true)
+  private final Image testIgnoredIcon = createManagedImage(TEST_IGNORED_ICON);
+
+  @Getter(lazy = true)
+  private final Image suiteIcon = createManagedImage(suiteIconDescriptor);
+
+  @Getter(lazy = true)
+  private final Image suiteOkIcon = createManagedImage(suiteOkIconDescriptor);
+
+  @Getter(lazy = true)
+  private final Image suiteErrorIcon = createManagedImage(suiteErrorIconDescriptor);
+
+  @Getter(lazy = true)
+  private final Image suiteFailIcon = createManagedImage(suiteFailIconDescriptor);
+
+  @Getter(lazy = true)
+  private final Image suiteRunningIcon = createManagedImage(suiteRunningIconDescriptor);
+
+  @Getter(lazy = true)
+  private final Image errorIcon = createManagedImage(ERROR_ICON);
+
+  @Getter(lazy = true)
+  private final Image stackIcon = createManagedImage(STACK_ICON);
+
+  @Getter(lazy = true)
+  private final Image targetIcon = createManagedImage(TARGET_ICON);
+
+  @Getter(lazy = true)
+  private final Image messageIcon = createManagedImage(getSharedImage(ISharedImages.IMG_OBJS_INFO_TSK));
+
+  private final List<Image> imagesToDispose = new ArrayList<>();
 
   public static ImageDescriptor getImageDescriptor(String relativePath) {
     return TestViewerPlugin.ui().getImageDescriptor(relativePath);
@@ -89,113 +142,10 @@ public class ImageProvider {
     return workbench.getSharedImages().getImageDescriptor(imageID);
   }
 
-  public ImageProvider() {
-    fImagesToDispose = new ArrayList<>();
-
-    fStackViewIcon = createManagedImage(STACK_ICON);
-    fTestRunOKIcon = createManagedImage(TEST_RUN_OK_ICON);
-    fTestRunFailIcon = createManagedImage(TEST_RUN_FAIL_ICON);
-
-    fTestIcon = createManagedImage(TEST_ICON);
-    fTestOkIcon = createManagedImage(TEST_OK_ICON);
-    fTestErrorIcon = createManagedImage(TEST_ERROR_ICON);
-    fTestFailIcon = createManagedImage(TEST_FAIL_ICON);
-    fTestRunningIcon = createManagedImage(TEST_RUNNING_ICON);
-    fTestIgnoredIcon = createManagedImage(TEST_IGNORED_ICON);
-    fTestAssumptionFailureIcon = createManagedImage(TEST_ASSUMPTION_FAILURE_ICON);
-
-    fSuiteIcon = createManagedImage(fSuiteIconDescriptor);
-    fSuiteOkIcon = createManagedImage(fSuiteOkIconDescriptor);
-    fSuiteErrorIcon = createManagedImage(fSuiteErrorIconDescriptor);
-    fSuiteFailIcon = createManagedImage(fSuiteFailIconDescriptor);
-    fSuiteRunningIcon = createManagedImage(fSuiteRunningIconDescriptor);
-
-  }
-
   public void dispose() {
-    for (Image imageToDispose : fImagesToDispose) {
+    for (Image imageToDispose : imagesToDispose) {
       imageToDispose.dispose();
     }
-  }
-
-  public Image getStackViewIcon() {
-    return fStackViewIcon;
-  }
-
-  public Image getTestRunOKIcon() {
-    return fTestRunOKIcon;
-  }
-
-  public Image getTestRunFailIcon() {
-    return fTestRunFailIcon;
-  }
-
-  public Image getTestIcon() {
-    return fTestIcon;
-  }
-
-  public Image getTestOkIcon() {
-    return fTestOkIcon;
-  }
-
-  public Image getTestErrorIcon() {
-    return fTestErrorIcon;
-  }
-
-  public Image getTestFailIcon() {
-    return fTestFailIcon;
-  }
-
-  public Image getTestAssumptionFailureIcon() {
-    return fTestAssumptionFailureIcon;
-  }
-
-  public Image getTestRunningIcon() {
-    return fTestRunningIcon;
-  }
-
-  public Image getTestIgnoredIcon() {
-    return fTestIgnoredIcon;
-  }
-
-  public ImageDescriptor getSuiteIconDescriptor() {
-    return fSuiteIconDescriptor;
-  }
-
-  public ImageDescriptor getSuiteOkIconDescriptor() {
-    return fSuiteOkIconDescriptor;
-  }
-
-  public ImageDescriptor getSuiteErrorIconDescriptor() {
-    return fSuiteErrorIconDescriptor;
-  }
-
-  public ImageDescriptor getSuiteFailIconDescriptor() {
-    return fSuiteFailIconDescriptor;
-  }
-
-  public ImageDescriptor getSuiteRunningIconDescriptor() {
-    return fSuiteRunningIconDescriptor;
-  }
-
-  public Image getSuiteIcon() {
-    return fSuiteIcon;
-  }
-
-  public Image getSuiteOkIcon() {
-    return fSuiteOkIcon;
-  }
-
-  public Image getSuiteErrorIcon() {
-    return fSuiteErrorIcon;
-  }
-
-  public Image getSuiteFailIcon() {
-    return fSuiteFailIcon;
-  }
-
-  public Image getSuiteRunningIcon() {
-    return fSuiteRunningIcon;
   }
 
   private Image createManagedImage(ImageDescriptor descriptor) {
@@ -203,7 +153,7 @@ public class ImageProvider {
     if (image == null) {
       image = ImageDescriptor.getMissingImageDescriptor().createImage();
     }
-    fImagesToDispose.add(image);
+    imagesToDispose.add(image);
     return image;
   }
 

@@ -19,6 +19,7 @@ val pluginBuildPath = layout.buildDirectory.dir("buildPlugin").get().asFile
 val publishTo = (findProperty("publishTo") ?: "").toString()
 
 var subProjects = arrayOf("viewer")
+val mvnCommand = if (Os.isFamily(Os.FAMILY_WINDOWS)) "mvn.cmd" else "mvn"
 
 repositories {
     mavenCentral()
@@ -91,20 +92,27 @@ tasks.register<Copy>("buildPlugin-copyFiles") {
     group = "build"
 }
 
+tasks.register<Exec>("download-lombok-plugin") {
+    isIgnoreExitValue = true
+    workingDir = pluginBuildPath
+    standardOutput = System.out
+
+
+    environment("MAVEN_OPTS", "")
+    commandLine(mvnCommand, "clean", "dependency:copy@get-lombok")
+    dependsOn(tasks.named("buildPlugin-copyFiles"))
+    group = "build"
+}
+
 tasks.register<Exec>("buildPlugin") {
     isIgnoreExitValue = true
     workingDir = pluginBuildPath
     standardOutput = System.out
 
-    environment("MAVEN_OPTS", "-Dhttps.protocols=TLSv1.2")
+    environment("MAVEN_OPTS", "-javaagent:target/lombok.jar=ECJ -Dhttps.protocols=TLSv1.2")
+    commandLine(mvnCommand, "dependency:resolve", "package")
 
-    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-        commandLine("mvn.cmd", "dependency:resolve", "package")
-    } else {
-        commandLine("mvn", "dependency:resolve", "package")
-    }
-
-    dependsOn(tasks.named("buildPlugin-copyFiles"))
+    dependsOn(tasks.named("download-lombok-plugin"))
     group = "build"
 }
 
@@ -137,10 +145,7 @@ tasks.register<Exec>("publishPlugin") {
     standardOutput = System.out
 
     val ghPagesPath = layout.buildDirectory.dir("buildPlugin").get().asFile
-    environment("MAVEN_OPTS", "-Dhttps.protocols=TLSv1.2")
-    var command = if (Os.isFamily(Os.FAMILY_WINDOWS)) "mvn.cmd" else "mvn"
-    var cliArgs = arrayOf(command, "dependency:resolve", "deploy", "-Prelease-composite")
-    commandLine(*cliArgs)
+    commandLine(mvnCommand, "dependency:resolve", "deploy", "-Prelease-composite")
 
     dependsOn(tasks.named("buildPlugin-copyFiles"))
     group = "build"

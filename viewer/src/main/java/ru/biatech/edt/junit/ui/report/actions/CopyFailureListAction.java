@@ -19,10 +19,7 @@ package ru.biatech.edt.junit.ui.report.actions;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWTError;
-import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.DND;
-import org.eclipse.swt.dnd.TextTransfer;
-import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
@@ -31,19 +28,19 @@ import ru.biatech.edt.junit.ui.IJUnitHelpContextIds;
 import ru.biatech.edt.junit.ui.ImageProvider;
 import ru.biatech.edt.junit.ui.JUnitMessages;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
+import ru.biatech.edt.junit.utils.ClipboardHelper;
+import ru.biatech.edt.junit.utils.StringUtilities;
 
 /**
  * Copies the names of the methods that failed and their traces to the clipboard.
  */
 public class CopyFailureListAction extends Action {
 
-  private final Clipboard fClipboard;
   private final TestRunnerViewPart fRunner;
 
-  public CopyFailureListAction(TestRunnerViewPart runner, Clipboard clipboard) {
+  public CopyFailureListAction(TestRunnerViewPart runner) {
     super(JUnitMessages.CopyFailureList_action_label);
     fRunner = runner;
-    fClipboard = clipboard;
     IWorkbench workbench = PlatformUI.getWorkbench();
     workbench.getHelpSystem().setHelp(this, IJUnitHelpContextIds.COPY_FAILURE_LIST_ACTION);
     setImageDescriptor(ImageProvider.getSharedImage(ISharedImages.IMG_TOOL_COPY));
@@ -54,32 +51,26 @@ public class CopyFailureListAction extends Action {
    */
   @Override
   public void run() {
-    TextTransfer plainTextTransfer = TextTransfer.getInstance();
-
     try {
-      fClipboard.setContents(
-              new String[]{getAllFailureTraces()},
-              new Transfer[]{plainTextTransfer});
+      ClipboardHelper.pasteToClipboard(getAllFailureTraces());
     } catch (SWTError e) {
-      if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD)
+      if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD) {
         throw e;
-      if (MessageDialog.openQuestion(TestViewerPlugin.ui().getActiveWorkbenchShell(), JUnitMessages.CopyFailureList_problem, JUnitMessages.CopyFailureList_clipboard_busy))
+      }
+      if (MessageDialog.openQuestion(TestViewerPlugin.ui().getActiveWorkbenchShell(), JUnitMessages.CopyFailureList_problem, JUnitMessages.CopyFailureList_clipboard_busy)) {
         run();
+      }
     }
   }
 
   public String getAllFailureTraces() {
     var buf = new StringBuilder();
     var failures = fRunner.getAllFailures();
-
     var lineSeparator = System.lineSeparator();
+
     for (var failure : failures) {
       buf.append(failure.getTestName()).append(lineSeparator);
-      String failureTrace = failure.getTrace();
-      if (failureTrace != null) {
-        failureTrace = failureTrace.replaceAll("\\r\\n|\\r|\\n", lineSeparator); //$NON-NLS-1$
-        buf.append(failureTrace);
-      }
+      buf.append(StringUtilities.getTrace(failure));
     }
     return buf.toString();
   }

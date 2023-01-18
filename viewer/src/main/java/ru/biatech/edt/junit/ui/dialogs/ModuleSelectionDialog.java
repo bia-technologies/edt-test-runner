@@ -16,15 +16,14 @@
 
 package ru.biatech.edt.junit.ui.dialogs;
 
-import java.util.List;
-
+import com._1c.g5.v8.dt.bsl.model.Module;
+import com._1c.g5.v8.dt.ui.util.Labeler;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
-import com._1c.g5.v8.dt.bsl.model.Module;
-import com._1c.g5.v8.dt.ui.util.Labeler;
+import java.util.List;
 
 /**
  * Диалог выбора модуля из списка

@@ -35,7 +35,7 @@
   <scm>
     <connection>scm:git:git@github.com:bia-technologies/edt-test-runner.git</connection>
   </scm>
-
+  
   <modules>
     <module>targets</module>
     <module>bundles</module>
@@ -57,5 +57,4 @@
       </plugins>
     </pluginManagement>
   </build>
-
 </project>

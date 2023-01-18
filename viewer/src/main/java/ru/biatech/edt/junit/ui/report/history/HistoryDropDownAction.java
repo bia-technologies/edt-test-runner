@@ -45,8 +45,7 @@ class HistoryDropDownAction<E> extends Action {
 
       String label = fHistory.getText(element);
       if (accelerator < 10) {
-        //add the numerical accelerator
-        label = new StringBuilder().append('&').append(accelerator).append(' ').append(label).toString();
+        label = String.format("&%s %s", accelerator, label);
       }
 
       setText(label);

@@ -16,12 +16,7 @@
 
 package ru.biatech.edt.junit.ui.stacktrace;
 
-import com._1c.g5.v8.dt.stacktraces.model.IStacktrace;
-import com._1c.g5.v8.dt.stacktraces.model.IStacktraceElement;
-import com._1c.g5.v8.dt.stacktraces.model.IStacktraceError;
 import com._1c.g5.v8.dt.stacktraces.model.IStacktraceFrame;
-import com._1c.g5.v8.dt.stacktraces.model.IStacktraceParser;
-import com.google.common.base.Strings;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.ToolBarManager;
@@ -32,21 +27,20 @@ import org.eclipse.jface.util.OpenStrategy;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.ViewForm;
-import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.IWorkbenchPage;
 import ru.biatech.edt.junit.TestViewerPlugin;
-import ru.biatech.edt.junit.model.Factory;
 import ru.biatech.edt.junit.model.TestElement;
-import ru.biatech.edt.junit.model.TestStatus;
+import ru.biatech.edt.junit.model.TestErrorInfo;
 import ru.biatech.edt.junit.ui.ImageProvider;
 import ru.biatech.edt.junit.ui.JUnitMessages;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
 import ru.biatech.edt.junit.ui.stacktrace.actions.CompareResultsAction;
 import ru.biatech.edt.junit.ui.stacktrace.actions.CopyTraceAction;
 import ru.biatech.edt.junit.v8utils.BslSourceDisplay;
-import ru.biatech.edt.junit.v8utils.Services;
 
 /**
  * Класс для отображения и взаимодействия с ошибками тестирования
@@ -55,10 +49,8 @@ public class FailureViewer {
 
   private StackTracesTreeView viewer;
   private final TestRunnerViewPart viewPart;
-  private TestElement testElement;
-  private final IStacktraceParser stacktraceParser;
-  private final Clipboard clipboard;
   private final ViewForm parent;
+  private TestOpenListener testOpenListener;
 
   // Actions
   private CopyTraceAction copyTraceAction;
@@ -69,43 +61,27 @@ public class FailureViewer {
     this.viewPart = viewPart;
     this.parent = parent;
 
-    clipboard = new Clipboard(parent.getDisplay());
-    stacktraceParser = Services.getStacktraceParser();
-
     createControls();
   }
 
-  /**
-   * Отображает информацию об ошибках теста
-   * @param testElement тест содержащий ошибки
-   */
   public void viewFailure(TestElement testElement) {
-    this.testElement = testElement;
-    boolean testElementExist = testElement != null;
-
-    String trace = testElementExist ? testElement.getTrace() : null;
-    if (!Strings.isNullOrEmpty(trace)) {
-      viewStackTrace(stacktraceParser.parse(trace, testElement.getTestName(), null));
-    } else {
-      clear();
-    }
-
-    compareAction.handleTestSelected(testElement);
-    copyTraceAction.handleTestSelected(testElement);
-    openAction.setEnabled(testElementExist);
+    viewer.viewFailure(testElement);
+    handleSelected();
   }
 
   public void clear() {
-    viewer.setStackTrace(null);
+    viewer.clear();
   }
 
   public void dispose() {
-    clipboard.dispose();
-    viewer.getTree().dispose();
-  }
-
-  private void viewStackTrace(IStacktrace stacktrace) {
-    this.viewer.setStackTrace(stacktrace);
+    if (testOpenListener != null && viewer != null) {
+      viewer.getTree().removeSelectionListener(testOpenListener);
+      testOpenListener = null;
+    }
+    if (viewer != null) {
+      viewer.dispose();
+      viewer = null;
+    }
   }
 
   private void createControls() {
@@ -115,13 +91,15 @@ public class FailureViewer {
     createViewer();
     createLabel();
     registerActions();
-
+    testOpenListener = new TestOpenListener();
+    viewer.getTree().addSelectionListener(testOpenListener);
     parent.setContent(viewer.getTree());
+    viewer.getTree().addDisposeListener(e -> dispose());
   }
 
   private void registerActions() {
-    compareAction = new CompareResultsAction(parent);
-    copyTraceAction = new CopyTraceAction(parent, clipboard);
+    compareAction = new CompareResultsAction();
+    copyTraceAction = new CopyTraceAction();
     openAction = new OpenAction();
 
     // Double click
@@ -172,11 +150,19 @@ public class FailureViewer {
     }
     var element = viewer.getSelected();
 
-    if (element instanceof IStacktraceError && testElement.isComparisonFailure()) {
+    if (element instanceof TestErrorInfo && ((TestErrorInfo) element).isComparisonFailure()) {
       compareAction.run();
     } else if (element instanceof IStacktraceFrame) {
       openAction.run();
     }
+  }
+
+  void handleSelected() {
+    var error = viewer.getSelectedError();
+
+    compareAction.handleTestSelected(error);
+    copyTraceAction.handleTestSelected(error);
+    openAction.setEnabled(error != null);
   }
 
   private class OpenAction extends Action {
@@ -189,12 +175,24 @@ public class FailureViewer {
 
     @Override
     public void run() {
-      IStacktraceElement element;
+      Object element;
       if (viewer.getSelection().isEmpty() || !((element = viewer.getSelected()) instanceof IStacktraceFrame)) {
         return;
       }
       IWorkbenchPage page = viewPart.getSite().getPage();
       BslSourceDisplay.INSTANCE.displayBslSource(element, page, false);
+    }
+  }
+
+  private final class TestOpenListener extends SelectionAdapter {
+    @Override
+    public void widgetDefaultSelected(SelectionEvent e) {
+      handleSelected();
+    }
+
+    @Override
+    public void widgetSelected(SelectionEvent e) {
+      handleSelected();
     }
   }
 }

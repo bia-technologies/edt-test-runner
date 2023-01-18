@@ -56,7 +56,6 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ViewForm;
-import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTarget;
 import org.eclipse.swt.dnd.DropTargetAdapter;
@@ -181,7 +180,6 @@ public class TestRunnerViewPart extends ViewPart {
   private Image fViewImage;
   private CounterPanel fCounterPanel;
   private boolean fShowOnErrorOnly;
-  private Clipboard fClipboard;
   private volatile String fInfoMessage;
   private boolean fPartIsVisible;
   Image fOriginalViewImage;
@@ -520,9 +518,6 @@ public class TestRunnerViewPart extends ViewPart {
     getViewSite().getPage().removePartListener(fPartListener);
 
     imageProvider.dispose();
-    if (fClipboard != null) {
-      fClipboard.dispose();
-    }
     if (fViewMenuListener != null) {
       getViewSite().getActionBars().getMenuManager().removeMenuListener(fViewMenuListener);
     }
@@ -932,7 +927,7 @@ action enablement
       }
     });
     top.setTopLeft(empty); // makes ViewForm draw the horizontal separator line ...
-    fTestViewer = new TestViewer(top, fClipboard, this);
+    fTestViewer = new TestViewer(top, this);
     top.setContent(fTestViewer.getTestViewerControl());
 
     ViewForm bottom = new ViewForm(fSashForm, SWT.NONE);
@@ -959,8 +954,6 @@ action enablement
     fParent = parent;
     addResizeListener(parent);
 
-    fClipboard = new Clipboard(parent.getDisplay());
-
     GridLayout gridLayout = new GridLayout();
     gridLayout.marginWidth = 0;
     gridLayout.marginHeight = 0;
@@ -976,7 +969,7 @@ action enablement
 
     IActionBars actionBars = getViewSite().getActionBars();
 
-    fCopyAction = new CopyTraceAction(sashForm, fClipboard);
+    fCopyAction = new CopyTraceAction();
     fCopyAction.setActionDefinitionId(ActionFactory.COPY.getCommandId());
     actionBars.setGlobalActionHandler(ActionFactory.COPY.getId(), fCopyAction);
 

@@ -152,7 +152,7 @@ public class RunnerViewHistory extends ViewHistory<TestRunSession> {
 
   @Override
   public void addMenuEntries(MenuManager manager) {
-    manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, new ImportTestRunSessionAction(testRunnerViewPart.getShell()));
+    manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, new ImportTestRunSessionAction());
   }
 
   @Override

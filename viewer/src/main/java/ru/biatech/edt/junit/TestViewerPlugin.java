@@ -47,7 +47,6 @@ public class TestViewerPlugin extends AbstractUIPlugin {
   TestsManager manager;
   private BundleContext bundleContext;
   private Injector injector;
-  private InjectorAwareServiceRegistrator registrator;
   private Logger logger = null;
 
   public TestViewerPlugin() {
@@ -130,7 +129,7 @@ public class TestViewerPlugin extends AbstractUIPlugin {
   public void start(BundleContext bundleContext) throws Exception {
     super.start(bundleContext);
 
-    registrator = new InjectorAwareServiceRegistrator(bundleContext, this::getInjector);
+    new InjectorAwareServiceRegistrator(bundleContext, this::getInjector);
     this.bundleContext = bundleContext;
     core().getModel().start();
   }

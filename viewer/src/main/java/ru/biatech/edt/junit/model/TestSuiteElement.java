@@ -128,15 +128,15 @@ public class TestSuiteElement extends TestElement implements ITestSuiteElement {
       return;
 
     if (status == TestStatus.RUNNING) {
-      if (fTime >= 0.0d) {
+      if (elapsedTimeInSeconds >= 0.0d) {
         // re-running child: ignore change
       } else {
-        fTime = -System.currentTimeMillis() / 1000d;
+        elapsedTimeInSeconds = -System.currentTimeMillis() / 1000d;
       }
     } else if (status.convertToProgressState() == ProgressState.COMPLETED) {
-      if (fTime < 0) { // assert ! Double.isNaN(fTime)
+      if (elapsedTimeInSeconds < 0) { // assert ! Double.isNaN(fTime)
         double endTime = System.currentTimeMillis() / 1000d;
-        fTime = endTime + fTime;
+        elapsedTimeInSeconds += endTime;
       }
     }
 

@@ -39,111 +39,115 @@ import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
  */
 public class JUnitUI {
 
-    public static final String PLUGIN_ID = "ru.biatech.edt.junit"; //$NON-NLS-1$
+  public static final String PLUGIN_ID = "ru.biatech.edt.junit"; //$NON-NLS-1$
 
-    public Shell getActiveWorkbenchShell() {
-        IWorkbenchWindow workBenchWindow = getActiveWorkbenchWindow();
-        if (workBenchWindow == null) {
-            IWorkbenchWindow[] windows = PlatformUI.getWorkbench().getWorkbenchWindows();
-            return windows.length > 0 ? windows[0].getShell() : null;
-        }
-        return workBenchWindow.getShell();
+  public Shell getActiveWorkbenchShell() {
+    IWorkbenchWindow workBenchWindow = getActiveWorkbenchWindow();
+    if (workBenchWindow == null) {
+      IWorkbenchWindow[] windows = PlatformUI.getWorkbench().getWorkbenchWindows();
+      return windows.length > 0 ? windows[0].getShell() : null;
     }
+    return workBenchWindow.getShell();
+  }
 
-    /**
-     * Returns the active workbench window
-     *
-     * @return the active workbench window
-     */
-    public IWorkbenchWindow getActiveWorkbenchWindow() {
-        IWorkbench workBench = PlatformUI.getWorkbench();
-        if (workBench == null)
-            return null;
-        return workBench.getActiveWorkbenchWindow();
+  /**
+   * Returns the active workbench window
+   *
+   * @return the active workbench window
+   */
+  public IWorkbenchWindow getActiveWorkbenchWindow() {
+    IWorkbench workBench = PlatformUI.getWorkbench();
+    if (workBench == null)
+      return null;
+    return workBench.getActiveWorkbenchWindow();
+  }
+
+  public IWorkbenchPage getActivePage() {
+    IWorkbenchWindow activeWorkbenchWindow = getActiveWorkbenchWindow();
+    if (activeWorkbenchWindow == null)
+      return null;
+    return activeWorkbenchWindow.getActivePage();
+  }
+
+  public ImageDescriptor getImageDescriptor(String relativePath) {
+    return TestViewerPlugin.getDefault().createImageDescriptor(relativePath, true);
+  }
+
+  public ImageDescriptor getImageDescriptor(String pathPrefix, String imageName, boolean useMissingImageDescriptor) {
+    return TestViewerPlugin.getDefault().createImageDescriptor(pathPrefix, imageName, useMissingImageDescriptor);
+  }
+
+  public Image createImage(String path) {
+    return getImageDescriptor(path).createImage();
+  }
+
+  /**
+   * Sets the three image descriptors for enabled, disabled, and hovered to an action. The actions
+   * are retrieved from the *lcl16 folders.
+   *
+   * @param action   the action
+   * @param iconName the icon name
+   */
+  public void setLocalImageDescriptors(IAction action, String iconName) {
+    setImageDescriptors(action, "lcl16", iconName); //$NON-NLS-1$
+  }
+
+  public IDialogSettings getDialogSettingsSection(String name) {
+    IDialogSettings dialogSettings = TestViewerPlugin.getDefault().getDialogSettings();
+    IDialogSettings section = dialogSettings.getSection(name);
+    if (section == null) {
+      section = dialogSettings.addNewSection(name);
     }
+    return section;
+  }
 
-    public IWorkbenchPage getActivePage() {
-        IWorkbenchWindow activeWorkbenchWindow = getActiveWorkbenchWindow();
-        if (activeWorkbenchWindow == null)
-            return null;
-        return activeWorkbenchWindow.getActivePage();
+  public void asyncShowTestRunnerViewPart() {
+    getDisplay().asyncExec(this::showTestRunnerViewPartInActivePage);
+  }
+
+  public TestRunnerViewPart showTestRunnerViewPartInActivePage() {
+    try {
+      // Have to force the creation of view part contents
+      // otherwise the UI will not be updated
+      IWorkbenchPage page = getActivePage();
+      if (page == null)
+        return null;
+      TestRunnerViewPart view = (TestRunnerViewPart) page.findView(TestRunnerViewPart.NAME);
+      if (view == null) {
+        //	create and show the result view if it isn't created yet.
+        return (TestRunnerViewPart) page.showView(TestRunnerViewPart.NAME, null, IWorkbenchPage.VIEW_VISIBLE);
+      } else {
+        return view;
+      }
+    } catch (PartInitException pie) {
+      TestViewerPlugin.log().logError(pie);
+      return null;
     }
+  }
 
-    public ImageDescriptor getImageDescriptor(String relativePath) {
-        return TestViewerPlugin.getDefault().createImageDescriptor(relativePath, true);
+  public Display getDisplay() {
+    Shell shell = getActiveWorkbenchShell();
+    if (shell != null) {
+      return shell.getDisplay();
     }
-
-    public ImageDescriptor getImageDescriptor(String pathPrefix, String imageName, boolean useMissingImageDescriptor) {
-        return TestViewerPlugin.getDefault().createImageDescriptor(pathPrefix, imageName, useMissingImageDescriptor);
+    Display display = Display.getCurrent();
+    if (display == null) {
+      display = Display.getDefault();
     }
+    return display;
+  }
 
-    public Image createImage(String path) {
-        return getImageDescriptor(path).createImage();
-    }
+  public Shell getShell() {
+    return getActiveWorkbenchShell();
+  }
 
-    /**
-     * Sets the three image descriptors for enabled, disabled, and hovered to an action. The actions
-     * are retrieved from the *lcl16 folders.
-     *
-     * @param action   the action
-     * @param iconName the icon name
-     */
-    public void setLocalImageDescriptors(IAction action, String iconName) {
-        setImageDescriptors(action, "lcl16", iconName); //$NON-NLS-1$
-    }
+  private void setImageDescriptors(IAction action, String type, String relPath) {
+    ImageDescriptor id = getImageDescriptor("d" + type, relPath, false); //$NON-NLS-1$
+    if (id != null)
+      action.setDisabledImageDescriptor(id);
 
-    private void setImageDescriptors(IAction action, String type, String relPath) {
-        ImageDescriptor id = getImageDescriptor("d" + type, relPath, false); //$NON-NLS-1$
-        if (id != null)
-            action.setDisabledImageDescriptor(id);
-
-        ImageDescriptor descriptor = getImageDescriptor("e" + type, relPath, true); //$NON-NLS-1$
-        action.setHoverImageDescriptor(descriptor);
-        action.setImageDescriptor(descriptor);
-    }
-
-    public IDialogSettings getDialogSettingsSection(String name) {
-        IDialogSettings dialogSettings = TestViewerPlugin.getDefault().getDialogSettings();
-        IDialogSettings section = dialogSettings.getSection(name);
-        if (section == null) {
-            section = dialogSettings.addNewSection(name);
-        }
-        return section;
-    }
-
-    public void asyncShowTestRunnerViewPart() {
-        getDisplay().asyncExec(this::showTestRunnerViewPartInActivePage);
-    }
-
-    public TestRunnerViewPart showTestRunnerViewPartInActivePage() {
-        try {
-            // Have to force the creation of view part contents
-            // otherwise the UI will not be updated
-            IWorkbenchPage page = getActivePage();
-            if (page == null)
-                return null;
-            TestRunnerViewPart view = (TestRunnerViewPart) page.findView(TestRunnerViewPart.NAME);
-            if (view == null) {
-                //	create and show the result view if it isn't created yet.
-                return (TestRunnerViewPart) page.showView(TestRunnerViewPart.NAME, null, IWorkbenchPage.VIEW_VISIBLE);
-            } else {
-                return view;
-            }
-        } catch (PartInitException pie) {
-            TestViewerPlugin.log().logError(pie);
-            return null;
-        }
-    }
-
-    private Display getDisplay() {
-        Shell shell = getActiveWorkbenchShell();
-        if (shell != null) {
-            return shell.getDisplay();
-        }
-        Display display = Display.getCurrent();
-        if (display == null) {
-            display = Display.getDefault();
-        }
-        return display;
-    }
+    ImageDescriptor descriptor = getImageDescriptor("e" + type, relPath, true); //$NON-NLS-1$
+    action.setHoverImageDescriptor(descriptor);
+    action.setImageDescriptor(descriptor);
+  }
 }

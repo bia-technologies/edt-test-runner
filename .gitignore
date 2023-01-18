@@ -5,6 +5,7 @@
 !/.idea/libraries/
 !/.idea/runConfigurations/
 !/.idea/copyright/
+!/.idea/codeStyles/
 *.prefs
 /eclipse_project/workspace/
 target/

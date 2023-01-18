@@ -20,27 +20,46 @@
 
 package ru.biatech.edt.junit.model;
 
-import org.eclipse.core.runtime.Assert;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Setter;
 
-public abstract class TestElement implements ITestElement {
-  private final TestSuiteElement fParent;
-  private final String fContext;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+@Getter
+public abstract class TestElement implements ITestElement, ITraceable {
+
+  /**
+   * The parent suite, or <code>null</code> for the root
+   */
+  private final TestSuiteElement parent;
+
+  /**
+   * имя контекста исполнения теста
+   */
+  private final String context;
+
   /**
    * The display name of the test element, can be <code>null</code>. In that case, use
-   * {@link TestElement#fTestName fTestName}.
+   * {@link TestElement#testName fTestName}.
    */
-  private final String fDisplayName;
+  private final String displayName;
+
   /**
    * The array of method parameter types (as given by
    * org.junit.platform.engine.support.descriptor.MethodSource.getMethodParameterTypes()) if
    * applicable, otherwise <code>null</code>.
    */
-  private final String[] fParameterTypes;
+  private final String[] parameterTypes;
+
   /**
    * The unique ID of the test element which can be <code>null</code> as it is applicable to JUnit 5
    * and above.
    */
-  private final String fUniqueId;
+  private final String uniqueId;
+
   /**
    * Running time in seconds. Contents depend on the current {@link #getProgressState()}:
    * <ul>
@@ -50,15 +69,26 @@ public abstract class TestElement implements ITestElement {
    * <li>{@link ProgressState#COMPLETED}: elapsed time</li>
    * </ul>
    */
-  /* default */ double fTime = Double.NaN;
-  private String fTestName;
-  private TestStatus fStatus;
-  private String fTrace;
-  private String fExpected;
-  private String fActual;
-  private String fMessage;
+  @Setter
+  protected double elapsedTimeInSeconds = Double.NaN;
 
-  private boolean fAssumptionFailed;
+  /**
+   * Test element name
+   */
+  private final String testName;
+
+  /**
+   * Статус исполнения теста
+   */
+  private TestStatus status;
+
+  /**
+   * Список ошибок теста
+   */
+  private List<TestErrorInfo> errorsList = Collections.emptyList();
+
+  @Setter
+  private boolean assumptionFailure;
 
   /**
    * @param parent         the parent, can be <code>null</code>
@@ -70,29 +100,30 @@ public abstract class TestElement implements ITestElement {
    * @param uniqueId       the unique ID of the test element, can be <code>null</code> as it is applicable
    *                       to JUnit 5 and above
    */
-  public TestElement(TestSuiteElement parent, String testName, String displayName, String[] parameterTypes, String uniqueId, String context) {
-    Assert.isNotNull(testName);
-    fParent = parent;
-    fTestName = testName;
-    fDisplayName = displayName;
-    fParameterTypes = parameterTypes;
-    fUniqueId = uniqueId;
-    fStatus = TestStatus.NOT_RUN;
-    fContext = context;
-    if (parent != null) parent.addChild(this);
+  public TestElement(TestSuiteElement parent, @NonNull String testName, String displayName, String[] parameterTypes, String uniqueId, String context) {
+    this.parent = parent;
+    this.testName = testName;
+    this.displayName = displayName;
+    this.parameterTypes = parameterTypes;
+    this.uniqueId = uniqueId;
+    this.context = context;
+    status = TestStatus.NOT_RUN;
+    if (parent != null) {
+      parent.addChild(this);
+    }
   }
 
   @Override
   public ProgressState getProgressState() {
-    return getStatus().convertToProgressState();
+    return status.convertToProgressState();
   }
 
   @Override
   public TestResult getTestResult(boolean includeChildren) {
-    if (fAssumptionFailed) {
+    if (assumptionFailure) {
       return TestResult.IGNORED;
     }
-    return getStatus().convertToResult();
+    return status.convertToResult();
   }
 
   @Override
@@ -102,80 +133,54 @@ public abstract class TestElement implements ITestElement {
 
   @Override
   public ITestElementContainer getParentContainer() {
-    if (fParent instanceof TestRoot) {
+    if (parent instanceof TestRoot) {
       return getTestRunSession();
     }
-    return fParent;
+    return parent;
   }
 
-  /**
-   * @return the parent suite, or <code>null</code> for the root
-   */
-  public TestSuiteElement getParent() {
-    return fParent;
-  }
+  public void pushErrorInfo(TestStatus status, String message, String type, String trace, String expected, String actual) {
+    var first = errorsList.isEmpty();
+    if (first) {
+      errorsList = new ArrayList<>();
+    }
 
-  public String getTestName() {
-    return fTestName;
-  }
+    errorsList.add(new TestErrorInfo(this, status, message, trace, type, actual, expected));
 
-  /**
-   * Возращает имя контекста исполнения теста
-   * @return имя контекста исполнения теста
-   */
-  public String getContext() {
-    return fContext;
-  }
+    if (first) {
+      setStatus(status);
+    } else {
+      var cumulated = this.status == null ? status : this.status;
 
-  public void setName(String name) {
-    fTestName = name;
-  }
+      for (var error : errorsList) {
+        cumulated = TestStatus.combineStatus(cumulated, error.getStatus());
+      }
 
-  public void setStatus(TestStatus status, String message, String trace, String expected, String actual) {
-    fTrace = concat(fTrace, trace);
-    fExpected = concat(fExpected, expected);
-    fActual = concat(fActual, actual);
-    fMessage = concat(fMessage, message);
-    setStatus(status);
-  }
+      setStatus(cumulated);
+    }
 
-  public TestStatus getStatus() {
-    return fStatus;
   }
 
   public void setStatus(TestStatus status) {
     if (status == TestStatus.RUNNING) {
-      fTime = -System.currentTimeMillis() / 1000d;
+      elapsedTimeInSeconds = -System.currentTimeMillis() / 1000d;
     } else if (status.convertToProgressState() == ProgressState.COMPLETED) {
-      if (fTime < 0) { // assert ! Double.isNaN(fTime)
-        double endTime = System.currentTimeMillis() / 1000.0d;
-        fTime = endTime + fTime;
+      if (elapsedTimeInSeconds < 0) { // assert ! Double.isNaN(fTime)
+        var endTime = System.currentTimeMillis() / 1000.0d;
+        elapsedTimeInSeconds = endTime + elapsedTimeInSeconds;
       }
     }
 
-    fStatus = status;
-    TestSuiteElement parent = getParent();
-    if (parent != null) parent.childChangedStatus(this, status);
+    this.status = status;
+    var parent = getParent();
+    if (parent != null) {
+      parent.childChangedStatus(this, status);
+    }
   }
 
-  public String getTrace() {
-    return fTrace;
-  }
-
-  public String getMessage() {
-    return fMessage;
-  }
-
-  public String getExpected() {
-    return fExpected;
-  }
-
-  public String getActual() {
-    return fActual;
-  }
-
-  public boolean isComparisonFailure() {
-    return fExpected != null && fActual != null;
+  @Override
+  public boolean hasTrace() {
+    return !errorsList.isEmpty();
   }
 
   public String getClassName() {
@@ -188,67 +193,15 @@ public abstract class TestElement implements ITestElement {
 
   @Override
   public double getElapsedTimeInSeconds() {
-    if (Double.isNaN(fTime) || fTime < 0.0d) {
+    if (Double.isNaN(elapsedTimeInSeconds) || elapsedTimeInSeconds < 0.0d) {
       return Double.NaN;
     }
 
-    return fTime;
-  }
-
-  public void setElapsedTimeInSeconds(double time) {
-    fTime = time;
-  }
-
-  public void setAssumptionFailed(boolean assumptionFailed) {
-    fAssumptionFailed = assumptionFailed;
-  }
-
-  public boolean isAssumptionFailure() {
-    return fAssumptionFailed;
+    return elapsedTimeInSeconds;
   }
 
   @Override
   public String toString() {
     return getProgressState() + " - " + getTestResult(true); //$NON-NLS-1$
   }
-
-  /**
-   * Returns the display name of the test. Can be <code>null</code>. In that case, use
-   * {@link TestElement#getTestName() getTestName()}.
-   *
-   * @return the test display name, can be <code>null</code>
-   */
-  public String getDisplayName() {
-    return fDisplayName;
-  }
-
-  /**
-   * @return the array of method parameter types (as given by
-   * org.junit.platform.engine.support.descriptor.MethodSource.getMethodParameterTypes()) if
-   * applicable, otherwise <code>null</code>
-   */
-  public String[] getParameterTypes() {
-    return fParameterTypes;
-  }
-
-  /**
-   * Returns the unique ID of the test element. Can be <code>null</code> as it is applicable to JUnit
-   * 5 and above.
-   *
-   * @return the unique ID of the test, can be <code>null</code>
-   */
-  public String getUniqueId() {
-    return fUniqueId;
-  }
-
-  String concat(String s1, String s2) {
-    if (s1 != null && s2 != null) {
-      return s1 + s2;
-    } else if (s1 != null) {
-      return s1;
-    } else {
-      return s2;
-    }
-  }
-
 }

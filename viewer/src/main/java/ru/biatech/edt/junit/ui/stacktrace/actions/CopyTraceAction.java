@@ -16,46 +16,34 @@
  *******************************************************************************/
 package ru.biatech.edt.junit.ui.stacktrace.actions;
 
-import org.eclipse.core.runtime.Assert;
+import com.google.common.base.Strings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWTError;
-import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.DND;
-import org.eclipse.swt.dnd.TextTransfer;
-import org.eclipse.swt.dnd.Transfer;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.SelectionListenerAction;
-import ru.biatech.edt.junit.model.TestElement;
+import ru.biatech.edt.junit.TestViewerPlugin;
+import ru.biatech.edt.junit.model.ITraceable;
 import ru.biatech.edt.junit.ui.IJUnitHelpContextIds;
 import ru.biatech.edt.junit.ui.ImageProvider;
 import ru.biatech.edt.junit.ui.JUnitMessages;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringReader;
-import java.io.StringWriter;
+import ru.biatech.edt.junit.utils.ClipboardHelper;
+import ru.biatech.edt.junit.utils.StringUtilities;
 
 /**
  * Copies a test failure stack trace to the clipboard.
  */
 public class CopyTraceAction extends SelectionListenerAction {
-  private final Composite fView;
-  private final Clipboard fClipboard;
-  private TestElement testElement;
+  private ITraceable testElement;
 
-  public CopyTraceAction(Composite view, Clipboard clipboard) {
+  public CopyTraceAction() {
     super(JUnitMessages.CopyTrace_action_label);
     setEnabled(false);
-    Assert.isNotNull(clipboard);
     IWorkbench workbench = PlatformUI.getWorkbench();
     workbench.getHelpSystem().setHelp(this, IJUnitHelpContextIds.COPY_TRACE_ACTION);
     setImageDescriptor(ImageProvider.getSharedImage(ISharedImages.IMG_TOOL_COPY));
-    fView = view;
-    fClipboard = clipboard;
   }
 
   /*
@@ -63,47 +51,33 @@ public class CopyTraceAction extends SelectionListenerAction {
    */
   @Override
   public void run() {
-    String trace = testElement.getTrace();
+    if (testElement == null) {
+      return;
+    }
+
+    String trace = StringUtilities.getTrace(testElement);
     String source = null;
-    if (trace != null) {
-      source = convertLineTerminators(trace);
+    if (!Strings.isNullOrEmpty(trace)) {
+      source = trace;
     } else if (testElement != null) {
       source = testElement.getTestName();
     }
-    if (source == null || source.length() == 0)
+    if (Strings.isNullOrEmpty(source)) {
       return;
+    }
 
-    TextTransfer plainTextTransfer = TextTransfer.getInstance();
     try {
-      fClipboard.setContents(
-          new String[]{convertLineTerminators(source)},
-          new Transfer[]{plainTextTransfer});
+      ClipboardHelper.pasteToClipboard(source);
     } catch (SWTError e) {
       if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD)
         throw e;
-      if (MessageDialog.openQuestion(fView.getShell(), JUnitMessages.CopyTraceAction_problem, JUnitMessages.CopyTraceAction_clipboard_busy))
+      if (MessageDialog.openQuestion(TestViewerPlugin.ui().getShell(), JUnitMessages.CopyTraceAction_problem, JUnitMessages.CopyTraceAction_clipboard_busy))
         run();
     }
   }
 
-  public void handleTestSelected(TestElement test) {
+  public void handleTestSelected(ITraceable test) {
     testElement = test;
     setEnabled(testElement != null);
-  }
-
-  private String convertLineTerminators(String in) {
-    StringWriter stringWriter = new StringWriter();
-    PrintWriter printWriter = new PrintWriter(stringWriter);
-    StringReader stringReader = new StringReader(in);
-    BufferedReader bufferedReader = new BufferedReader(stringReader);
-    String line;
-    try {
-      while ((line = bufferedReader.readLine()) != null) {
-        printWriter.println(line);
-      }
-    } catch (IOException e) {
-      return in; // return the trace unfiltered
-    }
-    return stringWriter.toString();
   }
 }

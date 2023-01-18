@@ -24,6 +24,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.ViewerComparator;
 
+@SuppressWarnings("restriction")
 public class UtilsUI {
 
   public static void setValueSource(ComboViewer control, Iterable<?> values, IBaseLabelProvider labelProvider) {

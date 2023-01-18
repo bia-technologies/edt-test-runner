@@ -18,7 +18,7 @@
 
 package ru.biatech.edt.junit.model;
 
-import org.eclipse.core.runtime.Assert;
+import lombok.NonNull;
 
 
 public class TestCaseElement extends TestElement implements ITestCaseElement {
@@ -26,9 +26,8 @@ public class TestCaseElement extends TestElement implements ITestCaseElement {
   private boolean fIgnored;
   private final boolean fIsDynamicTest;
 
-  public TestCaseElement(TestSuiteElement parent, String testName, String displayName, boolean isDynamicTest, String[] parameterTypes, String uniqueId, String context) {
+  public TestCaseElement(@NonNull TestSuiteElement parent, @NonNull String testName, String displayName, boolean isDynamicTest, String[] parameterTypes, String uniqueId, String context) {
     super(parent, testName, displayName, parameterTypes, uniqueId, context);
-    Assert.isNotNull(parent);
     fIsDynamicTest = isDynamicTest;
   }
 

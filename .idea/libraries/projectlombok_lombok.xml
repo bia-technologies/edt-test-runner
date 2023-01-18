@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="projectlombok.lombok" type="repository">
+    <properties maven-id="org.projectlombok:lombok:1.18.16" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.16/lombok-1.18.16.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

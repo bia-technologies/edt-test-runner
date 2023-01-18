@@ -36,5 +36,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="plugins" level="project" />
+    <orderEntry type="library" name="projectlombok.lombok" level="project" />
   </component>
 </module>

@@ -18,9 +18,8 @@ package ru.biatech.edt.junit.ui.stacktrace.actions;
 
 
 import org.eclipse.jface.action.Action;
-import org.eclipse.swt.widgets.Composite;
 import ru.biatech.edt.junit.TestViewerPlugin;
-import ru.biatech.edt.junit.model.TestElement;
+import ru.biatech.edt.junit.model.TestErrorInfo;
 import ru.biatech.edt.junit.ui.JUnitMessages;
 import ru.biatech.edt.junit.ui.dialogs.CompareResultDialog;
 
@@ -29,11 +28,10 @@ import ru.biatech.edt.junit.ui.dialogs.CompareResultDialog;
  */
 public class CompareResultsAction extends Action {
 
-  private final Composite view;
   private CompareResultDialog fOpenDialog;
-  private TestElement testElement;
+  private TestErrorInfo testElement;
 
-  public CompareResultsAction(Composite view) {
+  public CompareResultsAction() {
     super(JUnitMessages.CompareResultsAction_label);
     setEnabled(false);
     setDescription(JUnitMessages.CompareResultsAction_description);
@@ -42,7 +40,6 @@ public class CompareResultsAction extends Action {
     setDisabledImageDescriptor(TestViewerPlugin.ui().getImageDescriptor("dlcl16/compare.png"));  //$NON-NLS-1$
     setHoverImageDescriptor(TestViewerPlugin.ui().getImageDescriptor("elcl16/compare.png"));  //$NON-NLS-1$
     setImageDescriptor(TestViewerPlugin.ui().getImageDescriptor("elcl16/compare.png"));  //$NON-NLS-1$
-    this.view = view;
   }
 
   /*
@@ -55,7 +52,7 @@ public class CompareResultsAction extends Action {
       fOpenDialog.getShell().setActive();
 
     } else {
-      fOpenDialog = new CompareResultDialog(view.getShell(), testElement);
+      fOpenDialog = new CompareResultDialog(TestViewerPlugin.ui().getShell(), testElement);
       fOpenDialog.create();
       fOpenDialog.getShell().addDisposeListener(e -> fOpenDialog = null);
       fOpenDialog.setBlockOnOpen(false);
@@ -63,7 +60,7 @@ public class CompareResultsAction extends Action {
     }
   }
 
-  public void handleTestSelected(TestElement test) {
+  public void handleTestSelected(TestErrorInfo test) {
     testElement = test;
     boolean enableCompare = test != null && test.isComparisonFailure();
     setEnabled(enableCompare);

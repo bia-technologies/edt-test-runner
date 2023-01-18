@@ -16,14 +16,15 @@
 
 package ru.biatech.edt.junit.ui.stacktrace;
 
-import com._1c.g5.v8.dt.stacktraces.model.IStacktrace;
 import com._1c.g5.v8.dt.stacktraces.model.IStacktraceElement;
 import com._1c.g5.v8.dt.stacktraces.model.IStacktraceError;
 import com._1c.g5.v8.dt.stacktraces.model.IStacktraceFrame;
+import com._1c.g5.v8.dt.stacktraces.model.IStacktraceParser;
+import com.google.common.base.Strings;
+import lombok.Value;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -31,8 +32,11 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
-import ru.biatech.edt.junit.TestViewerPlugin;
+import ru.biatech.edt.junit.model.TestElement;
+import ru.biatech.edt.junit.model.TestErrorInfo;
+import ru.biatech.edt.junit.model.TestStatus;
 import ru.biatech.edt.junit.ui.ImageProvider;
+import ru.biatech.edt.junit.v8utils.Services;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,44 +44,82 @@ import java.util.List;
 /**
  * Элемент для отображения стека ошибок
  */
-public class StackTracesTreeView extends TreeViewer {
+ public class StackTracesTreeView extends TreeViewer {
+  private final IStacktraceParser stacktraceParser;
+  private final ImageProvider imageProvider = new ImageProvider();
 
   public StackTracesTreeView(Composite parent) {
-    super(parent, SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL | SWT.SHEET);
+    super(parent, SWT.V_SCROLL | SWT.SINGLE);
+    setUseHashlookup(true);
+    stacktraceParser = Services.getStacktraceParser();
     createControl();
   }
 
-  public void setStackTrace(IStacktrace stacktrace) {
-    if (stacktrace != null) {
-      List<TreeItem> items = new ArrayList<>();
-      fillModel(items, stacktrace.getChilden(), null);
-      this.setInput(items);
-      this.setSelection(new StructuredSelection(items.get(0)));
-      this.expandAll();
-    } else {
-      this.setInput(null);
+  public void viewFailure(TestElement testElement) {
+    if (testElement == null) {
+      clear();
+      return;
     }
+
+    var items = new ArrayList<TreeItem>();
+    for (var error : testElement.getErrorsList()) {
+      TreeItem parent = null;
+
+      if (!Strings.isNullOrEmpty(error.getMessage())) {
+        items.add(parent = new TreeItem(error, null));
+      }
+
+      if (error.hasTrace()) {
+        var stacktrace = stacktraceParser.parse(error.getTrace(), testElement.getTestName(), null);
+        fillModel(parent == null ? items : parent.getChildren(), stacktrace.getChilden(), parent, error);
+      }
+    }
+
+    this.setInput(items);
+    if (!items.isEmpty()) {
+      this.setSelection(new StructuredSelection(items.get(0)));
+    }
+    this.expandAll();
   }
 
-  public IStacktraceElement getSelected() {
-    ISelection selection = getSelection();
+  public void clear() {
+    this.setInput(null);
+  }
+
+  public Object getSelected() {
+    var item = getSelectedItem();
+    return item == null ? null : item.getData();
+  }
+
+  public TestErrorInfo getSelectedError() {
+    var item = getSelectedItem();
+    return item == null ? null : item.getError();
+  }
+
+  public void dispose() {
+    getTree().dispose();
+    imageProvider.dispose();
+  }
+
+  private TreeItem getSelectedItem() {
+    var selection = getSelection();
     if (selection instanceof IStructuredSelection) {
-      IStructuredSelection structuredSelection = (IStructuredSelection) selection;
+      var structuredSelection = (IStructuredSelection) selection;
       if (structuredSelection.size() == 1) {
-        Object context = structuredSelection.getFirstElement();
+        var context = structuredSelection.getFirstElement();
         if (context instanceof TreeItem) {
-          return ((TreeItem) context).getData();
+          return ((TreeItem) context);
         }
       }
     }
     return null;
   }
 
-  private void fillModel(List<TreeItem> treeItems, List<IStacktraceElement> elements, TreeItem parent) {
+  private void fillModel(List<TreeItem> treeItems, List<IStacktraceElement> elements, TreeItem parent, TestErrorInfo error) {
     for (var item : elements) {
-      TreeItem treeItem = new TreeItem(item, parent);
+      var treeItem = new TreeItem(error, item, parent);
       treeItems.add(treeItem);
-      fillModel(treeItem.getChildren(), item.getChilden(), treeItem);
+      fillModel(treeItem.getChildren(), item.getChilden(), treeItem, error);
     }
   }
 
@@ -88,46 +130,43 @@ public class StackTracesTreeView extends TreeViewer {
     ColumnViewerToolTipSupport.enableFor(this);
   }
 
+  @Value
   private static class TreeItem {
-    final String text;
-    final IStacktraceElement data;
-    final List<TreeItem> children = new ArrayList<>();
-    final TreeItem parent;
+    String text;
+    Object data;
+    List<TreeItem> children = new ArrayList<>();
+    TreeItem parent;
+    TestErrorInfo error;
 
-    public TreeItem(IStacktraceElement data, TreeItem parent) {
+    public TreeItem(TestErrorInfo error, IStacktraceElement data, TreeItem parent) {
+      this.error = error;
       this.data = data;
       this.parent = parent;
       var lines = data.getName().split(":", 2);
       text = String.join("\n", lines);
     }
 
-    public String getText() {
-      return text == null ? data.getName() : text;
-    }
-
-    public IStacktraceElement getData() {
-      return data;
-    }
-
-    public List<TreeItem> getChildren() {
-      return children;
-    }
-
-    public TreeItem getParent() {
-      return parent;
+    public TreeItem(TestErrorInfo error, TreeItem parent) {
+      this.error = error;
+      this.data = error;
+      this.parent = parent;
+      var lines = error.getMessage().split(":", 2);
+      text = String.join("\n", lines);
     }
   }
 
-  private static class TreeItemColumnLabelProvider extends ColumnLabelProvider {
+  private class TreeItemColumnLabelProvider extends ColumnLabelProvider {
     @Override
     public Image getImage(Object element) {
-      var data = ((TreeItem) element).getData();
-      if (data instanceof IStacktraceError) {
-        return TestViewerPlugin.ui().createImage(ImageProvider.ERROR_ICON);
-      } else if (data instanceof IStacktraceFrame) {
-        return TestViewerPlugin.ui().createImage(ImageProvider.STACK_ICON);
+      var item = (TreeItem) element;
+      var data = item.getData();
+      if (data instanceof TestErrorInfo) {
+        var status = ((TestErrorInfo) item.getData()).getStatus();
+        return getIcon(status);
+      } else if (data instanceof IStacktraceElement) {
+        return getIcon((IStacktraceElement) data);
       } else {
-        return TestViewerPlugin.ui().createImage(ImageProvider.TARGET_ICON);
+        return super.getImage(element);
       }
     }
 
@@ -138,7 +177,33 @@ public class StackTracesTreeView extends TreeViewer {
 
     @Override
     public String getToolTipText(Object element) {
-      return ((TreeItem) element).getData().getName();
+      var item = (TreeItem) element;
+      if (item.getData() instanceof IStacktraceElement) {
+        return ((IStacktraceElement) item.getData()).getName();
+      } else {
+        return item.getText();
+      }
+    }
+
+    Image getIcon(TestStatus status) {
+      switch (status) {
+        case ERROR:
+          return imageProvider.getTestErrorIcon();
+        case FAILURE:
+          return imageProvider.getTestFailIcon();
+        default:
+          return imageProvider.getMessageIcon();
+      }
+    }
+
+    Image getIcon(IStacktraceElement element) {
+      if (element instanceof IStacktraceError) {
+        return imageProvider.getErrorIcon();
+      } else if (element instanceof IStacktraceFrame) {
+        return imageProvider.getStackIcon();
+      } else {
+        return imageProvider.getTargetIcon();
+      }
     }
   }
 

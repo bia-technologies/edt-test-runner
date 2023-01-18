@@ -1,6 +1,6 @@
 /*******************************************************************************
  * Copyright (c) 2007, 2017 IBM Corporation and others.
- * Copyright (c) 2022 BIA-Technologies Limited Liability Company.
+ * Copyright (c) 2022-2023 BIA-Technologies Limited Liability Company.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -18,7 +18,7 @@
  *     BIA-Technologies LLC - adaptation for EDT
  *******************************************************************************/
 
-package ru.biatech.edt.junit.model;
+package ru.biatech.edt.junit.model.serialize;
 
 import com._1c.g5.v8.dt.core.platform.IV8Project;
 import com.google.common.base.Strings;
@@ -30,11 +30,22 @@ import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
+import ru.biatech.edt.junit.model.Factory;
+import ru.biatech.edt.junit.model.IXMLTags;
+import ru.biatech.edt.junit.model.TestCaseElement;
+import ru.biatech.edt.junit.model.TestElement;
+import ru.biatech.edt.junit.model.TestRunSession;
+import ru.biatech.edt.junit.model.TestStatus;
+import ru.biatech.edt.junit.model.TestSuiteElement;
 import ru.biatech.edt.junit.ui.JUnitMessages;
 import ru.biatech.edt.junit.v8utils.Resolver;
 
 import java.util.Stack;
 
+/**
+ * Класс-обработчик чтения отчета jUnit
+ * Содержит основную логику парсинга файла отчета
+ */
 public class TestRunHandler extends DefaultHandler {
 
   /*
@@ -162,18 +173,16 @@ public class TestRunHandler extends DefaultHandler {
     switch (qName) {
       // OK
       case IXMLTags.NODE_TESTRUN:
-        break;
-      // OK
       case IXMLTags.NODE_TESTSUITES:
+      case IXMLTags.NODE_PROPERTIES:
+      case IXMLTags.NODE_PROPERTY:
+      case IXMLTags.NODE_SYSTEM_OUT:
+      case IXMLTags.NODE_SYSTEM_ERR:
         break;
       case IXMLTags.NODE_TESTSUITE:
         handleTestElementEnd(fTestSuite);
         fTestSuite = fTestSuite.getParent();
         //TODO: end suite: compare counters?
-        break;
-      // OK
-      case IXMLTags.NODE_PROPERTIES:
-      case IXMLTags.NODE_PROPERTY:
         break;
       case IXMLTags.NODE_TESTCASE:
         handleTestElementEnd(fTestCase);
@@ -197,21 +206,17 @@ public class TestRunHandler extends DefaultHandler {
         // skip whitespace from before <expected> and <actual> nodes
         errorInfo.trace.setLength(0);
         break;
-      // OK
-      case IXMLTags.NODE_SYSTEM_OUT:
-      case IXMLTags.NODE_SYSTEM_ERR:
-        break;
       case IXMLTags.NODE_SKIPPED: {
         TestElement testElement = fTestCase;
         if (testElement == null)
           testElement = fTestSuite;
         if (errorInfo.trace.length() > 0 || !Strings.isNullOrEmpty(errorInfo.message)) {
           handleFailure(testElement);
-          testElement.setAssumptionFailed(true);
+          testElement.setAssumptionFailure(true);
         } else if (fTestCase != null) {
           fTestCase.setIgnored(true);
         } else { // not expected
-          testElement.setAssumptionFailed(true);
+          testElement.setAssumptionFailure(true);
         }
         break;
       }
@@ -331,7 +336,7 @@ public class TestRunHandler extends DefaultHandler {
   }
 
   private void handleFailure(TestElement testElement) {
-    testElement.setStatus(fStatus, errorInfo.message, errorInfo.getTrace(), errorInfo.getExpected(), errorInfo.getActual());
+    testElement.pushErrorInfo(fStatus, errorInfo.message, errorInfo.type, errorInfo.getTrace(), errorInfo.getExpected(), errorInfo.getActual());
     fTestRunSession.registerTestFailureStatus(testElement);
     errorInfo.clean(false);
     fStatus = null;

@@ -27,7 +27,7 @@ package ru.biatech.edt.junit.model;
  * @noextend This interface is not intended to be extended by clients.
  * @since 3.3
  */
-public interface ITestCaseElement extends ITestElement {
+public interface ITestCaseElement extends ITestElement, ITraceable {
 
   /**
    * Returns the name of the test method.
@@ -45,13 +45,8 @@ public interface ITestCaseElement extends ITestElement {
 
   /**
    * Возвращает имя контекста исполнения теста
+   *
    * @return имя контекста исполнения теста
    */
   String getContext();
-
-  /**
-   * Возвращает стек ошибок
-   * @return стек ошибок
-   */
-  String getTrace();
 }

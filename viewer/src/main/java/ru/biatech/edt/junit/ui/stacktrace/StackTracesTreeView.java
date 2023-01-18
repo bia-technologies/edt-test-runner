@@ -21,6 +21,7 @@ import com._1c.g5.v8.dt.stacktraces.model.IStacktraceError;
 import com._1c.g5.v8.dt.stacktraces.model.IStacktraceFrame;
 import com._1c.g5.v8.dt.stacktraces.model.IStacktraceParser;
 import com.google.common.base.Strings;
+import lombok.EqualsAndHashCode;
 import lombok.Value;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -131,6 +132,7 @@ import java.util.List;
   }
 
   @Value
+  @EqualsAndHashCode(exclude = "parent")
   private static class TreeItem {
     String text;
     Object data;

@@ -1,5 +1,6 @@
 name: Publish update-site
 on:
+  workflow_dispatch:
   push:
     branches:
     - master
@@ -48,7 +49,7 @@ jobs:
           ./gradlew publishPlugin
 
       - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3.9.0
+        uses: peaceiris/actions-gh-pages@v3.9.2
         with:
           deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
           publish_branch: gh-pages

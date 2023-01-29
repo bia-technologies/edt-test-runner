@@ -19,5 +19,5 @@
    <feature id="ru.biatech.edt.xtest.feature">
       <category name="ru.biatech.edt.xtest.category"/>
    </feature>
-   <category-def name="ru.biatech.edt.xtest.category" label="Тестироваие 1С"/>
+   <category-def name="ru.biatech.edt.xtest.category" label="Тестирование 1С"/>
 </site>

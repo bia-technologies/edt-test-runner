@@ -42,7 +42,6 @@ import ru.biatech.edt.junit.v8utils.MdUtils;
 
 public class TestMethodMarker implements IExternalBslValidator {
 
-
   @Override
   public boolean needValidation(EObject object) {
     return object instanceof Module && TestViewerPlugin.getTestManager().isTestModule((Module) object);
@@ -67,7 +66,7 @@ public class TestMethodMarker implements IExternalBslValidator {
     methods.forEach(method -> createMarket(resource, method));
   }
 
-  void createMarket(IResource resource, Method method) {
+  private void createMarket(IResource resource, Method method) {
     var node = NodeModelUtils.findActualNodeFor(method);
     Map<String, Object> attributes = new HashMap<>();
     MarkerUtilities.setLineNumber(attributes, node.getStartLine());

@@ -49,13 +49,13 @@ import ru.biatech.edt.junit.ui.JUnitMessages;
 public class TestMethodActionDelegate extends AbstractRulerActionDelegate implements IActionDelegate2 {
 
   private static final String MODE_ATTRIBUTE = "mode";
-  
+
   private final int fDoubleClickTime = TestViewerPlugin.ui().getActiveWorkbenchShell().getDisplay().getDoubleClickTime();
-  protected IAction action;
-  long fMouseUpDelta;
-  boolean fDoubleClicked;
-  BslXtextEditor bslXtextEditor;
-  Menu testMethodMenu;
+  private IAction action;
+  private long fMouseUpDelta;
+  private boolean fDoubleClicked;
+  private BslXtextEditor bslXtextEditor;
+  private Menu testMethodMenu;
 
   @Override
   public void selectionChanged(IAction action, ISelection selection) {
@@ -63,7 +63,9 @@ public class TestMethodActionDelegate extends AbstractRulerActionDelegate implem
 
   @Override
   public void dispose() {
-    testMethodMenu.dispose();
+    if (testMethodMenu != null) {
+      testMethodMenu.dispose();
+    }
     super.dispose();
   }
 
@@ -162,7 +164,7 @@ public class TestMethodActionDelegate extends AbstractRulerActionDelegate implem
 
   void showMenu(Event event) {
     IMarker marker = (IMarker) event.data;
-    String method = marker.getAttribute(RulerAttributes.ATTRIBUTE_METHOD, (String)null);
+    String method = marker.getAttribute(RulerAttributes.ATTRIBUTE_METHOD, (String) null);
     Menu menu = getMenu();
     for (MenuItem item : menu.getItems()) {
       item.setData(RulerAttributes.ATTRIBUTE_METHOD, method);

@@ -56,7 +56,7 @@ public class LaunchConfigurationTab extends AbstractLaunchConfigurationTab {
     onecConfiguration.ifPresent(launchConfiguration ->
                                         configuration.setAttribute(LaunchConfigurationAttributes.USED_LAUNCH_CONFIGURATION, launchConfiguration.getName()));
 
-    var extensions = LaunchHelper.getExtensions();
+    var extensions = LaunchHelper.getTestExtensions();
     if (extensions.size() == 1)
       configuration.setAttribute(LaunchConfigurationAttributes.TEST_EXTENSION, extensions.get(0).getDtProject().getName());
   }

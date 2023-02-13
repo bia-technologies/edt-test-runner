@@ -57,7 +57,12 @@ public class ImageProvider {
   public static final String STACK_ICON = "obj16/stkfrm_obj.png"; //$NON-NLS-1$
   public static final String ERROR_ICON = "obj16/error.png"; //$NON-NLS-1$
   public static final String TARGET_ICON = "obj16/target.png"; //$NON-NLS-1$
-  public static final String GOTO_ICON = "obj16/goto.png"; //$NON-NLS-1$
+  public static final String GOTO_ICON = "elcl16/goto_input.png"; //$NON-NLS-1$
+
+  // ACTIONS
+  public static final String RUN_TEST = "etool16/run_exc.png"; //$NON-NLS-1$
+  public static final String DEBUG_TEST = "etool16/debug_exc.png"; //$NON-NLS-1$
+  public static final String UNDER_TEST = "elcl16/under_test.png"; //$NON-NLS-1$
 
   @Getter
   private final ImageDescriptor suiteIconDescriptor = getImageDescriptor(SUITE_ICON);
@@ -131,6 +136,15 @@ public class ImageProvider {
   @Getter(lazy = true)
   private final Image messageIcon = createManagedImage(getSharedImage(ISharedImages.IMG_OBJS_INFO_TSK));
 
+  @Getter(lazy = true)
+  private final Image runTestIcon = createManagedImage(RUN_TEST);
+
+  @Getter(lazy = true)
+  private final Image debugTestIcon = createManagedImage(DEBUG_TEST);
+
+  @Getter(lazy = true)
+  private final Image gotoIcon = createManagedImage(GOTO_ICON);
+
   private final List<Image> imagesToDispose = new ArrayList<>();
 
   public static ImageDescriptor getImageDescriptor(String relativePath) {
@@ -146,6 +160,7 @@ public class ImageProvider {
     for (Image imageToDispose : imagesToDispose) {
       imageToDispose.dispose();
     }
+    imagesToDispose.clear();
   }
 
   private Image createManagedImage(ImageDescriptor descriptor) {

@@ -38,7 +38,7 @@ import ru.biatech.edt.junit.model.TestRunSession;
 import ru.biatech.edt.junit.model.TestStatus;
 import ru.biatech.edt.junit.model.TestSuiteElement;
 import ru.biatech.edt.junit.ui.JUnitMessages;
-import ru.biatech.edt.junit.v8utils.Resolver;
+import ru.biatech.edt.junit.v8utils.Projects;
 
 import java.util.Stack;
 
@@ -263,7 +263,7 @@ public class TestRunHandler extends DefaultHandler {
       // support standalone suites and Ant's 'junitreport' task:
       IV8Project project = null;
       if (!Strings.isNullOrEmpty(fDefaultProjectName)) {
-        project = Resolver.getProject(fDefaultProjectName); // TODO Подумать как определять проект
+        project = Projects.getProject(fDefaultProjectName); // TODO Подумать как определять проект
       }
       fTestRunSession = new TestRunSession(name, project);
       parentSuite = fTestRunSession.getTestRoot();
@@ -305,7 +305,7 @@ public class TestRunHandler extends DefaultHandler {
       projectName = fDefaultProjectName;
     }
     if (!Strings.isNullOrEmpty(projectName)) {
-      project = Resolver.getProject(projectName);
+      project = Projects.getProject(projectName);
     }
     fTestRunSession = new TestRunSession(name, project);
     String includeTags = attributes.getValue(IXMLTags.ATTR_INCLUDE_TAGS);

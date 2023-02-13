@@ -37,7 +37,7 @@ import ru.biatech.edt.junit.model.TestElement;
 import ru.biatech.edt.junit.model.TestErrorInfo;
 import ru.biatech.edt.junit.model.TestStatus;
 import ru.biatech.edt.junit.ui.ImageProvider;
-import ru.biatech.edt.junit.v8utils.Services;
+import ru.biatech.edt.junit.v8utils.VendorServices;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +52,7 @@ import java.util.List;
   public StackTracesTreeView(Composite parent) {
     super(parent, SWT.V_SCROLL | SWT.SINGLE);
     setUseHashlookup(true);
-    stacktraceParser = Services.getStacktraceParser();
+    stacktraceParser = VendorServices.getStacktraceParser();
     createControl();
   }
 

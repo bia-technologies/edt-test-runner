@@ -27,7 +27,10 @@ Require-Bundle: org.eclipse.ui.ide;bundle-version="[3.5.0,4.0.0)",
  org.eclipse.xtext.ui.shared;bundle-version="2.24.0",
  com._1c.g5.v8.dt.bsl.ui;bundle-version="15.0.0",
  com._1c.g5.v8.dt.bsl;bundle-version="19.0.0",
- org.apache.commons.lang3
+ org.apache.commons.lang3,
+ com._1c.g5.v8.dt.bsl.core;bundle-version="6.0.300",
+ org.eclipse.handly;bundle-version="1.5.0",
+ com._1c.g5.v8.dt.lcore;bundle-version="3.1.900"
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Import-Package: com._1c.g5.v8.dt.bm.index.emf,
  com._1c.g5.v8.dt.bsl.model,

@@ -19,12 +19,15 @@
 
 package ru.biatech.edt.junit.kinds;
 
+import com._1c.g5.v8.dt.bsl.model.Module;
 import com._1c.g5.v8.dt.core.platform.IV8Project;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.emf.ecore.EObject;
 import ru.biatech.edt.junit.JUnitCore;
+import ru.biatech.edt.junit.v8utils.Projects;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -52,8 +55,33 @@ public class TestKindRegistry {
     return YAXUNIT_TEST_KIND_ID;
   }
 
-  public static ITestKind getContainerTestKind(IV8Project element) {
-    return getDefault().getKind(getContainerTestKindId(element));
+  /**
+   * Возвращает описание вида тестового движка для объекта
+   * @param module модуль с тестами
+   * @return описание тестового движка
+   */
+  public static ITestKind getContainerTestKind(Module module) {
+    var project = Projects.getParentProject(module.getOwner());
+    return getContainerTestKind(project);
+  }
+
+  /**
+   * Возвращает описание вида тестового движка для объекта
+   * @param object объект с тестами
+   * @return описание тестового движка
+   */
+  public static ITestKind getContainerTestKind(EObject object) {
+    var project = Projects.getParentProject(object);
+    return getContainerTestKind(project);
+  }
+
+  /**
+   * Возвращает описание вида тестового движка для объекта
+   * @param project проект с тестами
+   * @return описание тестового движка
+   */
+  public static ITestKind getContainerTestKind(IV8Project project) {
+    return getDefault().getKind(getContainerTestKindId(project));
   }
 
   public ArrayList<TestKind> getAllKinds() {

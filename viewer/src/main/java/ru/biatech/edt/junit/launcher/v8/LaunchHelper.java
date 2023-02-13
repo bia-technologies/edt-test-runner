@@ -20,6 +20,7 @@ import com._1c.g5.v8.dt.core.platform.IExtensionProject;
 import com._1c.g5.v8.dt.core.platform.IV8Project;
 import com._1c.g5.v8.dt.launching.core.ILaunchConfigurationTypes;
 import com._1c.g5.v8.dt.metadata.mdclass.CommonModule;
+import lombok.experimental.UtilityClass;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.DebugPlugin;
@@ -30,9 +31,9 @@ import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.kinds.ITestKind;
 import ru.biatech.edt.junit.kinds.TestKindRegistry;
 import ru.biatech.edt.junit.launcher.LaunchConfigurationTypes;
+import ru.biatech.edt.junit.services.TestsManager;
 import ru.biatech.edt.junit.ui.JUnitMessages;
-import ru.biatech.edt.junit.v8utils.Resolver;
-import ru.biatech.edt.junit.v8utils.Services;
+import ru.biatech.edt.junit.v8utils.Projects;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -43,12 +44,14 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@UtilityClass
 public class LaunchHelper {
 
-  public final static String REPORT_FILE_NAME = "junit.xml"; //$NON-NLS-1$
+  public final String REPORT_FILE_NAME = "junit.xml"; //$NON-NLS-1$
 
-  public final static String PREFIX_LAUNCH_TEST = "RunTest "; //$NON-NLS-1$
-  public static Stream<ILaunchConfiguration> getOnecLaunchConfigurations() {
+  public final String PREFIX_LAUNCH_TEST = "RunTest "; //$NON-NLS-1$
+
+  public Stream<ILaunchConfiguration> getOnecLaunchConfigurations() {
     try {
       return Arrays.stream(DebugPlugin.getDefault().getLaunchManager().getLaunchConfigurations()).filter(LaunchHelper::isOnecConfiguration);
     } catch (CoreException e) {
@@ -57,7 +60,7 @@ public class LaunchHelper {
     }
   }
 
-  public static Stream<ILaunchConfiguration> getTestLaunchConfigurations() {
+  public Stream<ILaunchConfiguration> getTestLaunchConfigurations() {
     try {
       return Arrays.stream(DebugPlugin.getDefault().getLaunchManager().getLaunchConfigurations()).filter(LaunchHelper::isRunTestConfiguration);
     } catch (CoreException e) {
@@ -66,7 +69,7 @@ public class LaunchHelper {
     }
   }
 
-  public static boolean isOnecConfiguration(ILaunchConfiguration configuration) {
+  public boolean isOnecConfiguration(ILaunchConfiguration configuration) {
     try {
       return Objects.equals(configuration.getType().getIdentifier(), ILaunchConfigurationTypes.RUNTIME_CLIENT);
     } catch (CoreException e) {
@@ -75,7 +78,7 @@ public class LaunchHelper {
     }
   }
 
-  public static boolean isRunTestConfiguration(ILaunchConfiguration configuration) {
+  public boolean isRunTestConfiguration(ILaunchConfiguration configuration) {
     try {
       return Objects.equals(configuration.getType().getIdentifier(), LaunchConfigurationTypes.TEST_CLIENT);
     } catch (CoreException e) {
@@ -84,7 +87,7 @@ public class LaunchHelper {
     }
   }
 
-  public static ILaunchConfiguration getLaunchConfiguration(String name) throws CoreException {
+  public ILaunchConfiguration getLaunchConfiguration(String name) throws CoreException {
     if (name == null || name.isEmpty()) return null;
     ILaunchConfiguration result = null;
     for (ILaunchConfiguration configuration : DebugPlugin.getDefault().getLaunchManager().getLaunchConfigurations()) {
@@ -96,14 +99,14 @@ public class LaunchHelper {
     return result;
   }
 
-  public static List<IExtensionProject> getExtensions() {
-    return Services.getProjectManager().getProjects(IExtensionProject.class)
-                   .stream()
-                   .filter(TestViewerPlugin.getTestManager()::isTestProject)
-                   .collect(Collectors.toList());
+  public List<IExtensionProject> getTestExtensions() {
+    return Projects.getExtensions()
+        .stream()
+        .filter(TestsManager::isTestProject)
+        .collect(Collectors.toList());
   }
 
-  public static void checkConfiguration(ILaunchConfiguration configuration) throws CoreException {
+  public void checkConfiguration(ILaunchConfiguration configuration) throws CoreException {
     String usedLC = configuration.getAttribute(LaunchConfigurationAttributes.USED_LAUNCH_CONFIGURATION, (String) null);
 
     var usedConfiguration = LaunchHelper.getLaunchConfiguration(usedLC);
@@ -115,25 +118,29 @@ public class LaunchHelper {
     }
   }
 
-  public static ILaunchConfiguration getTargetConfiguration(ILaunchConfiguration configuration) throws CoreException {
+  public ILaunchConfiguration getTargetConfiguration(ILaunchConfiguration configuration) throws CoreException {
     String targetConfigurationName = LaunchConfigurationAttributes.getTargetConfigurationName(configuration);
 
     return getLaunchConfiguration(targetConfigurationName);
   }
 
-  public static IExtensionProject getTestExtension(ILaunchConfiguration configuration) {
-    return (IExtensionProject) Resolver.getProject(LaunchConfigurationAttributes.getTestExtensionName(configuration));
+  public IExtensionProject getTestExtension(ILaunchConfiguration configuration) {
+    return (IExtensionProject) Projects.getProject(LaunchConfigurationAttributes.getTestExtensionName(configuration));
   }
 
-  public static List<String> getTestModules(IExtensionProject extensionProject) {
+  public Stream<CommonModule> getTestModulesStream(IExtensionProject extensionProject) {
     return extensionProject.getConfiguration().getCommonModules()
-                   .stream()
-                   .filter(TestViewerPlugin.getTestManager()::isTestModule)
-                   .map(CommonModule::getName)
-                   .collect(Collectors.toList());
+        .stream()
+        .filter(TestsManager::isTestModule);
   }
 
-  public static Path getWorkPath(ILaunchConfiguration configuration) {
+  public List<String> getTestModules(IExtensionProject extensionProject) {
+    return getTestModulesStream(extensionProject)
+        .map(CommonModule::getName)
+        .collect(Collectors.toList());
+  }
+
+  public Path getWorkPath(ILaunchConfiguration configuration) {
     var reportLocation = Platform.getStateLocation(TestViewerPlugin.getBundleContext().getBundle()).append(configuration.getName());
     var path = reportLocation.toFile().toPath();
     try {
@@ -145,7 +152,9 @@ public class LaunchHelper {
     return path;
   }
 
-  public static void runTestMethod(String methodFullName, String launchMode) {
+  public void runTestMethod(String moduleName, String methodName, String launchMode) {
+    var methodFullName = moduleName + "." + methodName; //$NON-NLS-1$
+
     var configuration = getTestLaunchConfigurations().findFirst();
     if (configuration.isEmpty()) return;
 
@@ -161,7 +170,7 @@ public class LaunchHelper {
     DebugUITools.launch(copy, launchMode);
   }
 
-  public static ITestKind getTestRunnerKind(ILaunchConfiguration launchConfiguration) {
+  public ITestKind getTestRunnerKind(ILaunchConfiguration launchConfiguration) {
     try {
       String loaderId = launchConfiguration.getAttribute(LaunchConfigurationAttributes.ATTR_TEST_RUNNER_KIND, (String) null);
       if (loaderId != null) {
@@ -172,7 +181,7 @@ public class LaunchHelper {
     return ITestKind.NULL;
   }
 
-  public static IV8Project getProject(ILaunchConfiguration configuration) {
+  public IV8Project getProject(ILaunchConfiguration configuration) {
     // TODO
 //		try {
 //			String projectName= configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, (String) null);

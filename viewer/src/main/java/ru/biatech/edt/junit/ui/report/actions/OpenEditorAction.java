@@ -17,97 +17,43 @@
 package ru.biatech.edt.junit.ui.report.actions;
 
 import com._1c.g5.v8.dt.core.platform.IV8Project;
-import com._1c.g5.v8.dt.metadata.mdclass.MdObject;
-import org.eclipse.emf.common.util.URI;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.text.TextSelection;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.texteditor.ITextEditor;
 import ru.biatech.edt.junit.TestViewerPlugin;
-import ru.biatech.edt.junit.kinds.ITestResolver;
-import ru.biatech.edt.junit.kinds.TestKindRegistry;
-import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.ImageProvider;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
-import ru.biatech.edt.junit.v8utils.Resolver;
-import ru.biatech.edt.junit.v8utils.Services;
+import ru.biatech.edt.junit.v8utils.BslSourceDisplay;
+import ru.biatech.edt.junit.v8utils.MethodReference;
 
 /**
- * Abstract Action for opening a Java editor.
+ * Абстрактное действие для перехода к методу
  */
 public abstract class OpenEditorAction extends Action {
 
   protected String fClassName;
   protected TestRunnerViewPart fTestRunner;
 
-  protected OpenEditorAction(TestRunnerViewPart testRunner, String testClassName) {
-    this(testRunner, testClassName, true);
-  }
-
-  public OpenEditorAction(TestRunnerViewPart testRunner, String className, boolean activate) {
-    super(JUnitMessages.OpenEditorAction_action_label);
-    fClassName = className;
+  protected OpenEditorAction(String text, String icon, TestRunnerViewPart testRunner, String testClassName) {
+    super(text, ImageProvider.getImageDescriptor(icon));
+    fClassName = testClassName;
     fTestRunner = testRunner;
-    setImageDescriptor(TestViewerPlugin.ui().getImageDescriptor("elcl16/goto_input.png")); //$NON-NLS-1$
   }
 
-  /*
-   * @see IAction#run()
-   */
   @Override
   public void run() {
-
-    IEditorPart editor;
     var position = getPosition();
-
-    var element = findType(getLaunchedProject(), position);
-    if (element == null) {
-      MessageDialog.openError(getShell(), JUnitMessages.OpenEditorAction_error_cannotopen_title, JUnitMessages.OpenEditorAction_error_cannotopen_message);
-      return;
+    if (position != null) {
+      BslSourceDisplay.INSTANCE.displayBslSource(position, TestViewerPlugin.ui().getActivePage(), true);
     }
-
-    TextSelection selection = getSelection(element, position);
-    if (selection == null) {
-      editor = Services.getOpenHelper().openEditor(element);
-    } else {
-      URI uri = Services.getResourceLookup().getPlatformResourceUri(element);
-      editor = Services.getOpenHelper().openEditor(uri, selection);
-    }
-
-    if (!(editor instanceof ITextEditor)) {
-      fTestRunner.registerInfoMessage(JUnitMessages.OpenEditorAction_message_cannotopen);
-      return;
-    }
-  }
-
-  protected Shell getShell() {
-    return fTestRunner.getSite().getShell();
   }
 
   /**
-   * @return the Java project, or <code>null</code>
+   * @return the 1C project, or <code>null</code>
    */
   protected IV8Project getLaunchedProject() {
     return fTestRunner.getLaunchedProject();
   }
 
-  protected final MdObject findType(final IV8Project project, ITestResolver.MethodPositionInfo position) {
-    return Resolver.findModule(project, position.getOwnerClass(), position.getOwnerName());
-  }
-
-  protected TextSelection getSelection(MdObject moduleOwner, ITestResolver.MethodPositionInfo position) {
+  protected MethodReference getPosition() {
     return null;
-  }
-
-  protected abstract ITestResolver.MethodPositionInfo getPosition();
-
-  protected ITestResolver getResolver(IV8Project project) {
-    var kind = TestKindRegistry.getContainerTestKind(project);
-    if (kind != null) {
-      return kind.getResolver();
-    } else {
-      return null;
-    }
   }
 }

@@ -71,15 +71,13 @@ public final class JUnitMessages extends NLS {
   public static String GotoReferencedTestAction_dialog_title;
   public static String GotoReferencedTestAction_selectdialog_title;
 
+  public static String GotoReferencedTestAction_error_model_not_available;
+
   // JUnitContainerWizardPage
   public static String JUnitContainerWizardPage_combo_label;
   public static String JUnitContainerWizardPage_error_problem_configuring_container;
   public static String JUnitContainerWizardPage_error_title;
   public static String JUnitContainerWizardPage_error_version_not_available;
-  public static String JUnitContainerWizardPage_lib_not_found;
-  public static String JUnitContainerWizardPage_option_junit3;
-  public static String JUnitContainerWizardPage_option_junit4;
-  public static String JUnitContainerWizardPage_option_junit5;
   public static String JUnitContainerWizardPage_resolved_label;
   public static String JUnitContainerWizardPage_source_location_label;
   public static String JUnitContainerWizardPage_source_not_found;
@@ -165,15 +163,7 @@ public final class JUnitMessages extends NLS {
   public static String LaunchConfigChange_configDeleted;
   public static String LaunchConfigRenameChange_name;
   public static String LaunchConfigSetAttributeChange_name;
-  public static String OpenEditorAction_action_label;
-  public static String OpenEditorAction_error_cannotopen_message;
-  public static String OpenEditorAction_error_cannotopen_title;
-  public static String OpenEditorAction_error_dialog_message;
-  public static String OpenEditorAction_error_dialog_title;
-  public static String OpenEditorAction_message_cannotopen;
-  public static String OpenTestAction_error_methodNoFound;
-  public static String OpenTestAction_dialog_title;
-  public static String OpenTestAction_select_element;
+
   public static String RerunAction_label_debug;
   public static String RerunAction_label_run;
   public static String RerunAction_label_rerun;
@@ -279,6 +269,14 @@ public final class JUnitMessages extends NLS {
   public static String JUnitLaunchListener_ProcessError;
   public static String JUnitModel_ReportIsEmpty;
 
+  public static String LaunchTest_dialog_title;
+  public static String LaunchTest_error_is_not_test;
+
+  public static String OpenTestAction_label;
+  public static String OpenTestAction_error_not_found;
+  public static String OpenUnderTestMethodAction_label;
+  public static String OpenUnderTestMethodAction_error_not_found;
+
   static {
     NLS.initializeMessages(BUNDLE_NAME, JUnitMessages.class);
   }
@@ -286,6 +284,4 @@ public final class JUnitMessages extends NLS {
   private JUnitMessages() {
     // Do not instantiate
   }
-
-
 }

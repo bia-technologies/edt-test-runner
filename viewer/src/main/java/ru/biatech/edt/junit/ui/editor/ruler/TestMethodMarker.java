@@ -14,7 +14,7 @@
  * limitations under the License.
  *******************************************************************************/
 
-package ru.biatech.edt.junit.ruler;
+package ru.biatech.edt.junit.ui.editor.ruler;
 
 import java.text.MessageFormat;
 import java.util.Collection;
@@ -37,15 +37,15 @@ import com._1c.g5.v8.dt.bsl.validation.CustomValidationMessageAcceptor;
 import com._1c.g5.v8.dt.bsl.validation.IExternalBslValidator;
 
 import ru.biatech.edt.junit.TestViewerPlugin;
+import ru.biatech.edt.junit.services.TestsManager;
 import ru.biatech.edt.junit.ui.JUnitMessages;
 import ru.biatech.edt.junit.v8utils.MdUtils;
 
 public class TestMethodMarker implements IExternalBslValidator {
 
-
   @Override
   public boolean needValidation(EObject object) {
-    return object instanceof Module && TestViewerPlugin.getTestManager().isTestModule((Module) object);
+    return object instanceof Module && TestsManager.isTestModule((Module) object);
   }
 
   @Override
@@ -63,11 +63,11 @@ public class TestMethodMarker implements IExternalBslValidator {
     } catch (CoreException e) {
       TestViewerPlugin.log().logError(JUnitMessages.TestMethodMarker_MarkersCleanError, e);
     }
-    Collection<Method> methods = TestViewerPlugin.getTestManager().getTestMethods(module);
+    Collection<Method> methods = TestsManager.getTestMethods(module);
     methods.forEach(method -> createMarket(resource, method));
   }
 
-  void createMarket(IResource resource, Method method) {
+  private void createMarket(IResource resource, Method method) {
     var node = NodeModelUtils.findActualNodeFor(method);
     Map<String, Object> attributes = new HashMap<>();
     MarkerUtilities.setLineNumber(attributes, node.getStartLine());

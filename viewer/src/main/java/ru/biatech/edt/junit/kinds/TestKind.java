@@ -22,7 +22,6 @@ package ru.biatech.edt.junit.kinds;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import ru.biatech.edt.junit.TestViewerPlugin;
-import ru.biatech.edt.junit.yaxunit.Resolver;
 
 public class TestKind implements ITestKind {
 
@@ -66,14 +65,6 @@ public class TestKind implements ITestKind {
       }
     }
     return fLauncher;
-  }
-
-  /*
-   * @see ru.biatech.edt.junit.kinds.ITestKind#getResolver()
-   */
-  @Override
-  public ITestResolver getResolver() {
-    return new Resolver(); // TODO
   }
 
   /*

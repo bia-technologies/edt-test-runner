@@ -36,7 +36,7 @@
             point="org.eclipse.debug.ui.launchConfigurationTypeImages">
         <launchConfigurationTypeImage
                 configTypeID="ru.biatech.edt.junit.launcher.v8.launchConfigurationType"
-                icon="$nl$/icons/full/eview16/junit.png"
+                icon="$nl$/icons/full/eview16/logo.png"
                 id="ru.biatech.edt.junit.launcher.v8.launchConfigurationTypeImage">
         </launchConfigurationTypeImage>
     </extension>
@@ -71,7 +71,7 @@
             point="org.eclipse.ui.views">
         <view
                 name="%View.label"
-                icon="$nl$/icons/full/eview16/junit.png"
+                icon="$nl$/icons/full/eview16/logo.png"
                 category="com._1c.g5.v8.dt.ui.v8category"
                 fastViewWidthRatio="0.40"
                 class="ru.biatech.edt.junit.ui.report.TestRunnerViewPart"
@@ -192,34 +192,6 @@
         </objectContribution>
     </extension>
     <extension
-            point="org.eclipse.ui.actionSets">
-        <actionSet
-                label="%JUnitActionSet.label"
-                visible="false"
-                id="ru.biatech.edt.junit.JUnitActionSet">
-            <menu
-                    label="%searchMenu.label"
-                    path="navigate"
-                    id="org.eclipse.search.menu">
-                <groupMarker name="internalDialogGroup"/>   <!-- not to be used by clients  -->
-                <groupMarker name="dialogGroup"/>           <!-- to be used by clients      -->
-                <separator name="fileSearchContextMenuActionsGroup"/> <!-- to be used by clients      -->
-                <separator name="contextMenuActionsGroup"/> <!-- to be used by clients -->
-                <separator name="occurencesActionsGroup"/> <!-- to be used by clients -->
-                <separator name="extraSearchGroup"/> <!-- to be used by clients -->
-            </menu>
-            <action
-                    definitionId="ru.biatech.edt.junit.gotoTest"
-                    label="%GotoTestAction.label"
-                    helpContextId="ru.biatech.edt.junit.goto_referenced_test_action_context"
-                    class="ru.biatech.edt.junit.ui.GotoReferencedTestAction"
-                    tooltip="%GotoTestAction.tooltip"
-                    menubarPath="org.eclipse.search.menu/extraSearchGroup"
-                    id="junit.actions.GotoTestAction">
-            </action>
-        </actionSet>
-    </extension>
-    <extension
             point="org.eclipse.ui.actionSetPartAssociations">
         <actionSetPartAssociation
                 targetID="ru.biatech.edt.junit.JUnitActionSet">
@@ -257,39 +229,6 @@
                     id="ru.biatech.edt.junit.ResultView">
             </part>
         </actionSetPartAssociation>
-    </extension>
-    <extension
-            point="org.eclipse.ui.commands">
-        <command
-                name="%GotoTestCommand.name"
-                description="%GotoTestCommand.description"
-                categoryId="org.eclipse.search.ui.category.search"
-                id="ru.biatech.edt.junit.gotoTest">
-        </command>
-        <command
-                name="%JUnitShortcut.description.run"
-                description="%JUnitShortcut.description.run"
-                categoryId="org.eclipse.debug.ui.category.run"
-                id="ru.biatech.edt.junit.junitShortcut.run">
-        </command>
-        <command
-                name="%JUnitShortcut.description.debug"
-                description="%JUnitShortcut.description.debug"
-                categoryId="org.eclipse.debug.ui.category.run"
-                id="ru.biatech.edt.junit.junitShortcut.debug">
-        </command>
-        <command
-                name="%JUnitShortcut.description.rerunLast"
-                description="%JUnitShortcut.description.rerunLast"
-                categoryId="org.eclipse.debug.ui.category.run"
-                id="ru.biatech.edt.junit.junitShortcut.rerunLast">
-        </command>
-        <command
-                name="%JUnitShortcut.description.rerunFailedFirst"
-                description="%JUnitShortcut.description.rerunFailedFirst"
-                categoryId="org.eclipse.debug.ui.category.run"
-                id="ru.biatech.edt.junit.junitShortcut.rerunFailedFirst">
-        </command>
     </extension>
 
     <!-- JUnit Container -->
@@ -338,17 +277,17 @@
     <extension
             point="com._1c.g5.v8.dt.bsl.externalBslValidator">
         <externalValidator
-                class="ru.biatech.edt.junit.ruler.TestMethodMarker">
+                class="ru.biatech.edt.junit.ui.editor.ruler.TestMethodMarker">
         </externalValidator>
     </extension>
     <extension
             point="org.eclipse.ui.editorActions">
         <editorContribution
-                id="ru.biatech.edt.junit.ruler.test"
+                id="ru.biatech.edt.junit.ui.editor.ruler.test"
                 targetID="com._1c.g5.v8.dt.bsl.Bsl">
             <action
                     actionID="RulerClick"
-                    class="ru.biatech.edt.junit.ruler.TestMethodActionDelegate"
+                    class="ru.biatech.edt.junit.ui.editor.ruler.TestMethodActionDelegate"
                     id="ru.biatech.edt.junit.makers.testAction"
                     label="Run test method"
                     state="true"
@@ -359,14 +298,14 @@
     <extension
             point="org.eclipse.ui.popupMenus">
         <viewerContribution
-                id="ru.biatech.edt.junit.ruler.popup"
+                id="ru.biatech.edt.junit.ui.editor.ruler.popup"
                 targetID="#TextRulerContext">
             <action
-                    class="ru.biatech.edt.junit.ruler.TestMethodActionDelegate"
-                    icon="icons/full/etool16/run_exc.png"
-                    id="ru.biatech.edt.junit.ruler.test.run"
-                    label="Run test method"
-                    menubarPath="debug">
+                  class="ru.biatech.edt.junit.ui.editor.ruler.TestMethodActionDelegate"
+                  icon="icons/full/etool16/run_exc.png"
+                  id="ru.biatech.edt.junit.ui.editor.ruler.test.run"
+                  label="Run test method"
+                  menubarPath="debug">
             </action>
         </viewerContribution>
     </extension>
@@ -375,5 +314,100 @@
         <testRunListener
                 class="ru.biatech.edt.junit.ui.UITestRunListener">
         </testRunListener>
+    </extension>
+    
+    <!-- Test commands in outline -->
+    
+    <extension
+          point="org.eclipse.ui.popupMenus">
+       <objectContribution
+             adaptable="false"
+             id="com._1c.g5.v8.dt.bsl.ui.extension.objectContribution2"
+             objectClass="com._1c.g5.v8.dt.bsl.core.IMethod">
+          <menu
+                id="ru.biatech.edt.junit.outline.RunTestGroup"
+                label="Run tests"
+                path="tests">
+             <separator
+                   name="ru.biatech.edt.junit.outline.RunTestGroupSeparator">
+             </separator>
+          </menu>
+          <action
+                class="ru.biatech.edt.junit.ui.editor.RunTestAction"
+                icon="icons/full/etool16/run_exc.png"
+                id="ru.biatech.edt.junit.outline.RunTest"
+                label="%JUnitShortcut.description.run"
+                menubarPath="tests"
+                style="push">
+          </action>
+          <action
+                class="ru.biatech.edt.junit.ui.editor.DebugTestAction"
+                icon="icons/full/etool16/debug_exc.png"
+                id="ru.biatech.edt.junit.outline.DebugTest"
+                label="%JUnitShortcut.description.debug"
+                menubarPath="tests"
+                style="push">
+          </action>
+       </objectContribution>
+    </extension>
+    
+    <!-- Goto commands -->
+    
+    <extension point="org.eclipse.ui.commands">
+        <command
+                name="%GotoTestAction.label"
+                id="ru.biatech.edt.junit.GotoTest">
+        </command>
+    </extension>
+     
+	<extension
+       point="org.eclipse.ui.handlers">
+	    <handler
+	          class="ru.biatech.edt.junit.ui.editor.GotoReferencedTestHandler"
+	          commandId="ru.biatech.edt.junit.GotoTest">
+	       <activeWhen>
+	          <reference
+	                definitionId="com._1c.g5.v8.dt.bsl.Bsl.Editor.opened">
+	          </reference>
+	       </activeWhen>
+	    </handler>
+	</extension>
+	 
+    <extension point="org.eclipse.ui.menus">
+       <menuContribution
+             locationURI="popup:#BslEditorContext?after=additions">
+          <command
+                commandId="ru.biatech.edt.junit.GotoTest"
+                icon="icons/full/eview16/referring.png"
+                style="push">
+          </command>
+       </menuContribution>
+    </extension>
+    
+    <extension point="org.eclipse.ui.popupMenus">
+       <objectContribution
+             adaptable="false"
+             id="com._1c.g5.v8.dt.bsl.ui.extension.objectContribution2"
+             objectClass="com._1c.g5.v8.dt.bsl.core.IMethod">
+          <action
+                class="ru.biatech.edt.junit.ui.editor.GotoReferencedTestAction"
+                icon="icons/full/eview16/referring.png"
+                id="ru.biatech.edt.junit.outline.Goto"
+                label="%GotoTestAction.label"
+                menubarPath="tests"
+                style="push"
+                tooltip="%GotoTestAction.tooltip">
+          </action>
+       </objectContribution>
+    </extension>
+
+    <extension
+            point="org.eclipse.ui.bindings">
+        <key
+                commandId="ru.biatech.edt.junit.GotoTest"
+                contextId="org.eclipse.ui.contexts.window"
+                schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+                sequence="M1+M2+T">
+        </key>
     </extension>
 </plugin>

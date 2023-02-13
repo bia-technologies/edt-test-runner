@@ -23,40 +23,55 @@ import com._1c.g5.v8.dt.core.platform.IResourceLookup;
 import com._1c.g5.v8.dt.core.platform.IV8ProjectManager;
 import com._1c.g5.v8.dt.stacktraces.model.IStacktraceParser;
 import com._1c.g5.v8.dt.ui.util.OpenHelper;
+import lombok.experimental.UtilityClass;
 import ru.biatech.edt.junit.TestViewerPlugin;
 
-public class Services {
-  private static OpenHelper openHelper;
+import java.util.Objects;
 
-  public static IV8ProjectManager getProjectManager() {
+/**
+ * Предоставляет доступ к сервисам плантформы без использования инжектов
+ */
+@UtilityClass
+public class VendorServices {
+  private OpenHelper openHelper;
+
+  /**
+   * Возвращает сервис работы с проктами
+   * @return сервис работы с проктами
+   */
+  public IV8ProjectManager getProjectManager() {
     return TestViewerPlugin.getService(IV8ProjectManager.class);
   }
 
-  public static IBmEmfIndexManager getBmEmfIndexManager() {
+  public IBmEmfIndexManager getBmEmfIndexManager() {
     return TestViewerPlugin.getService(IBmEmfIndexManager.class);
   }
 
-  public static IResourceLookup getResourceLookup() {
+  public IResourceLookup getResourceLookup() {
     return TestViewerPlugin.getService(IResourceLookup.class);
   }
 
-  public synchronized static OpenHelper getOpenHelper() {
-    if (openHelper != null) {
-      return openHelper;
-    } else {
-      return openHelper = new OpenHelper();
-    }
+  /**
+   * Возвращает помощник открытия редакторов
+   * @return помощник открытия редакторов
+   */
+  public synchronized OpenHelper getOpenHelper() {
+    return Objects.requireNonNullElseGet(openHelper, () -> openHelper = new OpenHelper());
   }
 
-  public static IStacktraceParser getStacktraceParser() {
+  /**
+   * Возвращает парсер стека ошибки
+   * @return парсер стека ошибки
+   */
+  public IStacktraceParser getStacktraceParser() {
     return TestViewerPlugin.getService(IStacktraceParser.class);
   }
 
-  public static IQualifiedNameFilePathConverter getQualifiedNameFilePathConverter() {
+  public IQualifiedNameFilePathConverter getQualifiedNameFilePathConverter() {
     return TestViewerPlugin.getService(IQualifiedNameFilePathConverter.class);
   }
 
-  public static IBslOwnerComputerService getBslOwnerComputerService() {
+  public IBslOwnerComputerService getBslOwnerComputerService() {
     return TestViewerPlugin.getService(IBslOwnerComputerService.class);
   }
 }

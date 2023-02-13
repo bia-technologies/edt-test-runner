@@ -168,8 +168,7 @@ public class FailureViewer {
   private class OpenAction extends Action {
 
     private OpenAction() {
-      setImageDescriptor(TestViewerPlugin.ui().getImageDescriptor(ImageProvider.GOTO_ICON));
-      setText("Goto line");
+      super("Goto line", ImageProvider.getImageDescriptor(ImageProvider.GOTO_ICON));
       setEnabled(false);
     }
 

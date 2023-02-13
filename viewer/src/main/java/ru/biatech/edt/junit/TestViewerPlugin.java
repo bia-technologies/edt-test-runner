@@ -32,7 +32,6 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import ru.biatech.edt.junit.services.TestsManager;
 import ru.biatech.edt.junit.ui.JUnitUI;
 
 import java.net.URL;
@@ -44,7 +43,6 @@ public class TestViewerPlugin extends AbstractUIPlugin {
   private static TestViewerPlugin plugin;
   JUnitCore core;
   JUnitUI ui;
-  TestsManager manager;
   private BundleContext bundleContext;
   private Injector injector;
   private Logger logger = null;
@@ -53,7 +51,6 @@ public class TestViewerPlugin extends AbstractUIPlugin {
     plugin = this;
     core = new JUnitCore();
     ui = new JUnitUI();
-    manager = new TestsManager();
   }
 
   public static TestViewerPlugin getDefault() {
@@ -81,10 +78,6 @@ public class TestViewerPlugin extends AbstractUIPlugin {
 
   public static JUnitUI ui() {
     return getDefault().ui;
-  }
-
-  public static TestsManager getTestManager() {
-    return getDefault().manager;
   }
 
   public static String getPluginId() {

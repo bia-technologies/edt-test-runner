@@ -14,17 +14,12 @@
  * limitations under the License.
  *******************************************************************************/
 
-package ru.biatech.edt.junit.ruler;
+package ru.biatech.edt.junit.ui.editor.ruler;
 
-import com._1c.g5.v8.dt.bsl.model.Module;
-import com._1c.g5.v8.dt.bsl.ui.editor.BslXtextDocument;
-import com._1c.g5.v8.dt.bsl.ui.editor.BslXtextEditor;
-import com._1c.g5.v8.dt.metadata.mdclass.CommonModule;
-import com._1c.g5.v8.dt.ui.editor.IDtGranularEditorEmbeddedEditorPage;
+import com._1c.g5.v8.dt.bsl.ui.menu.BslHandlerUtil;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchManager;
-import org.eclipse.emf.ecore.EObject;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.text.source.IVerticalRulerInfo;
@@ -42,20 +37,23 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.AbstractRulerActionDelegate;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.MarkerUtilities;
+import org.eclipse.xtext.ui.editor.XtextEditor;
 import ru.biatech.edt.junit.TestViewerPlugin;
-import ru.biatech.edt.junit.launcher.v8.LaunchHelper;
+import ru.biatech.edt.junit.services.TestsManager;
+import ru.biatech.edt.junit.ui.ImageProvider;
 import ru.biatech.edt.junit.ui.JUnitMessages;
 
 public class TestMethodActionDelegate extends AbstractRulerActionDelegate implements IActionDelegate2 {
 
   private static final String MODE_ATTRIBUTE = "mode";
-  
+
   private final int fDoubleClickTime = TestViewerPlugin.ui().getActiveWorkbenchShell().getDisplay().getDoubleClickTime();
-  protected IAction action;
-  long fMouseUpDelta;
-  boolean fDoubleClicked;
-  BslXtextEditor bslXtextEditor;
-  Menu testMethodMenu;
+  private IAction action;
+  private long fMouseUpDelta;
+  private boolean fDoubleClicked;
+  private XtextEditor bslXtextEditor;
+  private Menu testMethodMenu;
+  private final ImageProvider imageProvider = new ImageProvider();
 
   @Override
   public void selectionChanged(IAction action, ISelection selection) {
@@ -63,19 +61,17 @@ public class TestMethodActionDelegate extends AbstractRulerActionDelegate implem
 
   @Override
   public void dispose() {
-    testMethodMenu.dispose();
+    if (testMethodMenu != null) {
+      testMethodMenu.dispose();
+    }
+    imageProvider.dispose();
     super.dispose();
   }
 
   @Override
   public void setActiveEditor(IAction callerAction, IEditorPart targetEditor) {
     action = null;
-    if (targetEditor instanceof IDtGranularEditorEmbeddedEditorPage<?>) {
-      var editor = ((IDtGranularEditorEmbeddedEditorPage<?>) targetEditor).getEmbeddedEditor();
-      bslXtextEditor = (BslXtextEditor) editor;
-    } else {
-      bslXtextEditor = null;
-    }
+    bslXtextEditor = BslHandlerUtil.extractXtextEditor(targetEditor);
     super.setActiveEditor(callerAction, targetEditor);
   }
 
@@ -139,22 +135,21 @@ public class TestMethodActionDelegate extends AbstractRulerActionDelegate implem
       public void widgetSelected(SelectionEvent selectionEvent) {
         String mode = (String) selectionEvent.widget.getData(MODE_ATTRIBUTE);
         String method = (String) selectionEvent.widget.getData(RulerAttributes.ATTRIBUTE_METHOD);
-        String module = ((CommonModule) getModel().getOwner()).getName();
-
-        LaunchHelper.runTestMethod(module + "." + method, mode); //$NON-NLS-1$
+        TestsManager.runTestMethod(bslXtextEditor, method, mode);
       }
     };
 
     MenuItem menuItem = new MenuItem(menu, SWT.NONE);
     menuItem.setText(JUnitMessages.TestMethodActionDelegate_Run);
     menuItem.setData(MODE_ATTRIBUTE, ILaunchManager.RUN_MODE);
-    menuItem.setImage(TestViewerPlugin.ui().createImage("etool16/run_exc.png")); //$NON-NLS-1$
+
+    menuItem.setImage(imageProvider.getRunTestIcon());
     menuItem.addSelectionListener(listener);
 
     menuItem = new MenuItem(menu, SWT.NONE);
     menuItem.setText(JUnitMessages.TestMethodActionDelegate_Debug);
     menuItem.setData(MODE_ATTRIBUTE, ILaunchManager.DEBUG_MODE);
-    menuItem.setImage(TestViewerPlugin.ui().createImage("etool16/debug_exc.png")); //$NON-NLS-1$
+    menuItem.setImage(imageProvider.getDebugTestIcon());
     menuItem.addSelectionListener(listener);
 
     return menu;
@@ -162,7 +157,7 @@ public class TestMethodActionDelegate extends AbstractRulerActionDelegate implem
 
   void showMenu(Event event) {
     IMarker marker = (IMarker) event.data;
-    String method = marker.getAttribute(RulerAttributes.ATTRIBUTE_METHOD, (String)null);
+    String method = marker.getAttribute(RulerAttributes.ATTRIBUTE_METHOD, (String) null);
     Menu menu = getMenu();
     for (MenuItem item : menu.getItems()) {
       item.setData(RulerAttributes.ATTRIBUTE_METHOD, method);
@@ -171,17 +166,6 @@ public class TestMethodActionDelegate extends AbstractRulerActionDelegate implem
     Point point = event.display.getCursorLocation();
     menu.setLocation(point.x - 5, point.y - 5);
     menu.setVisible(true);
-  }
-
-  Module getModel() {
-    return getDocument().readOnlyDataModel(state -> {
-      EObject root = state.getParseResult().getRootASTElement();
-      return (Module) root;
-    });
-  }
-
-  BslXtextDocument getDocument() {
-    return (BslXtextDocument) bslXtextEditor.getDocumentProvider().getDocument(bslXtextEditor.getEditorInput());
   }
 
   IMarker[] getMarkers() {

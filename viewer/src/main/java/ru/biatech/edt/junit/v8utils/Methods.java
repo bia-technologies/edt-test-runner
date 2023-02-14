@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 BIA-Technologies Limited Liability Company.
+ * Copyright (c) 2023 BIA-Technologies Limited Liability Company.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,23 @@
  * limitations under the License.
  *******************************************************************************/
 
-package ru.biatech.edt.junit.ruler;
+package ru.biatech.edt.junit.v8utils;
 
-public class RulerAttributes {
-  static final String MARKER_ID = "ru.biatech.edt.junit.testMethodMarker";
-  static final String ATTRIBUTE_METHOD = "method";
+import com._1c.g5.v8.dt.bsl.model.Method;
+import com._1c.g5.v8.dt.bsl.model.Module;
+import lombok.experimental.UtilityClass;
+
+/**
+ * Помощник для работы с методами
+ */
+@UtilityClass
+public class Methods {
+
+  public Method findMethod(Module module, String methodName) {
+    return module.allMethods()
+        .stream()
+        .filter(m -> methodName.equalsIgnoreCase(m.getName()))
+        .findFirst()
+        .orElse(null);
+  }
 }

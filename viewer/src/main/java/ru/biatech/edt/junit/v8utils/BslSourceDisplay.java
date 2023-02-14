@@ -29,17 +29,16 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.jface.window.Window;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.progress.UIJob;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.ui.dialogs.ModuleSelectionDialog;
-
-import java.util.List;
 
 public class BslSourceDisplay {
 
@@ -54,21 +53,35 @@ public class BslSourceDisplay {
       if (module != null) {
         this.displayModule(page, stackFrame, module);
       }
+    } else if (element instanceof MethodReference) {
+      MethodReference reference = (MethodReference) element;
+      var method = reference.getMethod();
+
+      int lineNumber = -1;
+      if (method != null) {
+        var node = NodeModelUtils.findActualNodeFor(method);
+        lineNumber = node.getStartLine();
+      }
+      SourceDisplayJob sourceDisplay = new SourceDisplayJob(reference.getModule(), page, lineNumber);
+      Job.getJobManager().cancel(sourceDisplay);
+      sourceDisplay.schedule();
+
     }
   }
 
   protected IEditorPart openModuleEditor(Module module) {
-    return Services.getOpenHelper().openEditor(EcoreUtil.getURI(module), null);
+    return VendorServices.getOpenHelper().openEditor(EcoreUtil.getURI(module), null);
   }
 
   private void displayModule(IWorkbenchPage page, IStacktraceFrame stackFrame, Module module) {
-    SourceDisplayJob sourceDisplay = new SourceDisplayJob(module, page, stackFrame);
+    SourceDisplayJob sourceDisplay = new SourceDisplayJob(module, page, stackFrame.getLineNumber() - 1);
     Job.getJobManager().cancel(sourceDisplay);
     sourceDisplay.schedule();
   }
 
-  private void displayModule(Module module, IStacktraceFrame stackFrame) {
+  private void displayModule(Module module, int line) {
     IEditorPart editor = this.openModuleEditor(module);
+    
     ITextEditor textEditor = null;
     if (editor instanceof ITextEditor) {
       textEditor = (ITextEditor) editor;
@@ -76,8 +89,8 @@ public class BslSourceDisplay {
       textEditor = editor.getAdapter(ITextEditor.class);
     }
 
-    if (textEditor != null) {
-      this.positionEditor(textEditor, stackFrame);
+    if (textEditor != null && line >= 0) {
+      this.positionEditor(textEditor, line);
     }
   }
 
@@ -105,9 +118,7 @@ public class BslSourceDisplay {
     return null;
   }
 
-  private void positionEditor(ITextEditor editor, IStacktraceFrame frame) {
-    int lineNumber = frame.getLineNumber();
-    --lineNumber;
+  private void positionEditor(ITextEditor editor, int lineNumber) {
     IRegion region = this.getLineInformation(editor, lineNumber);
     if (region != null) {
       editor.selectAndReveal(region.getOffset(), 0);
@@ -120,15 +131,15 @@ public class BslSourceDisplay {
 
   private class SourceDisplayJob extends UIJob {
     private final IWorkbenchPage page;
-    private final IStacktraceFrame stackFrame;
+    private final int line;
     private final Module module;
 
-    private SourceDisplayJob(Module module, IWorkbenchPage page, IStacktraceFrame stackFrame) {
+    private SourceDisplayJob(Module module, IWorkbenchPage page, int line) {
       super("Module Source Display");
       this.setSystem(true);
       this.setPriority(10);
       this.page = page;
-      this.stackFrame = stackFrame;
+      this.line = line;
       this.module = module;
     }
 
@@ -145,14 +156,14 @@ public class BslSourceDisplay {
     @Override
     public IStatus runInUIThread(IProgressMonitor monitor) {
       if (!monitor.isCanceled()) {
-        BslSourceDisplay.this.displayModule(this.module, this.stackFrame);
+        BslSourceDisplay.this.displayModule(this.module, this.line);
       }
 
       return Status.OK_STATUS;
     }
   }
 
-  public Module get(IStacktraceFrame stackFrame) {
+  private Module get(IStacktraceFrame stackFrame) {
     Module module = stackFrame.getModule();
     if (module == null) {
       module = this.moduleLocator.getModule(stackFrame.getSymlink(), this.getProject(stackFrame), stackFrame.isExtension());
@@ -166,18 +177,18 @@ public class BslSourceDisplay {
     return module;
   }
 
-  public Module select(IStacktraceFrame stackFrame, boolean autoModuleSelect) {
+  private Module select(IStacktraceFrame stackFrame, boolean autoModuleSelect) {
     Module module = null;
-    List<Module> modules = this.moduleLocator.getModules(stackFrame);
+    var modules = this.moduleLocator.getModules(stackFrame);
     if (!modules.isEmpty()) {
       if (modules.size() == 1 && autoModuleSelect) {
         module = modules.get(0);
       } else {
-        Shell shell = TestViewerPlugin.ui().getActiveWorkbenchShell();
-        ModuleSelectionDialog dialog = new ModuleSelectionDialog(shell, modules);
+        var shell = TestViewerPlugin.ui().getActiveWorkbenchShell();
+        var dialog = new ModuleSelectionDialog(shell, modules);
         int result = dialog.open();
-        if (result == 0) {
-          module = (Module) dialog.getFirstResult();
+        if (result == Window.OK) {
+          module = dialog.getSelectedItem();
         }
       }
 
@@ -191,7 +202,7 @@ public class BslSourceDisplay {
   }
 
   private void setProjectName(IStacktraceFrame stackFrame, Module foundedModule) {
-    IV8Project v8Project = Services.getProjectManager().getProject(foundedModule);
+    IV8Project v8Project = VendorServices.getProjectManager().getProject(foundedModule);
     if (v8Project != null) {
       stackFrame.setProjectName(v8Project.getProject().getName());
     }
@@ -205,6 +216,6 @@ public class BslSourceDisplay {
         }
       }
     }
-    return Resolver.getProject(stackFrame.getProjectName());
+    return Projects.getProject(stackFrame.getProjectName());
   }
 }

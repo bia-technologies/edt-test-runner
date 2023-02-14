@@ -60,6 +60,7 @@ import ru.biatech.edt.junit.model.TestSuiteElement;
 import ru.biatech.edt.junit.ui.JUnitMessages;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart.SortingCriterion;
 import ru.biatech.edt.junit.ui.report.actions.CopyFailureListAction;
+import ru.biatech.edt.junit.ui.report.actions.OpenUnderTestMethodAction;
 import ru.biatech.edt.junit.ui.report.actions.OpenTestAction;
 import ru.biatech.edt.junit.ui.report.actions.RerunAction;
 import ru.biatech.edt.junit.ui.report.contentProviders.TestSessionLabelProvider;
@@ -428,6 +429,8 @@ public class TestViewer {
       } else {
         TestCaseElement testCaseElement = (TestCaseElement) testElement;
         manager.add(getOpenTestAction(testCaseElement));
+
+        manager.add(new OpenUnderTestMethodAction(fTestRunnerPart, testCaseElement));
         manager.add(new Separator());
         addRerunActions(manager, testCaseElement);
       }

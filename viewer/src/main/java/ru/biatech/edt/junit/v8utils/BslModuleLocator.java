@@ -39,9 +39,9 @@ public class BslModuleLocator {
   private final IV8ProjectManager v8projectManager;
 
   public BslModuleLocator() {
-    qualifiedNameFilePathConverter = Services.getQualifiedNameFilePathConverter();
-    bslOwnerComputerService = Services.getBslOwnerComputerService();
-    v8projectManager = Services.getProjectManager();
+    qualifiedNameFilePathConverter = VendorServices.getQualifiedNameFilePathConverter();
+    bslOwnerComputerService = VendorServices.getBslOwnerComputerService();
+    v8projectManager = VendorServices.getProjectManager();
   }
 
   public Module getModule(String symlink, IV8Project v8Project, boolean extension) {

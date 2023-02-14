@@ -53,8 +53,6 @@ public interface ITestKind {
 
   IUnitLauncher getLauncher();
 
-  ITestResolver getResolver();
-
   String getId();
 
   String getDisplayName();

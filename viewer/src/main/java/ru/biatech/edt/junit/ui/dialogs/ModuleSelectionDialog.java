@@ -38,6 +38,14 @@ public class ModuleSelectionDialog extends ElementListSelectionDialog {
     this.setMultipleSelection(false);
   }
 
+  /**
+   * Возвращает ссылку на выбранный модуль
+   * @return выбранный модуль
+   */
+  public Module getSelectedItem(){
+    return (Module) getFirstResult();
+  }
+
   private static class ObjectModuleLabelProvider extends LabelProvider {
     private ObjectModuleLabelProvider() {
     }

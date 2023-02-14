@@ -40,12 +40,20 @@ jobs:
         if: github.ref == 'refs/heads/master'
         run: |
           export publication_location=../../../public/repository
+
+          export MAVEN_OPTS=
+          ./gradlew download-lombok-plugin
+          export MAVEN_OPTS=-javaagent:target/lombok.jar=ECJ
           ./gradlew publishPlugin
       - name: Build develop update site
         if: github.ref == 'refs/heads/develop'
         run: |
           export publication_location=../../../public/dev/repository
           export site_label_suffix='DEV. '
+
+          export MAVEN_OPTS=
+          ./gradlew download-lombok-plugin
+          export MAVEN_OPTS=-javaagent:target/lombok.jar=ECJ
           ./gradlew publishPlugin
 
       - name: Deploy

@@ -93,7 +93,6 @@ tasks.register<Copy>("buildPlugin-copyFiles") {
 }
 
 tasks.register<Exec>("download-lombok-plugin") {
-    isIgnoreExitValue = true
     workingDir = pluginBuildPath
     standardOutput = System.out
 
@@ -105,14 +104,12 @@ tasks.register<Exec>("download-lombok-plugin") {
 }
 
 tasks.register<Exec>("buildPlugin") {
-    isIgnoreExitValue = true
     workingDir = pluginBuildPath
     standardOutput = System.out
 
     environment("MAVEN_OPTS", "-javaagent:target/lombok.jar=ECJ -Dhttps.protocols=TLSv1.2")
     commandLine(mvnCommand, "dependency:resolve", "package")
 
-    dependsOn(tasks.named("download-lombok-plugin"))
     group = "build"
 }
 

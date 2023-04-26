@@ -1,0 +1,270 @@
+<html>
+<head>
+    <style>
+        html {
+            font-family: monospace, sans-serif;
+            font-size: 10pt;
+            font-style: normal;
+            font-weight: normal;
+        }
+        
+        body {
+            background: BG_COLOR;
+            color: FG_COLOR;
+            overflow-x: hidden;
+            overflow-y: auto;
+            overflow-wrap: anywhere;
+            margin: 0;
+            padding: 0;
+            display: flow-root;
+        }
+        
+        .caret {
+            cursor: pointer;
+            display: inline-block;
+            width: 1.5em;
+            height: 1.5em;
+            margin-right: 0.5em;
+        }
+        
+        .caret::before {
+            content: url("data:image/svg+xml,%3Csvg%20version%3D%271.1%27%20baseProfile%3D%27full%27%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%2720px%27%20height%3D%2720px%27%3E%3Cpolygon%20points%3D%274%2C6%2010%2C14%2016%2C6%27%20fill%3D%27gray%27%2F%3E%3C%2Fsvg%3E");
+        }
+        
+        .caret-collapse {
+            transform: rotate(-90deg);
+        }
+        
+        .nested {
+            display: block;
+        }
+        
+        .hide {
+            display: none;
+        }
+        
+        .status {
+            margin-right: 0.5em;
+        }
+        
+        .status::before {
+            display: inline-block;
+            width: 1.2em;
+            height: 1.2em;
+            text-align: center;
+            color: white;
+            border-radius: 4px;
+        }
+        
+        .success .status::before {
+            content: "\2714";
+            background-color: green;
+        }
+        
+        .error .status::before {
+            content: "\2717";
+            background-color: #da3333;
+        }
+        
+        .failure .status::before {
+            content: "\2717";
+            background-color: #3360da;
+        }
+        
+        .line .status::before {
+            content: "\2937";
+            color: #03A9F4;
+            font-size: 1.5em;
+        }
+        
+        .row {
+            display: flex;
+            padding: 0.5em;
+            cursor: default;
+            border-bottom: 1px solid HOVER_BG_COLOR;
+        }
+        
+        .row:hover {
+            background: HOVER_BG_COLOR;
+        }
+        
+        .main {
+            font-weight: bold;
+        }
+        
+        .side {
+            color: rgb(128, 128, 128);
+        }
+        
+        .selected {
+            background: SELECTION_BG_COLOR !important;
+            color: SELECTION_FG_COLOR !important;
+        }
+        
+        .context-menu {
+            position: absolute;
+        }
+        
+        .menu {
+            display: flex;
+            flex-direction: column;
+            background: BG_COLOR;
+            color: FG_COLOR;
+            box-shadow: 5px 5px 20px 3px rgb(116 116 116);
+            padding: 0;
+            border: 1px solid #e5e5e5;
+        }
+        
+        .menu>div {
+            padding: 10px 30px 10px 20px;
+            display: flex;
+            align-items: center;
+            position: relative;
+            text-decoration: unset;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        
+        .menu>div>svg {
+            margin-right: .5em;
+            width: 1.2em;
+            height: 1.2em;
+        }
+        
+        .menu>div:hover {
+            background: SELECTION_BG_COLOR;
+            color: SELECTION_FG_COLOR;
+        }
+        
+        .splitter {
+            height: 1px;
+            background-color: #a1a1a1;
+            width: 100%;
+            border: none;
+            margin-top: 0.5em;
+            margin-bottom: 0.5em;
+        }
+
+        #errors {
+            position: absolute;
+            width: 100%;
+        }
+
+        .error-message-ballon {
+            padding: 10px;
+            margin: 5px;
+            border-radius: 4px;
+            background-color: #bd2c2c;
+            color: white;
+            white-space: pre;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="errors"></div>
+    <div id="contextMenu" class="context-menu" style="display: none">
+        <div class="menu">
+            <div class="menu-item" id="gotoLineAction" onclick="riseEvent('action', this)">
+                <svg style="vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024">
+                <path
+                        d="M401.664 554.666667l55.168 55.168a42.624 42.624 0 1 1-60.330667 60.330666l-128-128a42.624 42.624 0 0 1 0-60.330666l128-128a42.624 42.624 0 1 1 60.330667 60.330666L401.664 469.333333H896a42.666667 42.666667 0 0 1 0 85.333334H401.664zM725.333333 128a42.666667 42.666667 0 0 1 0 85.333333H128a42.666667 42.666667 0 0 1 0-85.333333h597.333333z m0 682.666667a42.666667 42.666667 0 0 1 0 85.333333H128a42.666667 42.666667 0 0 1 0-85.333333h597.333333z" />
+                <path
+                        d="M401.664 554.666667l55.168 55.168a42.624 42.624 0 1 1-60.330667 60.330666l-128-128a42.624 42.624 0 0 1 0-60.330666l128-128a42.624 42.624 0 1 1 60.330667 60.330666L401.664 469.333333H896a42.666667 42.666667 0 0 1 0 85.333334H401.664zM725.333333 128a42.666667 42.666667 0 0 1 0 85.333333H128a42.666667 42.666667 0 0 1 0-85.333333h597.333333zM725.333333 810.666667a42.666667 42.666667 0 0 1 0 85.333333H128a42.666667 42.666667 0 0 1 0-85.333333h597.333333z" />
+            </svg> Goto line
+            </div>
+            <hr class="splitter" />
+            <div class="menu-item" id="compareAction" onclick="riseEvent('action', this)">
+                <svg fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12.5 6.75a.75.75 0 00-1.5 0V9H8.75a.75.75 0 000 1.5H11v2.25a.75.75 0 001.5 0V10.5h2.25a.75.75 0 000-1.5H12.5V6.75zM8.75 16a.75.75 0 000 1.5h6a.75.75 0 000-1.5h-6z"/>
+                <path fill-rule="evenodd" d="M5 1a2 2 0 00-2 2v18a2 2 0 002 2h14a2 2 0 002-2V7.018a2 2 0 00-.586-1.414l-4.018-4.018A2 2 0 0014.982 1H5zm-.5 2a.5.5 0 01.5-.5h9.982a.5.5 0 01.354.146l4.018 4.018a.5.5 0 01.146.354V21a.5.5 0 01-.5.5H5a.5.5 0 01-.5-.5V3z"/>
+            </svg> Compare Result
+            </div>
+            <div class="menu-item" id="copyTraceAction" onclick="riseEvent('action', this)">
+                <svg fill="currentColor" viewBox="0 0 1920 1920">
+                <path d="M0 1919.887h1467.88V452.008H0v1467.88ZM1354.965 564.922v1242.051H112.914V564.922h1242.051ZM1920 0v1467.992h-338.741v-113.027h225.827V112.914H565.035V338.74H452.008V0H1920ZM338.741 1016.93h790.397V904.016H338.74v112.914Zm0 451.062h790.397v-113.027H338.74v113.027Zm0-225.588h564.57v-112.913H338.74v112.913Z" fill-rule="evenodd"/>
+            </svg> Copy Trace
+            </div>
+        </div>
+    </div>
+    TREE_CONTENT
+    <script>
+        carets = document.getElementsByClassName("caret");
+        for (let i = 0; i < carets.length; i++) {
+            carets[i].addEventListener("click", toggleTreeItem, false);
+        }
+        var rows = document.getElementsByClassName("row");
+
+        for (let i = 0; i < rows.length; i++) {
+            rows[i].addEventListener("click", function() {
+                selectItem(this);
+                riseEvent("click", this);
+            }, false);
+
+            rows[i].addEventListener("dblclick", function() {
+                riseEvent("dblclick", this)
+            })
+        }
+
+        function toggleTreeItem(event) {
+            this.parentElement.parentElement.querySelector(".nested").classList.toggle("hide");
+            this.classList.toggle("caret-collapse");
+        }
+
+        function riseEvent(eventName, element) {
+            let event = {
+                "event": eventName,
+                "element": element.id
+            };
+            let data = JSON.stringify(event);
+            console.log(data);
+            try {
+                riseJavaEvent(data);
+            } catch (e) {
+                showError(e);
+            }
+        }
+
+        function selectItem(item) {
+            var selected = document.getElementsByClassName("selected");
+            for (let index = 0; index < selected.length; index++) {
+                const element = selected[index];
+                element.classList.toggle("selected");
+            }
+            item.classList.toggle("selected");
+        }
+        function showError(e) {
+            const parent = document.getElementById("errors");
+            const newDiv = document.createElement("div");
+            newDiv.className = "error-message-ballon";
+            newDiv.appendChild(document.createTextNode(e.name + "\n"));
+            newDiv.appendChild(document.createTextNode(e.message + "\n"));
+            newDiv.appendChild(document.createTextNode(e.stack));
+            parent.appendChild(newDiv);
+        }
+        
+        // Context menu
+        document.onclick = hideMenu;
+        document.oncontextmenu = rightClick;
+
+        function hideMenu() {
+            document.getElementById("contextMenu").style.display = "none"
+        }
+
+        function rightClick(e) {
+            e.preventDefault();
+
+            if (e.target.classList.contains("row")) {
+                selectItem(e.target);
+                riseEvent("click", e.target);
+            }
+
+            var menu = document.getElementById("contextMenu")
+            menu.style.display = 'block';
+            menu.style.left = e.pageX + "px";
+            menu.style.top = e.pageY + "px";
+        }
+    </script>
+</body>
+
+</html>

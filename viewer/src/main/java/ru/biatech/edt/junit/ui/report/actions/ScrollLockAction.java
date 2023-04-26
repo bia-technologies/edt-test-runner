@@ -17,9 +17,7 @@
 package ru.biatech.edt.junit.ui.report.actions;
 
 
-import org.eclipse.jface.action.Action;
 import org.eclipse.ui.PlatformUI;
-
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.ui.IJUnitHelpContextIds;
 import ru.biatech.edt.junit.ui.JUnitMessages;
@@ -28,19 +26,15 @@ import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
 /**
  * Toggles console auto-scroll
  */
-public class ScrollLockAction extends Action {
+public class ScrollLockAction extends SettingsChangeAction {
 
-  private final TestRunnerViewPart fRunnerViewPart;
-
-  public ScrollLockAction(TestRunnerViewPart viewer) {
-    super(JUnitMessages.ScrollLockAction_action_label);
-    fRunnerViewPart = viewer;
+  public ScrollLockAction(TestRunnerViewPart.ReportSettings settings) {
+    super(settings, JUnitMessages.ScrollLockAction_action_label);
     setToolTipText(JUnitMessages.ScrollLockAction_action_tooltip);
     setDisabledImageDescriptor(TestViewerPlugin.ui().getImageDescriptor("dlcl16/lock.png")); //$NON-NLS-1$
     setHoverImageDescriptor(TestViewerPlugin.ui().getImageDescriptor("elcl16/lock.png")); //$NON-NLS-1$
     setImageDescriptor(TestViewerPlugin.ui().getImageDescriptor("elcl16/lock.png")); //$NON-NLS-1$
     PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJUnitHelpContextIds.OUTPUT_SCROLL_LOCK_ACTION);
-    setChecked(false);
   }
 
   /**
@@ -48,6 +42,11 @@ public class ScrollLockAction extends Action {
    */
   @Override
   public void run() {
-    fRunnerViewPart.setAutoScroll(!isChecked());
+    settings.setAutoScroll(!isChecked());
+  }
+
+  @Override
+  public void update() {
+    setChecked(settings.isAutoScroll());
   }
 }

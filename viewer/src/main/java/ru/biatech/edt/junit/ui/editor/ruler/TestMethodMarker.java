@@ -16,11 +16,10 @@
 
 package ru.biatech.edt.junit.ui.editor.ruler;
 
-import java.text.MessageFormat;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
+import com._1c.g5.v8.dt.bsl.model.Method;
+import com._1c.g5.v8.dt.bsl.model.Module;
+import com._1c.g5.v8.dt.bsl.validation.CustomValidationMessageAcceptor;
+import com._1c.g5.v8.dt.bsl.validation.IExternalBslValidator;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -30,16 +29,15 @@ import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 import org.eclipse.xtext.util.CancelIndicator;
 import org.eclipse.xtext.validation.Check;
 import org.eclipse.xtext.validation.CheckType;
-
-import com._1c.g5.v8.dt.bsl.model.Method;
-import com._1c.g5.v8.dt.bsl.model.Module;
-import com._1c.g5.v8.dt.bsl.validation.CustomValidationMessageAcceptor;
-import com._1c.g5.v8.dt.bsl.validation.IExternalBslValidator;
-
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.services.TestsManager;
 import ru.biatech.edt.junit.ui.JUnitMessages;
 import ru.biatech.edt.junit.v8utils.MdUtils;
+
+import java.text.MessageFormat;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class TestMethodMarker implements IExternalBslValidator {
 

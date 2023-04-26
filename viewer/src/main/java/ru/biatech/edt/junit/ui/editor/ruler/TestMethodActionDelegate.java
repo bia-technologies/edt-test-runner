@@ -23,12 +23,10 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.text.source.IVerticalRulerInfo;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
@@ -56,10 +54,6 @@ public class TestMethodActionDelegate extends AbstractRulerActionDelegate implem
   private final ImageProvider imageProvider = new ImageProvider();
 
   @Override
-  public void selectionChanged(IAction action, ISelection selection) {
-  }
-
-  @Override
   public void dispose() {
     if (testMethodMenu != null) {
       testMethodMenu.dispose();
@@ -71,11 +65,10 @@ public class TestMethodActionDelegate extends AbstractRulerActionDelegate implem
   @Override
   public void setActiveEditor(IAction callerAction, IEditorPart targetEditor) {
     action = null;
-    if (targetEditor == null) {
-      return;
+    if (targetEditor != null) {
+      bslXtextEditor = BslHandlerUtil.extractXtextEditor(targetEditor);
+      super.setActiveEditor(callerAction, targetEditor);
     }
-    bslXtextEditor = BslHandlerUtil.extractXtextEditor(targetEditor);
-    super.setActiveEditor(callerAction, targetEditor);
   }
 
   @Override
@@ -100,16 +93,16 @@ public class TestMethodActionDelegate extends AbstractRulerActionDelegate implem
 
   @Override
   public void mouseUp(MouseEvent mouseEvent) {
-    final int delay = fMouseUpDelta == 0 ? 0 : fDoubleClickTime - (int) (System.currentTimeMillis() - fMouseUpDelta);
+    final var delay = fMouseUpDelta == 0 ? 0 : fDoubleClickTime - (int) (System.currentTimeMillis() - fMouseUpDelta);
     if (1 != mouseEvent.button)
       return;
-    IMarker marker = getMarker();
+    var marker = getMarker();
     if (marker == null) {
       return;
     }
     Runnable runnable = () -> {
       if (!fDoubleClicked && action != null) {
-        Event event = new Event();
+        var event = new Event();
         event.x = mouseEvent.x;
         event.y = mouseEvent.y;
         event.data = marker;
@@ -123,26 +116,45 @@ public class TestMethodActionDelegate extends AbstractRulerActionDelegate implem
       mouseEvent.widget.getDisplay().timerExec(delay, runnable);
   }
 
-  protected Menu getMenu() {
+  private void showMenu(Event event) {
+    if (bslXtextEditor == null) {
+      return;
+    }
+    var marker = (IMarker) event.data;
+    var method = marker.getAttribute(RulerAttributes.ATTRIBUTE_METHOD, null);
+    var menu = getMenu();
+    for (var item : menu.getItems()) {
+      item.setData(RulerAttributes.ATTRIBUTE_METHOD, method);
+    }
+
+    var point = getRulerInfo().getControl().toDisplay(event.x, event.y);
+    menu.setLocation(point.x - 5, point.y - 5);
+    menu.setVisible(true);
+  }
+
+  private Menu getMenu() {
     if (testMethodMenu == null) {
       testMethodMenu = createMenu();
     }
     return testMethodMenu;
   }
 
-  Menu createMenu() {
-    Menu menu = new Menu(bslXtextEditor.getShell(), SWT.POP_UP);
+  private Menu createMenu() {
+    if (bslXtextEditor == null) {
+      return null;
+    }
+    var menu = new Menu(bslXtextEditor.getShell(), SWT.POP_UP);
 
     var listener = new SelectionAdapter() {
       @Override
       public void widgetSelected(SelectionEvent selectionEvent) {
-        String mode = (String) selectionEvent.widget.getData(MODE_ATTRIBUTE);
-        String method = (String) selectionEvent.widget.getData(RulerAttributes.ATTRIBUTE_METHOD);
+        var mode = (String) selectionEvent.widget.getData(MODE_ATTRIBUTE);
+        var method = (String) selectionEvent.widget.getData(RulerAttributes.ATTRIBUTE_METHOD);
         TestsManager.runTestMethod(bslXtextEditor, method, mode);
       }
     };
 
-    MenuItem menuItem = new MenuItem(menu, SWT.NONE);
+    var menuItem = new MenuItem(menu, SWT.NONE);
     menuItem.setText(JUnitMessages.TestMethodActionDelegate_Run);
     menuItem.setData(MODE_ATTRIBUTE, ILaunchManager.RUN_MODE);
 
@@ -158,20 +170,23 @@ public class TestMethodActionDelegate extends AbstractRulerActionDelegate implem
     return menu;
   }
 
-  void showMenu(Event event) {
-    IMarker marker = (IMarker) event.data;
-    String method = marker.getAttribute(RulerAttributes.ATTRIBUTE_METHOD, (String) null);
-    Menu menu = getMenu();
-    for (MenuItem item : menu.getItems()) {
-      item.setData(RulerAttributes.ATTRIBUTE_METHOD, method);
+  private IMarker getMarker() {
+    if (bslXtextEditor == null) {
+      return null;
     }
-
-    Point point = event.display.getCursorLocation();
-    menu.setLocation(point.x - 5, point.y - 5);
-    menu.setVisible(true);
+    var line = getRulerInfo().getLineOfLastMouseButtonActivity() + 1;
+    for (var marker : getMarkers()) {
+      if (MarkerUtilities.getLineNumber(marker) == line) {
+        return marker;
+      }
+    }
+    return null;
   }
 
-  IMarker[] getMarkers() {
+  private IMarker[] getMarkers() {
+    if (bslXtextEditor == null) {
+      return null;
+    }
     try {
       return bslXtextEditor.getResource().findMarkers(RulerAttributes.MARKER_ID, false, 0);
     } catch (CoreException e) {
@@ -180,17 +195,7 @@ public class TestMethodActionDelegate extends AbstractRulerActionDelegate implem
     return null;
   }
 
-  IMarker getMarker() {
-    int line = getRulerInfo().getLineOfLastMouseButtonActivity() + 1;
-    for (IMarker marker : getMarkers()) {
-      if (MarkerUtilities.getLineNumber(marker) == line) {
-        return marker;
-      }
-    }
-    return null;
-  }
-
-  IVerticalRulerInfo getRulerInfo() {
+  private IVerticalRulerInfo getRulerInfo() {
     return bslXtextEditor.getAdapter(IVerticalRulerInfo.class);
   }
 

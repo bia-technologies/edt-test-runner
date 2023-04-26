@@ -28,6 +28,8 @@
 package ru.biatech.edt.junit.ui.report;
 
 import com._1c.g5.v8.dt.core.platform.IV8Project;
+import lombok.Getter;
+import lombok.Setter;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.IHandler;
@@ -38,12 +40,10 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ILock;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
@@ -111,9 +111,17 @@ import ru.biatech.edt.junit.ui.IJUnitHelpContextIds;
 import ru.biatech.edt.junit.ui.ImageProvider;
 import ru.biatech.edt.junit.ui.JUnitMessages;
 import ru.biatech.edt.junit.ui.JUnitUIPreferencesConstants;
+import ru.biatech.edt.junit.ui.report.actions.ActivateOnErrorAction;
+import ru.biatech.edt.junit.ui.report.actions.FailuresOnlyFilterAction;
+import ru.biatech.edt.junit.ui.report.actions.IgnoredOnlyFilterAction;
 import ru.biatech.edt.junit.ui.report.actions.ScrollLockAction;
 import ru.biatech.edt.junit.ui.report.actions.ShowNextFailureAction;
 import ru.biatech.edt.junit.ui.report.actions.ShowPreviousFailureAction;
+import ru.biatech.edt.junit.ui.report.actions.ShowTestHierarchyAction;
+import ru.biatech.edt.junit.ui.report.actions.ShowTimeAction;
+import ru.biatech.edt.junit.ui.report.actions.ShowWebStackTraceAction;
+import ru.biatech.edt.junit.ui.report.actions.ToggleOrientationAction;
+import ru.biatech.edt.junit.ui.report.actions.ToggleSortingAction;
 import ru.biatech.edt.junit.ui.report.history.RunnerViewHistory;
 import ru.biatech.edt.junit.ui.stacktrace.FailureViewer;
 import ru.biatech.edt.junit.ui.stacktrace.actions.CopyTraceAction;
@@ -135,32 +143,10 @@ public class TestRunnerViewPart extends ViewPart {
   public static final int LAYOUT_HIERARCHICAL = 1;
   public static final Object FAMILY_JUNIT_RUN = new Object();
   private static final int REFRESH_INTERVAL = 200;
-  // Persistence tags.
-  private static final String TAG_RATIO = "ratio"; //$NON-NLS-1$
-  private static final String TAG_ORIENTATION = "orientation"; //$NON-NLS-1$
-  private static final String TAG_SCROLL = "scroll"; //$NON-NLS-1$
-
-  /**
-   * @since 3.2
-   */
-  private static final String TAG_LAYOUT = "layout"; //$NON-NLS-1$
-  /**
-   * @since 3.2
-   */
-  private static final String TAG_FAILURES_ONLY = "failuresOnly"; //$NON-NLS-1$
-  /**
-   * @since 3.8
-   */
-  private static final String TAG_IGNORED_ONLY = "ignoredOnly"; //$NON-NLS-1$
-  /**
-   * @since 3.4
-   */
-  private static final String TAG_SHOW_TIME = "time"; //$NON-NLS-1$
-  private static final String TAG_SORTING_CRITERION = "sortingCriterion"; //$NON-NLS-1$
   //orientations
-  private static final int VIEW_ORIENTATION_VERTICAL = 0;
-  private static final int VIEW_ORIENTATION_HORIZONTAL = 1;
-  private static final int VIEW_ORIENTATION_AUTOMATIC = 2;
+  public static final int VIEW_ORIENTATION_VERTICAL = 0;
+  public static final int VIEW_ORIENTATION_HORIZONTAL = 1;
+  public static final int VIEW_ORIENTATION_AUTOMATIC = 2;
   private static final String RERUN_LAST_COMMAND = "ru.biatech.edt.junit.junitShortcut.rerunLast"; //$NON-NLS-1$
   private static final String RERUN_FAILED_FIRST_COMMAND = "ru.biatech.edt.junit.junitShortcut.rerunFailedFirst"; //$NON-NLS-1$
 
@@ -171,42 +157,23 @@ public class TestRunnerViewPart extends ViewPart {
 
   private FailureViewer failureViewer;
   private final ImageProvider imageProvider;
-  /**
-   * Whether the output scrolls and reveals tests as they are executed.
-   */
-  private boolean fAutoScroll = true;
   private ProgressBar fProgressBar;
   private ProgressImages fProgressImages;
   private Image fViewImage;
   private CounterPanel fCounterPanel;
-  private boolean fShowOnErrorOnly;
   private volatile String fInfoMessage;
   private boolean fPartIsVisible;
   Image fOriginalViewImage;
   /**
    * The current orientation; either <code>VIEW_ORIENTATION_HORIZONTAL</code>
-   * <code>VIEW_ORIENTATION_VERTICAL</code>, or <code>VIEW_ORIENTATION_AUTOMATIC</code>.
-   */
-  private int fOrientation = VIEW_ORIENTATION_AUTOMATIC;
-  /**
-   * The current orientation; either <code>VIEW_ORIENTATION_HORIZONTAL</code>
    * <code>VIEW_ORIENTATION_VERTICAL</code>.
    */
   private int fCurrentOrientation;
-  /**
-   * The current layout mode (LAYOUT_FLAT or LAYOUT_HIERARCHICAL).
-   */
-  private int fLayout = LAYOUT_HIERARCHICAL;
-
   private TestViewer fTestViewer;
   /**
    * Is the UI disposed?
    */
   private boolean fIsDisposed;
-  /**
-   * The current sorting criterion.
-   */
-  private SortingCriterion fSortingCriterion = SortingCriterion.SORT_BY_EXECUTION_ORDER;
   /**
    * Actions
    */
@@ -218,16 +185,16 @@ public class TestRunnerViewPart extends ViewPart {
   private IHandlerActivation fRerunLastActivation;
   private Action fRerunFailedFirstAction;
   private IHandlerActivation fRerunFailedFirstActivation;
-  private Action fFailuresOnlyFilterAction;
-  private Action fIgnoredOnlyFilterAction;
+  private FailuresOnlyFilterAction fFailuresOnlyFilterAction;
+  private IgnoredOnlyFilterAction fIgnoredOnlyFilterAction;
   private ScrollLockAction fScrollLockAction;
   private ToggleOrientationAction[] fToggleOrientationActions;
   private ShowTestHierarchyAction fShowTestHierarchyAction;
   private ShowTimeAction fShowTimeAction;
+  private ShowWebStackTraceAction showWebStackTraceAction;
   private ActivateOnErrorAction fActivateOnErrorAction;
-  private IMenuListener fViewMenuListener;
-  private MenuManager fSortByMenu;
   private ToggleSortingAction[] fToggleSortingActions;
+  private IMenuListener fViewMenuListener;
   private TestRunSession fTestRunSession;
   private TestSessionListener fTestSessionListener;
   private RunnerViewHistory fViewHistory;
@@ -286,6 +253,9 @@ public class TestRunnerViewPart extends ViewPart {
     }
   };
 
+  @Getter
+  final ReportSettings settings;
+
   private static boolean getShowOnErrorOnly() {
     return Platform.getPreferencesService().getBoolean(TestViewerPlugin.getPluginId(), JUnitPreferencesConstants.SHOW_ON_ERROR_ONLY, false, null);
   }
@@ -303,17 +273,7 @@ public class TestRunnerViewPart extends ViewPart {
 
   public TestRunnerViewPart() {
     imageProvider = new ImageProvider();
-  }
-
-  public SortingCriterion getSortingCriterion() {
-    return fSortingCriterion;
-  }
-
-  public void setSortingCriterion(SortingCriterion sortingCriterion) {
-    fSortingCriterion = sortingCriterion;
-    if (fTestRunSession != null && !fTestRunSession.isStarting() && !fTestRunSession.isRunning()) {
-      fTestViewer.setSortingCriterion(sortingCriterion);
-    }
+    settings = new ReportSettings();
   }
 
   @Override
@@ -328,72 +288,6 @@ public class TestRunnerViewPart extends ViewPart {
 
   private IWorkbenchSiteProgressService getProgressService() {
     return getSite().getAdapter(IWorkbenchSiteProgressService.class);
-  }
-
-  @Override
-  public void saveState(IMemento memento) {
-    if (fSashForm == null) {
-      // part has not been created
-      if (fMemento != null) //Keep the old state;
-        memento.putMemento(fMemento);
-      return;
-    }
-
-    memento.putBoolean(TAG_SCROLL, fScrollLockAction.isChecked());
-    int[] weights = fSashForm.getWeights();
-    int ratio = (weights[0] * 1000) / (weights[0] + weights[1]);
-    memento.putInteger(TAG_RATIO, ratio);
-    memento.putInteger(TAG_ORIENTATION, fOrientation);
-
-    memento.putBoolean(TAG_FAILURES_ONLY, fFailuresOnlyFilterAction.isChecked());
-    memento.putBoolean(TAG_IGNORED_ONLY, fIgnoredOnlyFilterAction.isChecked());
-    memento.putInteger(TAG_LAYOUT, fLayout);
-    memento.putBoolean(TAG_SHOW_TIME, fShowTimeAction.isChecked());
-    memento.putInteger(TAG_SORTING_CRITERION, fSortingCriterion.ordinal());
-  }
-
-  private void restoreLayoutState(IMemento memento) {
-    var ratio = memento.getInteger(TAG_RATIO);
-    if (ratio != null) {
-      fSashForm.setWeights(ratio, 1000 - ratio);
-    }
-    var orientation = memento.getInteger(TAG_ORIENTATION);
-    if (orientation != null) {
-      fOrientation = orientation;
-    }
-    computeOrientation();
-
-    var scrollLock = memento.getBoolean(TAG_SCROLL);
-    if (scrollLock != null) {
-      fScrollLockAction.setChecked(scrollLock);
-      setAutoScroll(!fScrollLockAction.isChecked());
-    }
-
-    var layout = memento.getInteger(TAG_LAYOUT);
-    var layoutValue = layout == null ? LAYOUT_HIERARCHICAL : layout;
-
-    var failuresOnly = memento.getBoolean(TAG_FAILURES_ONLY);
-    var showFailuresOnly = failuresOnly != null && failuresOnly;
-
-    var ignoredOnly = memento.getBoolean(TAG_IGNORED_ONLY);
-    var showIgnoredOnly = ignoredOnly != null && ignoredOnly;
-
-    var time = memento.getBoolean(TAG_SHOW_TIME);
-    var showTime = time == null || time;
-
-    var tagSortingCriterion = memento.getInteger(TAG_SORTING_CRITERION);
-    var sortingCriterion = tagSortingCriterion == null ?
-        SortingCriterion.SORT_BY_EXECUTION_ORDER :
-        SortingCriterion.values()[tagSortingCriterion];
-
-    setSortingCriterion(sortingCriterion);
-
-    for (var toggleSortingAction : fToggleSortingActions) {
-      toggleSortingAction.setChecked(sortingCriterion == toggleSortingAction.getActionSortingCriterion());
-    }
-
-    setFilterAndLayout(showFailuresOnly, showIgnoredOnly, layoutValue);
-    setShowExecutionTime(showTime);
   }
 
   /**
@@ -467,14 +361,6 @@ public class TestRunnerViewPart extends ViewPart {
           JUnitMessages.TestRunnerViewPart_cannotrerun_title,
           JUnitMessages.TestRunnerViewPart_cannotrerurn_message);
     }
-  }
-
-  public boolean isAutoScroll() {
-    return fAutoScroll;
-  }
-
-  public void setAutoScroll(boolean scroll) {
-    fAutoScroll = scroll;
   }
 
   public void selectNextFailure() {
@@ -602,7 +488,7 @@ action enablement
         fTestSessionListener = new TestSessionListener();
         fTestRunSession.addTestSessionListener(fTestSessionListener);
       }
-      if (!fTestRunSession.isStarting() && !fShowOnErrorOnly) {
+      if (!fTestRunSession.isStarting() && !settings.isShowOnErrorOnly()) {
         showTestResultsView();
       }
 
@@ -626,7 +512,7 @@ action enablement
 
         fStopAction.setEnabled(fTestRunSession.isKeptAlive());
         fTestViewer.expandFirstLevel();
-        setSortingCriterion(fSortingCriterion);
+        settings.setSortingCriterion(settings.getSortingCriterion());
       }
     }
     return deactivatedSession;
@@ -690,7 +576,7 @@ action enablement
   }
 
   private void updateNextPreviousActions() {
-    boolean hasErrorsOrFailures = !fIgnoredOnlyFilterAction.isChecked() && hasErrorsOrFailures();
+    boolean hasErrorsOrFailures = !settings.isShowIgnoredOnly() && hasErrorsOrFailures();
     fNextAction.setEnabled(hasErrorsOrFailures);
     fPreviousAction.setEnabled(hasErrorsOrFailures);
   }
@@ -982,10 +868,10 @@ action enablement
 
     getViewSite().getPage().addPartListener(fPartListener);
 
-    setFilterAndLayout(false, false, LAYOUT_HIERARCHICAL);
-    setShowExecutionTime(true);
+    settings.setLayoutMode(LAYOUT_HIERARCHICAL);
+    settings.setShowExecutionTime(true);
     if (fMemento != null) {
-      restoreLayoutState(fMemento);
+      settings.restoreLayoutState(fMemento);
     }
     fMemento = null;
 
@@ -997,6 +883,11 @@ action enablement
     if (!testRunSessions.isEmpty()) {
       fTestRunSessionListener.sessionAdded(testRunSessions.get(0));
     }
+  }
+
+  @Override
+  public void saveState(IMemento memento) {
+    settings.saveState(memento);
   }
 
   /*
@@ -1090,8 +981,8 @@ action enablement
   }
 
   private void computeOrientation() {
-    if (fOrientation != VIEW_ORIENTATION_AUTOMATIC) {
-      fCurrentOrientation = fOrientation;
+    if (settings.getOrientation() != VIEW_ORIENTATION_AUTOMATIC) {
+      fCurrentOrientation = settings.getOrientation();
       setOrientation(fCurrentOrientation);
     } else {
       Point size = fParent.getSize();
@@ -1152,25 +1043,11 @@ action enablement
     };
     fRerunFailedFirstActivation = handlerService.activateHandler(RERUN_FAILED_FIRST_COMMAND, handler);
 
-    fFailuresOnlyFilterAction = new FailuresOnlyFilterAction();
-    fIgnoredOnlyFilterAction = new IgnoredOnlyFilterAction();
-
-    fScrollLockAction = new ScrollLockAction(this);
-    fScrollLockAction.setChecked(!fAutoScroll);
-
-    fToggleOrientationActions = new ToggleOrientationAction[]{
-        new ToggleOrientationAction(VIEW_ORIENTATION_VERTICAL),
-        new ToggleOrientationAction(VIEW_ORIENTATION_HORIZONTAL),
-        new ToggleOrientationAction(VIEW_ORIENTATION_AUTOMATIC)};
-
-    fShowTestHierarchyAction = new ShowTestHierarchyAction();
-    fShowTimeAction = new ShowTimeAction();
-
     toolBar.add(fNextAction);
     toolBar.add(fPreviousAction);
-    toolBar.add(fFailuresOnlyFilterAction);
-    toolBar.add(fIgnoredOnlyFilterAction);
-    toolBar.add(fScrollLockAction);
+    toolBar.add(fFailuresOnlyFilterAction = new FailuresOnlyFilterAction(settings));
+    toolBar.add(fIgnoredOnlyFilterAction = new IgnoredOnlyFilterAction(settings));
+    toolBar.add(fScrollLockAction = new ScrollLockAction(settings));
     toolBar.add(new Separator());
     toolBar.add(fRerunLastTestAction);
     toolBar.add(fRerunFailedFirstAction);
@@ -1178,20 +1055,25 @@ action enablement
     toolBar.add(fViewHistory.createHistoryDropDownAction());
 
 
-    viewMenu.add(fShowTestHierarchyAction);
-    viewMenu.add(fShowTimeAction);
+    viewMenu.add(fShowTestHierarchyAction = new ShowTestHierarchyAction(settings));
+    viewMenu.add(fShowTimeAction = new ShowTimeAction(settings));
     viewMenu.add(new Separator());
 
     fToggleSortingActions = new ToggleSortingAction[]{
-        new ToggleSortingAction(SortingCriterion.SORT_BY_EXECUTION_ORDER),
-        new ToggleSortingAction(SortingCriterion.SORT_BY_EXECUTION_TIME),
-        new ToggleSortingAction(SortingCriterion.SORT_BY_NAME)};
-    fSortByMenu = new MenuManager(JUnitMessages.TestRunnerViewPart_sort_by_menu);
+        new ToggleSortingAction(settings, SortingCriterion.SORT_BY_EXECUTION_ORDER),
+        new ToggleSortingAction(settings, SortingCriterion.SORT_BY_EXECUTION_TIME),
+        new ToggleSortingAction(settings, SortingCriterion.SORT_BY_NAME)};
+    MenuManager fSortByMenu = new MenuManager(JUnitMessages.TestRunnerViewPart_sort_by_menu);
     for (ToggleSortingAction fToggleSortingAction : fToggleSortingActions) {
       fSortByMenu.add(fToggleSortingAction);
     }
     viewMenu.add(fSortByMenu);
     viewMenu.add(new Separator());
+
+    fToggleOrientationActions = new ToggleOrientationAction[]{
+        new ToggleOrientationAction(settings, VIEW_ORIENTATION_VERTICAL),
+        new ToggleOrientationAction(settings, VIEW_ORIENTATION_HORIZONTAL),
+        new ToggleOrientationAction(settings, VIEW_ORIENTATION_AUTOMATIC)};
 
     MenuManager layoutSubMenu = new MenuManager(JUnitMessages.TestRunnerViewPart_layout_menu);
     for (ToggleOrientationAction toggleOrientationAction : fToggleOrientationActions) {
@@ -1202,14 +1084,11 @@ action enablement
 
     viewMenu.add(fFailuresOnlyFilterAction);
     viewMenu.add(fIgnoredOnlyFilterAction);
-
-
-    fActivateOnErrorAction = new ActivateOnErrorAction();
-    viewMenu.add(fActivateOnErrorAction);
+    viewMenu.add(fActivateOnErrorAction = new ActivateOnErrorAction(settings));
+    viewMenu.add(showWebStackTraceAction = new ShowWebStackTraceAction(settings));
     fViewMenuListener = manager -> fActivateOnErrorAction.update();
 
     viewMenu.addMenuListener(fViewMenuListener);
-
     actionBars.updateActionBars();
   }
 
@@ -1282,7 +1161,7 @@ action enablement
     boolean horizontal = orientation == VIEW_ORIENTATION_HORIZONTAL;
     fSashForm.setOrientation(horizontal ? SWT.HORIZONTAL : SWT.VERTICAL);
     for (ToggleOrientationAction toggleOrientationAction : fToggleOrientationActions) {
-      toggleOrientationAction.setChecked(fOrientation == toggleOrientationAction.getOrientation());
+      toggleOrientationAction.update();
     }
     fCurrentOrientation = orientation;
     GridLayout layout = (GridLayout) fCounterComposite.getLayout();
@@ -1298,34 +1177,7 @@ action enablement
     }
   }
 
-  private void setShowFailuresOnly(boolean failuresOnly) {
-    setFilterAndLayout(failuresOnly, false /*ignoredOnly must be off*/, fLayout);
-  }
-
-  private void setShowIgnoredOnly(boolean ignoredOnly) {
-    setFilterAndLayout(false /*failuresOnly must be off*/, ignoredOnly, fLayout);
-  }
-
-  private void setLayoutMode(int mode) {
-    setFilterAndLayout(fFailuresOnlyFilterAction.isChecked(), fIgnoredOnlyFilterAction.isChecked(), mode);
-  }
-
-  private void setFilterAndLayout(boolean failuresOnly, boolean ignoredOnly, int layoutMode) {
-    fShowTestHierarchyAction.setChecked(layoutMode == LAYOUT_HIERARCHICAL);
-    fLayout = layoutMode;
-    fFailuresOnlyFilterAction.setChecked(failuresOnly);
-    fIgnoredOnlyFilterAction.setChecked(ignoredOnly);
-    fTestViewer.setShowFailuresOrIgnoredOnly(failuresOnly, ignoredOnly, layoutMode);
-    updateNextPreviousActions();
-  }
-
-  private void setShowExecutionTime(boolean showTime) {
-    fTestViewer.setShowTime(showTime);
-    fShowTimeAction.setChecked(showTime);
-
-  }
-
-  enum SortingCriterion {
+  public enum SortingCriterion {
     SORT_BY_NAME,
     SORT_BY_EXECUTION_ORDER,
     SORT_BY_EXECUTION_TIME
@@ -1379,7 +1231,7 @@ action enablement
     @Override
     public void sessionStarted() {
       fTestViewer.registerViewersRefresh();
-      fShowOnErrorOnly = getShowOnErrorOnly();
+      settings.setShowOnErrorOnly(getShowOnErrorOnly());
 
       startUpdateJobs();
 
@@ -1415,7 +1267,7 @@ action enablement
       logMessageIfNoTests();
 
       // When test session ended, apply user sorting criterion
-      getDisplay().asyncExec(() -> setSortingCriterion(fSortingCriterion));
+      getDisplay().asyncExec(() -> settings.setSortingCriterion(settings.getSortingCriterion()));
     }
 
     @Override
@@ -1440,7 +1292,7 @@ action enablement
 
     @Override
     public void runningBegins() {
-      if (!fShowOnErrorOnly) {
+      if (!settings.isShowOnErrorOnly()) {
         postShowTestResultsView();
       }
     }
@@ -1458,13 +1310,13 @@ action enablement
 
     @Override
     public void testFailed(TestElement testElement, TestStatus status, String trace, String expected, String actual) {
-      if (isAutoScroll()) {
+      if (settings.isAutoScroll()) {
         fTestViewer.registerFailedForAutoScroll(testElement);
       }
       fTestViewer.registerViewerUpdate(testElement);
 
       // show the view on the first error only
-      if (fShowOnErrorOnly && (getErrorsPlusFailures() == 1)) {
+      if (settings.isShowOnErrorOnly() && (getErrorsPlusFailures() == 1)) {
         postShowTestResultsView();
       }
 
@@ -1591,144 +1443,187 @@ action enablement
     }
   }
 
-  private class ToggleOrientationAction extends Action {
-    private final int fActionOrientation;
+  public class ReportSettings {
+    // TODO В будущем сделать рефакторинг вынеся в самостоятельный класс
+    private static final String TAG_RATIO = "ratio"; //$NON-NLS-1$
+    private static final String TAG_ORIENTATION = "orientation"; //$NON-NLS-1$
+    private static final String TAG_SCROLL = "scroll"; //$NON-NLS-1$
+    private static final String TAG_LAYOUT = "layout"; //$NON-NLS-1$
+    private static final String TAG_FAILURES_ONLY = "failuresOnly"; //$NON-NLS-1$
+    private static final String TAG_IGNORED_ONLY = "ignoredOnly"; //$NON-NLS-1$
+    private static final String TAG_SHOW_TIME = "time"; //$NON-NLS-1$
+    private static final String TAG_SORTING_CRITERION = "sortingCriterion"; //$NON-NLS-1$
+    private static final String TAG_WEB_STACKTRACE = "webStackTrace"; //$NON-NLS-1$
 
-    public ToggleOrientationAction(int orientation) {
-      super("", IAction.AS_RADIO_BUTTON); //$NON-NLS-1$
-      switch (orientation) {
-        case TestRunnerViewPart.VIEW_ORIENTATION_HORIZONTAL:
-          setText(JUnitMessages.TestRunnerViewPart_toggle_horizontal_label);
-          setImageDescriptor(TestViewerPlugin.ui().getImageDescriptor("elcl16/th_horizontal.png")); //$NON-NLS-1$
-          break;
-        case TestRunnerViewPart.VIEW_ORIENTATION_VERTICAL:
-          setText(JUnitMessages.TestRunnerViewPart_toggle_vertical_label);
-          setImageDescriptor(TestViewerPlugin.ui().getImageDescriptor("elcl16/th_vertical.png")); //$NON-NLS-1$
-          break;
-        case TestRunnerViewPart.VIEW_ORIENTATION_AUTOMATIC:
-          setText(JUnitMessages.TestRunnerViewPart_toggle_automatic_label);
-          setImageDescriptor(TestViewerPlugin.ui().getImageDescriptor("elcl16/th_automatic.png")); //$NON-NLS-1$
-          break;
-        default:
-          break;
+    /**
+     * The current orientation; either <code>VIEW_ORIENTATION_HORIZONTAL</code>
+     * <code>VIEW_ORIENTATION_VERTICAL</code>, or <code>VIEW_ORIENTATION_AUTOMATIC</code>.
+     */
+    @Getter
+    private int orientation = VIEW_ORIENTATION_AUTOMATIC;
+
+    /**
+     * The current layout mode (LAYOUT_FLAT or LAYOUT_HIERARCHICAL).
+     */
+    @Getter
+    private int layoutMode = LAYOUT_HIERARCHICAL;
+
+    /**
+     * Whether the output scrolls and reveals tests as they are executed.
+     */
+    @Getter
+    @Setter
+    boolean autoScroll;
+
+    @Getter
+    @Setter
+    boolean showOnErrorOnly;
+
+    /**
+     * The current sorting criterion.
+     */
+    @Getter
+    private SortingCriterion sortingCriterion = SortingCriterion.SORT_BY_EXECUTION_ORDER;
+
+    public boolean isShowFailuresOnly() {
+      return fFailuresOnlyFilterAction != null && fFailuresOnlyFilterAction.isChecked();
+    }
+
+    public void setShowFailuresOnly(boolean failuresOnly) {
+      updateFilterAndLayout(failuresOnly, false /*ignoredOnly must be off*/, getLayoutMode());
+    }
+
+    public boolean isShowIgnoredOnly() {
+      return fIgnoredOnlyFilterAction != null && fIgnoredOnlyFilterAction.isChecked();
+    }
+
+    public void setShowIgnoredOnly(boolean ignoredOnly) {
+      updateFilterAndLayout(false, isShowIgnoredOnly(), getLayoutMode());
+    }
+
+    public boolean isScrollLock() {
+      return fScrollLockAction != null && fScrollLockAction.isChecked();
+    }
+
+    public boolean isShowExecutionTime() {
+      return fShowTimeAction != null && fShowTimeAction.isChecked();
+    }
+
+    public boolean isHtmlStackTrace() {
+      return showWebStackTraceAction != null && showWebStackTraceAction.isChecked();
+    }
+
+    public void setHtmlStackTrace(boolean value) {
+      showWebStackTraceAction.setChecked(value);
+      failureViewer.setStacktraceViewer(value);
+    }
+
+    public void setShowExecutionTime(boolean showTime) {
+      fTestViewer.setShowTime(showTime);
+      fShowTimeAction.setChecked(showTime);
+    }
+
+    public int getRatio() {
+      int[] weights = fSashForm.getWeights();
+      return (weights[0] * 1000) / (weights[0] + weights[1]);
+    }
+
+    public void setRation(Integer ratio) {
+      if (ratio != null) {
+        fSashForm.setWeights(ratio, 1000 - ratio);
       }
-      fActionOrientation = orientation;
-      PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJUnitHelpContextIds.RESULTS_VIEW_TOGGLE_ORIENTATION_ACTION);
     }
 
-    public int getOrientation() {
-      return fActionOrientation;
+    public void setLayoutMode(int mode) {
+      updateFilterAndLayout(isShowFailuresOnly(), isShowIgnoredOnly(), mode);
     }
 
-    @Override
-    public void run() {
-      if (isChecked()) {
-        fOrientation = fActionOrientation;
-        computeOrientation();
-      }
-    }
-  }
-
-  private class ToggleSortingAction extends Action {
-    private final SortingCriterion fActionSortingCriterion;
-
-    public ToggleSortingAction(SortingCriterion sortingCriterion) {
-      super("", IAction.AS_RADIO_BUTTON); //$NON-NLS-1$
-      switch (sortingCriterion) {
-        case SORT_BY_NAME:
-          setText(JUnitMessages.TestRunnerViewPart_toggle_name_label);
-          break;
-        case SORT_BY_EXECUTION_ORDER:
-          setText(JUnitMessages.TestRunnerViewPart_toggle_execution_order_label);
-          break;
-        case SORT_BY_EXECUTION_TIME:
-          setText(JUnitMessages.TestRunnerViewPart_toggle_execution_time_label);
-          break;
-        default:
-          break;
-      }
-      fActionSortingCriterion = sortingCriterion;
+    public void setOrientation(int orientation) {
+      this.orientation = orientation;
+      computeOrientation();
     }
 
-    @Override
-    public void run() {
-      if (isChecked()) {
-        setSortingCriterion(fActionSortingCriterion);
+    public void setSortingCriterion(SortingCriterion sortingCriterion) {
+      this.sortingCriterion = sortingCriterion;
+      if (fTestRunSession != null && !fTestRunSession.isStarting() && !fTestRunSession.isRunning()) {
+        fTestViewer.setSortingCriterion(this.sortingCriterion);
       }
     }
 
-    public SortingCriterion getActionSortingCriterion() {
-      return fActionSortingCriterion;
-    }
-  }
+    public void saveState(IMemento memento) {
+      if (fSashForm == null) {
+        // part has not been created
+        if (fMemento != null) //Keep the old state;
+          memento.putMemento(fMemento);
+        return;
+      }
 
-  private class FailuresOnlyFilterAction extends Action {
-    public FailuresOnlyFilterAction() {
-      super(JUnitMessages.TestRunnerViewPart_show_failures_only, IAction.AS_CHECK_BOX);
-      setToolTipText(JUnitMessages.TestRunnerViewPart_show_failures_only);
-      setImageDescriptor(TestViewerPlugin.ui().getImageDescriptor(ImageProvider.FAILURES_ICON));
-    }
+      memento.putBoolean(TAG_SCROLL, isScrollLock());
+      memento.putInteger(TAG_RATIO, getRatio());
+      memento.putInteger(TAG_ORIENTATION, getOrientation());
 
-    @Override
-    public void run() {
-      setShowFailuresOnly(isChecked());
-    }
-  }
-
-  private class IgnoredOnlyFilterAction extends Action {
-    public IgnoredOnlyFilterAction() {
-      super(JUnitMessages.TestRunnerViewPart_show_ignored_only, IAction.AS_CHECK_BOX);
-      setToolTipText(JUnitMessages.TestRunnerViewPart_show_ignored_only);
-      setImageDescriptor(TestViewerPlugin.ui().getImageDescriptor(ImageProvider.TEST_IGNORED_ICON));
+      memento.putBoolean(TAG_FAILURES_ONLY, isShowFailuresOnly());
+      memento.putBoolean(TAG_IGNORED_ONLY, isShowIgnoredOnly());
+      memento.putInteger(TAG_LAYOUT, getLayoutMode());
+      memento.putBoolean(TAG_SHOW_TIME, isShowExecutionTime());
+      memento.putInteger(TAG_SORTING_CRITERION, getSortingCriterion().ordinal());
+      memento.putBoolean(TAG_WEB_STACKTRACE, isHtmlStackTrace());
     }
 
-    @Override
-    public void run() {
-      setShowIgnoredOnly(isChecked());
+    private void restoreLayoutState(IMemento memento) {
+      setRation(memento.getInteger(TAG_RATIO));
+
+      var orientation = memento.getInteger(TAG_ORIENTATION);
+      if (orientation != null) {
+        this.orientation = orientation;
+      }
+      computeOrientation();
+
+      var scrollLock = memento.getBoolean(TAG_SCROLL);
+      if (scrollLock != null) {
+        fScrollLockAction.setChecked(scrollLock);
+        setAutoScroll(!isScrollLock());
+      }
+
+      var layout = memento.getInteger(TAG_LAYOUT);
+      layout = layout == null ? LAYOUT_HIERARCHICAL : layout;
+
+      var failuresOnly = memento.getBoolean(TAG_FAILURES_ONLY);
+      failuresOnly = failuresOnly != null && failuresOnly;
+
+      var ignoredOnly = memento.getBoolean(TAG_IGNORED_ONLY);
+      ignoredOnly = ignoredOnly != null && ignoredOnly;
+
+      var time = memento.getBoolean(TAG_SHOW_TIME);
+      time = time == null || time;
+
+      var webStack = memento.getBoolean(TAG_WEB_STACKTRACE);
+      webStack = webStack == null || webStack; // default - true
+
+      var tagSortingCriterion = memento.getInteger(TAG_SORTING_CRITERION);
+      var sortingCriterion = tagSortingCriterion == null ?
+          TestRunnerViewPart.SortingCriterion.SORT_BY_EXECUTION_ORDER :
+          TestRunnerViewPart.SortingCriterion.values()[tagSortingCriterion];
+
+      setSortingCriterion(sortingCriterion);
+
+      for (var toggleSortingAction : fToggleSortingActions) {
+        toggleSortingAction.update();
+      }
+
+      updateFilterAndLayout(failuresOnly, ignoredOnly, layout);
+      setShowExecutionTime(time);
+      setHtmlStackTrace(webStack);
     }
-  }
 
-  private class ShowTimeAction extends Action {
-
-    public ShowTimeAction() {
-      super(JUnitMessages.TestRunnerViewPart_show_execution_time, IAction.AS_CHECK_BOX);
+    private void updateFilterAndLayout(boolean failuresOnly, boolean ignoredOnly, int layoutMode) {
+      this.layoutMode = layoutMode;
+      fShowTestHierarchyAction.update();
+      fFailuresOnlyFilterAction.setChecked(failuresOnly);
+      fIgnoredOnlyFilterAction.setChecked(ignoredOnly);
+      fTestViewer.setShowFailuresOrIgnoredOnly(failuresOnly, ignoredOnly, layoutMode);
+      updateNextPreviousActions();
     }
 
-    @Override
-    public void run() {
-      setShowExecutionTime(isChecked());
-    }
-  }
-
-  private class ShowTestHierarchyAction extends Action {
-
-    public ShowTestHierarchyAction() {
-      super(JUnitMessages.TestRunnerViewPart_hierarchical_layout, IAction.AS_CHECK_BOX);
-      setImageDescriptor(TestViewerPlugin.ui().getImageDescriptor("elcl16/hierarchicalLayout.png")); //$NON-NLS-1$
-    }
-
-    @Override
-    public void run() {
-      int mode = isChecked() ? LAYOUT_HIERARCHICAL : LAYOUT_FLAT;
-      setLayoutMode(mode);
-    }
-  }
-
-  private class ActivateOnErrorAction extends Action {
-    public ActivateOnErrorAction() {
-      super(JUnitMessages.TestRunnerViewPart_activate_on_failure_only, IAction.AS_CHECK_BOX);
-      update();
-    }
-
-    public void update() {
-      setChecked(getShowOnErrorOnly());
-    }
-
-    @Override
-    public void run() {
-      boolean checked = isChecked();
-      fShowOnErrorOnly = checked;
-      InstanceScope.INSTANCE.getNode(TestViewerPlugin.getPluginId()).putBoolean(JUnitPreferencesConstants.SHOW_ON_ERROR_ONLY, checked);
-    }
   }
 }

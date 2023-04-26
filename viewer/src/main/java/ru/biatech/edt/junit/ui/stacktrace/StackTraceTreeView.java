@@ -19,11 +19,10 @@ package ru.biatech.edt.junit.ui.stacktrace;
 import com._1c.g5.v8.dt.stacktraces.model.IStacktraceElement;
 import com._1c.g5.v8.dt.stacktraces.model.IStacktraceError;
 import com._1c.g5.v8.dt.stacktraces.model.IStacktraceFrame;
-import com._1c.g5.v8.dt.stacktraces.model.IStacktraceParser;
-import com.google.common.base.Strings;
-import lombok.EqualsAndHashCode;
-import lombok.Value;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.util.IOpenEventListener;
+import org.eclipse.jface.util.OpenStrategy;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -31,97 +30,107 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Menu;
 import ru.biatech.edt.junit.model.TestElement;
 import ru.biatech.edt.junit.model.TestErrorInfo;
 import ru.biatech.edt.junit.model.TestStatus;
 import ru.biatech.edt.junit.ui.ImageProvider;
-import ru.biatech.edt.junit.v8utils.VendorServices;
+import ru.biatech.edt.junit.ui.stacktrace.events.Listener;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Элемент для отображения стека ошибок
  */
- public class StackTracesTreeView extends TreeViewer {
-  private final IStacktraceParser stacktraceParser;
+public class StackTraceTreeView extends TreeViewer implements StackTraceView {
   private final ImageProvider imageProvider = new ImageProvider();
 
-  public StackTracesTreeView(Composite parent) {
+  private final StackTraceMixin mixin = new StackTraceMixin();
+
+  public StackTraceTreeView(Composite parent) {
     super(parent, SWT.V_SCROLL | SWT.SINGLE);
+    mixin.addTestElementChangedListener(this::renderTest);
     setUseHashlookup(true);
-    stacktraceParser = VendorServices.getStacktraceParser();
     createControl();
   }
 
+  /**
+   * {@link StackTraceView#viewFailure(TestElement)}
+   */
+  @Override
   public void viewFailure(TestElement testElement) {
-    if (testElement == null) {
-      clear();
-      return;
-    }
-
-    var items = new ArrayList<TreeItem>();
-    for (var error : testElement.getErrorsList()) {
-      TreeItem parent = null;
-
-      if (!Strings.isNullOrEmpty(error.getMessage())) {
-        items.add(parent = new TreeItem(error, null));
-      }
-
-      if (error.hasTrace()) {
-        var stacktrace = stacktraceParser.parse(error.getTrace(), testElement.getTestName(), null);
-        fillModel(parent == null ? items : parent.getChildren(), stacktrace.getChilden(), parent, error);
-      }
-    }
-
-    this.setInput(items);
-    if (!items.isEmpty()) {
-      this.setSelection(new StructuredSelection(items.get(0)));
-    }
-    this.expandAll();
+    mixin.setTestElement(testElement);
   }
 
+  /**
+   * {@link StackTraceView#clear()}
+   */
+  @Override
   public void clear() {
-    this.setInput(null);
+    mixin.clear();
   }
 
+  /**
+   * {@link StackTraceView#getSelected()}
+   */
+  @Override
   public Object getSelected() {
-    var item = getSelectedItem();
-    return item == null ? null : item.getData();
+    return mixin.getSelectedItemData();
   }
 
+  /**
+   * {@link StackTraceView#getSelectedError()}
+   */
+  @Override
   public TestErrorInfo getSelectedError() {
-    var item = getSelectedItem();
-    return item == null ? null : item.getError();
+    return mixin.getSelectedError();
   }
 
+  /**
+   * {@link StackTraceView#registerMenu(MenuManager)}
+   */
+  @Override
+  public void registerMenu(MenuManager menuManager) {
+    Menu menu = menuManager.createContextMenu(getTree());
+    getTree().setMenu(menu);
+  }
+
+  /**
+   * {@link StackTraceView#dispose()}
+   */
+  @Override
   public void dispose() {
     getTree().dispose();
     imageProvider.dispose();
   }
 
-  private TreeItem getSelectedItem() {
-    var selection = getSelection();
-    if (selection instanceof IStructuredSelection) {
-      var structuredSelection = (IStructuredSelection) selection;
-      if (structuredSelection.size() == 1) {
-        var context = structuredSelection.getFirstElement();
-        if (context instanceof TreeItem) {
-          return ((TreeItem) context);
-        }
-      }
-    }
-    return null;
+  /**
+   * {@link StackTraceView#addSelectionChangedListeners(Listener)}
+   */
+  @Override
+  public void addSelectionChangedListeners(Listener listener) {
+    mixin.addSelectionChangedListeners(listener);
   }
 
-  private void fillModel(List<TreeItem> treeItems, List<IStacktraceElement> elements, TreeItem parent, TestErrorInfo error) {
-    for (var item : elements) {
-      var treeItem = new TreeItem(error, item, parent);
-      treeItems.add(treeItem);
-      fillModel(treeItem.getChildren(), item.getChilden(), treeItem, error);
-    }
+  /**
+   * {@link StackTraceView#addOpenListeners(Listener)}
+   */
+  @Override
+  public void addOpenListeners(Listener listener) {
+    mixin.addOpenListeners(listener);
+  }
+
+  /**
+   * {@link StackTraceView#getContent()}
+   */
+  @Override
+  public Control getContent() {
+    return getTree();
   }
 
   private void createControl() {
@@ -129,38 +138,59 @@ import java.util.List;
     this.setContentProvider(new TreeItemContentProvider());
     this.setLabelProvider(new TreeItemColumnLabelProvider());
     ColumnViewerToolTipSupport.enableFor(this);
+
+    IOpenEventListener openListener = e -> mixin.riseOnOpen();
+    OpenStrategy handler = new OpenStrategy(getTree());
+    handler.addOpenListener(openListener);
+
+    getTree().addSelectionListener(new SelectionListener() {
+      @Override
+      public void widgetSelected(SelectionEvent e) {
+        selectionChanged(e);
+      }
+
+      @Override
+      public void widgetDefaultSelected(SelectionEvent e) {
+        selectionChanged(e);
+      }
+    });
   }
 
-  @Value
-  @EqualsAndHashCode(exclude = "parent")
-  private static class TreeItem {
-    String text;
-    Object data;
-    List<TreeItem> children = new ArrayList<>();
-    TreeItem parent;
-    TestErrorInfo error;
-
-    public TreeItem(TestErrorInfo error, IStacktraceElement data, TreeItem parent) {
-      this.error = error;
-      this.data = data;
-      this.parent = parent;
-      var lines = data.getName().split(":", 2);
-      text = String.join("\n", lines);
+  void selectionChanged(SelectionEvent e) {
+    var data = e.data;
+    if (data == null && e.item != null) {
+      data = e.item.getData();
     }
+    if (data instanceof IStructuredSelection) {
+      var structuredSelection = (IStructuredSelection) data;
+      if (structuredSelection.size() == 1) {
+        var context = structuredSelection.getFirstElement();
+        if (context instanceof StackTraceTreeBuilder.TreeItem) {
+          mixin.setSelectedItem((StackTraceTreeBuilder.TreeItem) context);
+          return;
+        }
+      }
+    } else if (data instanceof StackTraceTreeBuilder.TreeItem) {
+      mixin.setSelectedItem((StackTraceTreeBuilder.TreeItem) data);
+      return;
 
-    public TreeItem(TestErrorInfo error, TreeItem parent) {
-      this.error = error;
-      this.data = error;
-      this.parent = parent;
-      var lines = error.getMessage().split(":", 2);
-      text = String.join("\n", lines);
     }
+    mixin.setSelectedItem(null);
+  }
+
+  private void renderTest() {
+    var tree = mixin.getTree();
+    this.setInput(tree.getChildren());
+    if (!tree.getChildren().isEmpty()) {
+      this.setSelection(new StructuredSelection(tree.getChildren().get(0)));
+    }
+    this.expandAll();
   }
 
   private class TreeItemColumnLabelProvider extends ColumnLabelProvider {
     @Override
     public Image getImage(Object element) {
-      var item = (TreeItem) element;
+      var item = (StackTraceTreeBuilder.TreeItem) element;
       var data = item.getData();
       if (data instanceof TestErrorInfo) {
         var status = ((TestErrorInfo) item.getData()).getStatus();
@@ -174,12 +204,12 @@ import java.util.List;
 
     @Override
     public String getText(Object element) {
-      return ((TreeItem) element).getText();
+      return ((StackTraceTreeBuilder.TreeItem) element).getText();
     }
 
     @Override
     public String getToolTipText(Object element) {
-      var item = (TreeItem) element;
+      var item = (StackTraceTreeBuilder.TreeItem) element;
       if (item.getData() instanceof IStacktraceElement) {
         return ((IStacktraceElement) item.getData()).getName();
       } else {
@@ -219,8 +249,8 @@ import java.util.List;
     public Object[] getChildren(Object parentElement) {
       if (parentElement instanceof List) {
         return ((List<?>) parentElement).toArray();
-      } else if (parentElement instanceof TreeItem) {
-        return ((TreeItem) parentElement).getChildren().toArray();
+      } else if (parentElement instanceof StackTraceTreeBuilder.TreeItem) {
+        return ((StackTraceTreeBuilder.TreeItem) parentElement).getChildren().toArray();
       } else {
         return new Object[0];
       }
@@ -228,7 +258,7 @@ import java.util.List;
 
     @Override
     public Object getParent(Object element) {
-      return element instanceof TreeItem ? ((TreeItem) element).getParent() : null;
+      return element instanceof StackTraceTreeBuilder.TreeItem ? ((StackTraceTreeBuilder.TreeItem) element).getParent() : null;
     }
 
     @Override

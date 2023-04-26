@@ -22,17 +22,11 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.jface.util.IOpenEventListener;
-import org.eclipse.jface.util.OpenStrategy;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.ViewForm;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.IWorkbenchPage;
-import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.model.TestElement;
 import ru.biatech.edt.junit.model.TestErrorInfo;
 import ru.biatech.edt.junit.ui.ImageProvider;
@@ -47,15 +41,19 @@ import ru.biatech.edt.junit.v8utils.BslSourceDisplay;
  */
 public class FailureViewer {
 
-  private StackTracesTreeView viewer;
+  private StackTraceHtmlView htmlViewer;
+  private StackTraceTreeView treeViewer;
+  private StackTraceView activeViewer;
   private final TestRunnerViewPart viewPart;
   private final ViewForm parent;
-  private TestOpenListener testOpenListener;
 
   // Actions
+  MenuManager menuManager;
   private CopyTraceAction copyTraceAction;
   private CompareResultsAction compareAction;
   private OpenAction openAction;
+
+  TestElement currentTestElement;
 
   public FailureViewer(TestRunnerViewPart viewPart, ViewForm parent) {
     this.viewPart = viewPart;
@@ -65,22 +63,22 @@ public class FailureViewer {
   }
 
   public void viewFailure(TestElement testElement) {
-    viewer.viewFailure(testElement);
+    activeViewer.viewFailure(currentTestElement = testElement);
     handleSelected();
   }
 
   public void clear() {
-    viewer.clear();
+    activeViewer.clear();
   }
 
   public void dispose() {
-    if (testOpenListener != null && viewer != null) {
-      viewer.getTree().removeSelectionListener(testOpenListener);
-      testOpenListener = null;
+    if (htmlViewer != null) {
+      htmlViewer.dispose();
+      htmlViewer = null;
     }
-    if (viewer != null) {
-      viewer.dispose();
-      viewer = null;
+    if (treeViewer != null) {
+      treeViewer.dispose();
+      treeViewer = null;
     }
   }
 
@@ -88,24 +86,15 @@ public class FailureViewer {
     GridLayoutFactory.fillDefaults().applyTo(parent);
     GridDataFactory.fillDefaults().grab(true, true).applyTo(parent);
 
-    createViewer();
     createLabel();
     registerActions();
-    testOpenListener = new TestOpenListener();
-    viewer.getTree().addSelectionListener(testOpenListener);
-    parent.setContent(viewer.getTree());
-    viewer.getTree().addDisposeListener(e -> dispose());
+    setStacktraceViewer(viewPart.getSettings().isHtmlStackTrace());
   }
 
   private void registerActions() {
     compareAction = new CompareResultsAction();
     copyTraceAction = new CopyTraceAction();
     openAction = new OpenAction();
-
-    // Double click
-    IOpenEventListener openListener = e -> openSelected();
-    OpenStrategy handler = new OpenStrategy(viewer.getTree());
-    handler.addOpenListener(openListener);
 
     // ToolBar
     ToolBar toolBar = new ToolBar(parent, SWT.FLAT | SWT.WRAP);
@@ -116,25 +105,15 @@ public class FailureViewer {
     failureToolBarManager.update(true);
 
     // Menu
-    MenuManager menuManager = new MenuManager();
+    menuManager = new MenuManager();
     menuManager.add(openAction);
     menuManager.add(compareAction);
     menuManager.add(copyTraceAction);
-    Menu menu = menuManager.createContextMenu(viewer.getTree());
-    viewer.getTree().setMenu(menu);
-    viewPart.getSite().registerContextMenu(menuManager, viewer);
 
     parent.addDisposeListener((e) -> {
       menuManager.dispose();
       failureToolBarManager.dispose();
-      handler.removeOpenListener(openListener);
     });
-
-
-  }
-
-  private void createViewer() {
-    this.viewer = new StackTracesTreeView(parent);
   }
 
   private void createLabel() {
@@ -145,11 +124,10 @@ public class FailureViewer {
   }
 
   private void openSelected() {
-    if (viewer.getSelection().isEmpty()) {
+    var element = activeViewer.getSelected();
+    if (element == null) {
       return;
     }
-    var element = viewer.getSelected();
-
     if (element instanceof TestErrorInfo && ((TestErrorInfo) element).isComparisonFailure()) {
       compareAction.run();
     } else if (element instanceof IStacktraceFrame) {
@@ -158,14 +136,42 @@ public class FailureViewer {
   }
 
   void handleSelected() {
-    var error = viewer.getSelectedError();
+    var error = activeViewer.getSelectedError();
 
     compareAction.handleTestSelected(error);
     copyTraceAction.handleTestSelected(error);
     openAction.setEnabled(error != null);
   }
 
-  private class OpenAction extends Action {
+  public synchronized void setStacktraceViewer(boolean showHtmlView) {
+    StackTraceView viewer;
+    if (showHtmlView) {
+      if (htmlViewer == null) {
+        configureViewer(htmlViewer = new StackTraceHtmlView(parent));
+      }
+      viewer = htmlViewer;
+    } else {
+      if (treeViewer == null) {
+        configureViewer(treeViewer = new StackTraceTreeView(parent));
+      }
+      viewer = treeViewer;
+    }
+    if (viewer == activeViewer) {
+      return;
+    }
+    activeViewer = viewer;
+    activeViewer.viewFailure(currentTestElement);
+    parent.setContent(activeViewer.getContent());
+  }
+
+  private void configureViewer(StackTraceView viewer) {
+    viewer.addSelectionChangedListeners(this::handleSelected);
+    viewer.addOpenListeners(this::openSelected);
+    viewer.registerMenu(menuManager);
+  }
+
+
+  class OpenAction extends Action {
 
     private OpenAction() {
       super("Goto line", ImageProvider.getImageDescriptor(ImageProvider.GOTO_ICON));
@@ -174,24 +180,12 @@ public class FailureViewer {
 
     @Override
     public void run() {
-      Object element;
-      if (viewer.getSelection().isEmpty() || !((element = viewer.getSelected()) instanceof IStacktraceFrame)) {
+      Object element = activeViewer.getSelected();
+      if (!(element instanceof IStacktraceFrame)) {
         return;
       }
       IWorkbenchPage page = viewPart.getSite().getPage();
       BslSourceDisplay.INSTANCE.displayBslSource(element, page, false);
-    }
-  }
-
-  private final class TestOpenListener extends SelectionAdapter {
-    @Override
-    public void widgetDefaultSelected(SelectionEvent e) {
-      handleSelected();
-    }
-
-    @Override
-    public void widgetSelected(SelectionEvent e) {
-      handleSelected();
     }
   }
 }

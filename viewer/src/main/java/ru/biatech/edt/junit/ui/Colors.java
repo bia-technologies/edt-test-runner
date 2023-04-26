@@ -16,11 +16,13 @@
 
 package ru.biatech.edt.junit.ui;
 
+import org.eclipse.jface.preference.JFacePreferences;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
+import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.ui.stacktrace.events.Listener;
 
 import java.util.ArrayList;
@@ -62,7 +64,7 @@ public class Colors {
   static {
     final var display = Display.getDefault();
     if (display != null && !display.isDisposed()) {
-      cacheColors(display);
+      updateColors();
       try {
         display.asyncExec(() -> {
           installColorUpdater(display);
@@ -83,9 +85,11 @@ public class Colors {
     listeners.remove(listener);
   }
 
-  private static void cacheColors(Display display) {
-    BG_COLOR = display.getSystemColor(SWT.COLOR_LIST_BACKGROUND);
-    FG_COLOR = display.getSystemColor(SWT.COLOR_LIST_FOREGROUND);
+  public static void updateColors() {
+    var registry = JFaceResources.getColorRegistry();
+    var display = Display.getCurrent();
+    BG_COLOR = registry.get(JFacePreferences.CONTENT_ASSIST_BACKGROUND_COLOR);
+    FG_COLOR = registry.get(JFacePreferences.CONTENT_ASSIST_FOREGROUND_COLOR);
     SELECTION_BG_COLOR = display.getSystemColor(SWT.COLOR_LIST_SELECTION);
     SELECTION_FG_COLOR = display.getSystemColor(SWT.COLOR_LIST_SELECTION_TEXT);
     HOVER_BG_COLOR = darker(BG_COLOR);
@@ -106,8 +110,9 @@ public class Colors {
   }
 
   private static void onChanged() {
+    TestViewerPlugin.log().debug("Colors changed");
     var oldColor = BG_COLOR;
-    cacheColors(Display.getDefault());
+    updateColors();
     if (!BG_COLOR.equals(oldColor)) {
       listeners.forEach(Listener::handle);
     }

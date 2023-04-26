@@ -100,6 +100,7 @@ tasks.register<Exec>("download-lombok-plugin") {
     environment("MAVEN_OPTS", "")
     commandLine(mvnCommand, "clean", "dependency:copy@get-lombok")
     group = "build"
+    dependsOn(tasks.named("buildPlugin-copyFiles"))
 }
 
 tasks.register<Exec>("buildPlugin") {
@@ -109,7 +110,6 @@ tasks.register<Exec>("buildPlugin") {
     environment("MAVEN_OPTS", "-javaagent:target/lombok.jar=ECJ -Dhttps.protocols=TLSv1.2")
     commandLine(mvnCommand, "dependency:resolve", "package")
 
-    dependsOn(tasks.named("buildPlugin-copyFiles"))
     dependsOn(tasks.named("download-lombok-plugin"))
     group = "build"
 }

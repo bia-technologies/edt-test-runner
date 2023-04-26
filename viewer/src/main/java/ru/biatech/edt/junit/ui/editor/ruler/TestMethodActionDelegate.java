@@ -71,6 +71,9 @@ public class TestMethodActionDelegate extends AbstractRulerActionDelegate implem
   @Override
   public void setActiveEditor(IAction callerAction, IEditorPart targetEditor) {
     action = null;
+    if (targetEditor == null) {
+      return;
+    }
     bslXtextEditor = BslHandlerUtil.extractXtextEditor(targetEditor);
     super.setActiveEditor(callerAction, targetEditor);
   }

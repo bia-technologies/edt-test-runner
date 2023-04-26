@@ -81,14 +81,16 @@ public class BslSourceDisplay {
 
   private void displayModule(Module module, int line) {
     IEditorPart editor = this.openModuleEditor(module);
-    
+
     ITextEditor textEditor = null;
     if (editor instanceof ITextEditor) {
       textEditor = (ITextEditor) editor;
     } else if (editor != null) {
       textEditor = editor.getAdapter(ITextEditor.class);
     }
-
+    if (textEditor != null) {
+      textEditor.setFocus();
+    }
     if (textEditor != null && line >= 0) {
       this.positionEditor(textEditor, line);
     }

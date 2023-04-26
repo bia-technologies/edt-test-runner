@@ -23,6 +23,8 @@ import java.text.MessageFormat;
 
 public class Logger {
 
+  private static final boolean debug = Boolean.parseBoolean(System.getProperty("ru.biatech.edt.junit.debug", "false"));
+
   private String getPluginID() {
     return TestViewerPlugin.PLUGIN_ID;
   }
@@ -60,11 +62,16 @@ public class Logger {
   }
 
   public void debug(String message) {
-    log(new Status(IStatus.INFO, getPluginID(), 0, message, null));
+    if (debug) {
+      log(new Status(IStatus.INFO, getPluginID(), 0, message, null));
+    }
   }
+
   public void debug(String template, Object... objects) {
-    String message = MessageFormat.format(template, objects);
-    debug(message);
+    if (debug) {
+      String message = MessageFormat.format(template, objects);
+      debug(message);
+    }
   }
 
 }

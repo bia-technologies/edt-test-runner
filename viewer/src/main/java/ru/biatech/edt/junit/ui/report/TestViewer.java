@@ -535,7 +535,7 @@ public class TestViewer {
   }
 
   private Comparator<ITestElement> getComparator() {
-    SortingCriterion sortingCriterion = fTestRunnerPart.getSortingCriterion();
+    SortingCriterion sortingCriterion = fTestRunnerPart.settings.getSortingCriterion();
     Comparator<ITestElement> comparator;
     switch (sortingCriterion) {
       case SORT_BY_EXECUTION_TIME:
@@ -638,7 +638,7 @@ public class TestViewer {
   }
 
   private void autoScrollInUI() {
-    if (!fTestRunnerPart.isAutoScroll()) {
+    if (!fTestRunnerPart.settings.isAutoScroll()) {
       clearAutoExpand();
       fAutoClose.clear();
       return;
@@ -768,6 +768,7 @@ public class TestViewer {
   private synchronized void clearAutoExpand() {
     fAutoExpand.clear();
   }
+
 
   private final class TestSelectionListener implements ISelectionChangedListener {
     @Override

@@ -34,6 +34,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import ru.biatech.edt.junit.ui.JUnitUI;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.text.MessageFormat;
 
@@ -185,4 +187,12 @@ public class TestViewerPlugin extends AbstractUIPlugin {
     return createImageDescriptor(getBundle(), path, useMissingImageDescriptor);
   }
 
+  public URL getResource(String path) throws IOException {
+    var url = FileLocator.find(getBundle(), new Path(path), null);
+    return FileLocator.toFileURL(url);
+  }
+
+  public InputStream getResourceStream(String path) throws IOException {
+    return FileLocator.openStream(getBundle(), new Path(path), false);
+  }
 }

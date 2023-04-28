@@ -57,13 +57,9 @@ public class Logger {
     return new Status(IStatus.WARNING, getPluginID(), 0, message, null);
   }
 
-  public IStatus createWarningStatus(final String message, Exception throwable) {
-    return new Status(IStatus.WARNING, getPluginID(), 0, message, throwable);
-  }
-
   public void debug(String message) {
     if (debug) {
-      log(new Status(IStatus.INFO, getPluginID(), 0, message, null));
+      log(new Status(IStatus.OK, getPluginID(), 0, message, null));
     }
   }
 
@@ -74,4 +70,8 @@ public class Logger {
     }
   }
 
+  public void warning(String template, Object... objects) {
+    String message = MessageFormat.format(template, objects);
+    log(createWarningStatus(message));
+  }
 }

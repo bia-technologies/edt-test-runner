@@ -28,11 +28,13 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchManager;
 import ru.biatech.edt.junit.JUnitCore;
-import ru.biatech.edt.junit.JUnitLaunchListener;
 import ru.biatech.edt.junit.JUnitPreferencesConstants;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.launcher.v8.LaunchConfigurationAttributes;
 import ru.biatech.edt.junit.launcher.v8.LaunchHelper;
+import ru.biatech.edt.junit.launcher.lifecycle.LifecycleEvent;
+import ru.biatech.edt.junit.launcher.lifecycle.LifecycleListener;
+import ru.biatech.edt.junit.launcher.lifecycle.LifecycleMonitor;
 import ru.biatech.edt.junit.model.serialize.Serializer;
 import ru.biatech.edt.junit.ui.JUnitMessages;
 
@@ -55,7 +57,7 @@ public final class JUnitModel {
    * Active test run sessions, youngest first.
    */
   private final LinkedList<TestRunSession> fTestRunSessions = new LinkedList<>();
-  private final JUnitLaunchListener fLaunchListener = new JUnitLaunchListener();
+  private LifecycleListener lifecycleListener;
 
   /**
    * Imports a test run session from the given file.
@@ -73,25 +75,23 @@ public final class JUnitModel {
    *
    * @param url     an URL to a test run session transcript
    * @param monitor a progress monitor for cancellation
-   * @return the imported test run session
    * @throws InvocationTargetException wrapping a CoreException if the import failed
    * @throws InterruptedException      if the import was cancelled
    * @since 3.6
    */
-  public static TestRunSession importTestRunSession(String url, String defaultProjectName, IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-    return Serializer.importTestRunSession(url, defaultProjectName, monitor);
-  }
-
-  public static void importIntoTestRunSession(File swapFile, TestRunSession testRunSession) throws CoreException {
-    Serializer.importIntoTestRunSession(swapFile, testRunSession);
+  public static void importTestRunSession(String url, String defaultProjectName, IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+    Serializer.importTestRunSession(url, defaultProjectName, monitor);
   }
 
   /**
    * Starts the model (called by the {@link JUnitCore} on startup).
    */
   public void start() {
-    DebugPlugin.getDefault().getLaunchManager().addLaunchListener(fLaunchListener);
-    DebugPlugin.getDefault().addDebugEventListener(fLaunchListener);
+    LifecycleMonitor.addListener(lifecycleListener = (eventType, launch) -> {
+      if (LifecycleEvent.isFinished(eventType)) {
+        JUnitModel.loadTestReport(launch);
+      }
+    });
     addTestRunSessionListener(new TestRunSessionListener());
   }
 
@@ -99,9 +99,7 @@ public final class JUnitModel {
    * Stops the model (called by the {@link JUnitCore} on shutdown).
    */
   public void stop() {
-    DebugPlugin.getDefault().removeDebugEventListener(fLaunchListener);
-    DebugPlugin.getDefault().getLaunchManager().removeLaunchListener(fLaunchListener);
-
+    LifecycleMonitor.removeListener(lifecycleListener);
     File historyDirectory = TestViewerPlugin.core().getHistoryDirectory();
     File[] swapFiles = historyDirectory.listFiles();
     if (swapFiles != null) {

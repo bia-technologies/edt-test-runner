@@ -32,6 +32,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import ru.biatech.edt.junit.launcher.lifecycle.LifecycleMonitor;
 import ru.biatech.edt.junit.ui.JUnitUI;
 
 import java.io.IOException;
@@ -127,10 +128,12 @@ public class TestViewerPlugin extends AbstractUIPlugin {
     new InjectorAwareServiceRegistrator(bundleContext, this::getInjector);
     this.bundleContext = bundleContext;
     core().getModel().start();
+    LifecycleMonitor.start();
   }
 
   @Override
   public void stop(BundleContext bundleContext) throws Exception {
+    LifecycleMonitor.stop();
     core().getModel().stop();
     plugin = null;
     super.stop(bundleContext);

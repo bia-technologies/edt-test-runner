@@ -1,6 +1,6 @@
 /*******************************************************************************
  * Copyright (c) 2009, 2010 IBM Corporation and others.
- * Copyright (c) 2022 BIA-Technologies Limited Liability Company.
+ * Copyright (c) 2022-2023 BIA-Technologies Limited Liability Company.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0

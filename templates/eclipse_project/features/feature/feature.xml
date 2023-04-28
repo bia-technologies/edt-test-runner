@@ -2,7 +2,7 @@
 <!--
 
     Copyright (c) 2020,2021 1C-Soft LLC
-    Copyright 2021-2022 BIA-Technologies Limited Liability Company
+    Copyright 2021-2023 BIA-Technologies Limited Liability Company
 
     This program and the accompanying materials are made available under
     the terms of the Eclipse Public License 2.0 which is available at
@@ -18,7 +18,7 @@
 <feature
       id="ru.biatech.edt.xtest.feature"
       label="Запуск модульных тестов"
-      version="22.10.0.qualifier"
+      version="23.04.0.qualifier"
       provider-name="BIA-Technologies Limited Liability Company">
 
    <description>
@@ -29,7 +29,7 @@
    </description>
 
    <copyright>
-      Copyright 2021-2022 BIA-Technologies Limited Liability Company
+      Copyright 2021-2023 BIA-Technologies Limited Liability Company
       https://bia-tech.ru/
       Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE file
       distributed with this work for additional information regarding copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the &quot;License&quot;); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
@@ -225,7 +225,7 @@
       same &quot;printed page&quot; as the copyright notice for easier
       identification within third-party archives.
 
-      Copyright 2022 BIA-Technologies Limited Liability Company
+      Copyright 2023 BIA-Technologies Limited Liability Company
 
       Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
       you may not use this file except in compliance with the License.

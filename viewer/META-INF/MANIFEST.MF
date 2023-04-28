@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: ru.biatech.edt.junit;singleton:=true
 Automatic-Module-Name: ru.biatech.edt.junit
-Bundle-Version: 22.10.0.qualifier
+Bundle-Version: 23.04.0.qualifier
 Bundle-Activator: ru.biatech.edt.junit.TestViewerPlugin
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: %providerName

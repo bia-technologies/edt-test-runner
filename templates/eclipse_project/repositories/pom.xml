@@ -2,7 +2,7 @@
 <!--
 
     Copyright (c) 2020,2021 1C-Soft LLC
-    Copyright 2021-2022 BIA-Technologies Limited Liability Company
+    Copyright 2021-2023 BIA-Technologies Limited Liability Company
 
     This program and the accompanying materials are made available under
     the terms of the Eclipse Public License 2.0 which is available at
@@ -23,7 +23,7 @@
   <parent>
     <groupId>ru.biatech.edt.xtest</groupId>
     <artifactId>parent</artifactId>
-    <version>22.10.0-SNAPSHOT</version>
+    <version>23.04.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>repositories</artifactId>

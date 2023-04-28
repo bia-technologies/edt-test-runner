@@ -1,6 +1,6 @@
 /*******************************************************************************
  * Copyright (c) 2000, 2022 IBM Corporation and others.
- * Copyright (c) 2022 BIA-Technologies Limited Liability Company.
+ * Copyright (c) 2022-2023 BIA-Technologies Limited Liability Company.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -32,9 +32,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import ru.biatech.edt.junit.TestViewerPlugin;
-import ru.biatech.edt.junit.ui.view.TestRunnerViewPart;
-
-import java.util.List;
+import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
 
 /**
  * The plug-in runtime class for the JUnit plug-in.
@@ -43,15 +41,12 @@ public class JUnitUI {
 
   public static final String PLUGIN_ID = "ru.biatech.edt.junit"; //$NON-NLS-1$
 
-  /**
-   * List storing the registered JUnit launch configuration types
-   */
-  private List<String> fJUnitLaunchConfigTypeIDs;
-
   public Shell getActiveWorkbenchShell() {
     IWorkbenchWindow workBenchWindow = getActiveWorkbenchWindow();
-    if (workBenchWindow == null)
-      return null;
+    if (workBenchWindow == null) {
+      IWorkbenchWindow[] windows = PlatformUI.getWorkbench().getWorkbenchWindows();
+      return windows.length > 0 ? windows[0].getShell() : null;
+    }
     return workBenchWindow.getShell();
   }
 
@@ -97,16 +92,6 @@ public class JUnitUI {
     setImageDescriptors(action, "lcl16", iconName); //$NON-NLS-1$
   }
 
-  private void setImageDescriptors(IAction action, String type, String relPath) {
-    ImageDescriptor id = getImageDescriptor("d" + type, relPath, false); //$NON-NLS-1$
-    if (id != null)
-      action.setDisabledImageDescriptor(id);
-
-    ImageDescriptor descriptor = getImageDescriptor("e" + type, relPath, true); //$NON-NLS-1$
-    action.setHoverImageDescriptor(descriptor);
-    action.setImageDescriptor(descriptor);
-  }
-
   public IDialogSettings getDialogSettingsSection(String name) {
     IDialogSettings dialogSettings = TestViewerPlugin.getDefault().getDialogSettings();
     IDialogSettings section = dialogSettings.getSection(name);
@@ -140,7 +125,7 @@ public class JUnitUI {
     }
   }
 
-  private Display getDisplay() {
+  public Display getDisplay() {
     Shell shell = getActiveWorkbenchShell();
     if (shell != null) {
       return shell.getDisplay();
@@ -150,5 +135,19 @@ public class JUnitUI {
       display = Display.getDefault();
     }
     return display;
+  }
+
+  public Shell getShell() {
+    return getActiveWorkbenchShell();
+  }
+
+  private void setImageDescriptors(IAction action, String type, String relPath) {
+    ImageDescriptor id = getImageDescriptor("d" + type, relPath, false); //$NON-NLS-1$
+    if (id != null)
+      action.setDisabledImageDescriptor(id);
+
+    ImageDescriptor descriptor = getImageDescriptor("e" + type, relPath, true); //$NON-NLS-1$
+    action.setHoverImageDescriptor(descriptor);
+    action.setImageDescriptor(descriptor);
   }
 }

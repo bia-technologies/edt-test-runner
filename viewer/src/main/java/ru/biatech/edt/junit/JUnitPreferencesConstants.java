@@ -1,6 +1,6 @@
 /*******************************************************************************
  * Copyright (c) 2000, 2022 IBM Corporation and others.
- * Copyright (c) 2022 BIA-Technologies Limited Liability Company.
+ * Copyright (c) 2022-2023 BIA-Technologies Limited Liability Company.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -17,23 +17,10 @@
  *******************************************************************************/
 package ru.biatech.edt.junit;
 
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.preferences.InstanceScope;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringTokenizer;
-
 /**
  * Defines constants which are used to refer to values in the plugin's preference store.
  */
 public class JUnitPreferencesConstants {
-  /**
-   * Boolean preference controlling whether the failure stack should be
-   * filtered.
-   */
-  public static final String DO_FILTER_STACK = TestViewerPlugin.getPluginId() + ".do_filter_stack"; //$NON-NLS-1$
-
   /**
    * Boolean preference controlling whether the JUnit view should be shown on
    * errors only.
@@ -47,12 +34,6 @@ public class JUnitPreferencesConstants {
   public static final String ENABLE_ASSERTIONS = TestViewerPlugin.getPluginId() + ".enable_assertions"; //$NON-NLS-1$
 
   public static final boolean ENABLE_ASSERTIONS_DEFAULT = true;
-
-  /**
-   * List of active stack filters. A String containing a comma separated list
-   * of fully qualified type names/patterns.
-   */
-  public static final String PREF_ACTIVE_FILTERS_LIST = TestViewerPlugin.getPluginId() + ".active_filters"; //$NON-NLS-1$
 
   /**
    * List of inactive stack filters. A String containing a comma separated
@@ -151,69 +132,7 @@ public class JUnitPreferencesConstants {
    */
   public static final String JUNIT_APIGUARDIAN_JAVADOC = TestViewerPlugin.getPluginId() + ".junit5.apiguardian.javadoclocation"; //$NON-NLS-1$
 
-  private static final String[] fgDefaultFilterPatterns = new String[]{
-          "ru.biatech.edt.junit.runner.*", //$NON-NLS-1$
-          "ru.biatech.edt.junit.ui.*", //$NON-NLS-1$
-          "junit.framework.TestCase", //$NON-NLS-1$
-          "junit.framework.TestResult", //$NON-NLS-1$
-          "junit.framework.TestResult$1", //$NON-NLS-1$
-          "junit.framework.TestSuite", //$NON-NLS-1$
-          "junit.framework.Assert", //$NON-NLS-1$
-          "org.junit.*", //$NON-NLS-1$ //TODO: filter all these?
-          "java.lang.reflect.Method.invoke", //$NON-NLS-1$
-          "sun.reflect.*", //$NON-NLS-1$
-          "jdk.internal.reflect.*", //$NON-NLS-1$
-  };
-
   private JUnitPreferencesConstants() {
     // no instance
-  }
-
-  /**
-   * Returns the default list of active stack filters.
-   *
-   * @return list
-   */
-  public static String[] createDefaultStackFiltersList() {
-    return fgDefaultFilterPatterns;
-  }
-
-  /**
-   * Serializes the array of strings into one comma-separated string.
-   *
-   * @param list array of strings
-   * @return a single string composed of the given list
-   */
-  public static String serializeList(String[] list) {
-    if (list == null)
-      return ""; //$NON-NLS-1$
-
-    return String.join(String.valueOf(','), list);
-  }
-
-  /**
-   * Parses the comma-separated string into an array of strings.
-   *
-   * @param listString a comma-separated string
-   * @return an array of strings
-   */
-  public static String[] parseList(String listString) {
-    List<String> list = new ArrayList<>(10);
-    StringTokenizer tokenizer = new StringTokenizer(listString, ","); //$NON-NLS-1$
-    while (tokenizer.hasMoreTokens())
-      list.add(tokenizer.nextToken());
-    return list.toArray(new String[list.size()]);
-  }
-
-  public static String[] getFilterPatterns() {
-    return JUnitPreferencesConstants.parseList(Platform.getPreferencesService().getString(TestViewerPlugin.getPluginId(), PREF_ACTIVE_FILTERS_LIST, null, null));
-  }
-
-  public static boolean getFilterStack() {
-    return Platform.getPreferencesService().getBoolean(TestViewerPlugin.getPluginId(), DO_FILTER_STACK, true, null);
-  }
-
-  public static void setFilterStack(boolean filter) {
-    InstanceScope.INSTANCE.getNode(TestViewerPlugin.getPluginId()).putBoolean(DO_FILTER_STACK, filter);
   }
 }

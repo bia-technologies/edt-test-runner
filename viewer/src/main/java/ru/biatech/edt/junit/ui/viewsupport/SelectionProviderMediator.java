@@ -1,6 +1,6 @@
 /*******************************************************************************
  * Copyright (c) 2000, 2008 IBM Corporation and others.
- * Copyright (c) 2022 BIA-Technologies Limited Liability Company.
+ * Copyright (c) 2022-2023 BIA-Technologies Limited Liability Company.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -16,7 +16,7 @@
  *******************************************************************************/
 package ru.biatech.edt.junit.ui.viewsupport;
 
-import org.eclipse.core.runtime.Assert;
+import lombok.NonNull;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.jface.viewers.IPostSelectionProvider;
 import org.eclipse.jface.viewers.ISelection;
@@ -79,8 +79,7 @@ public class SelectionProviderMediator implements IPostSelectionProvider {
    * @param viewers       All viewers that can provide a selection
    * @param viewerInFocus the viewer currently in focus or <code>null</code>
    */
-  public SelectionProviderMediator(StructuredViewer[] viewers, StructuredViewer viewerInFocus) {
-    Assert.isNotNull(viewers);
+  public SelectionProviderMediator(@NonNull StructuredViewer[] viewers, StructuredViewer viewerInFocus) {
     fViewers = viewers;
     InternalListener listener = new InternalListener();
     fSelectionChangedListeners = new ListenerList<>();

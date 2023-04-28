@@ -2,7 +2,7 @@
 <!--
 
     Copyright (c) 2020,2021 1C-Soft LLC
-    Copyright 2021-2022 BIA-Technologies Limited Liability Company
+    Copyright 2021-2023 BIA-Technologies Limited Liability Company
 
     This program and the accompanying materials are made available under
     the terms of the Eclipse Public License 2.0 which is available at
@@ -21,7 +21,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>ru.biatech.edt.xtest</groupId>
   <artifactId>bom</artifactId>
-  <version>22.10.0-SNAPSHOT</version>
+  <version>23.04.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>BOM</name>
@@ -32,7 +32,7 @@
 
   <properties>
     <tycho.version>2.2.0</tycho.version>
-    <tycho.extras.version>2.2.0</tycho.extras.version>
+    <tycho.extras.version>${tycho.version}</tycho.extras.version>
     
     <spotbugs.maven.plugin.version>3.1.12.2</spotbugs.maven.plugin.version>
 
@@ -45,11 +45,31 @@
     <maven.build.timestamp.format>'v'yyyyMMdd-HHmm</maven.build.timestamp.format>
     <qualifier>${maven.build.timestamp}</qualifier>
 
-    <eclipse.p2.latest>http://download.eclipse.org/releases/2020-12/</eclipse.p2.latest>
+    <eclipse-version>2020-12</eclipse-version>
+    <eclipse.p2.latest>http://download.eclipse.org/releases/${eclipse-version}/</eclipse.p2.latest>
 
     <p2repo.archive.skip>false</p2repo.archive.skip>
     <org.jacoco.version>0.8.6</org.jacoco.version>
+
+    <maven-antrun-plugin.version>1.7</maven-antrun-plugin.version>
+
+    <!-- Required properties for releasing -->
+    <publication-site-location>${env.publication_location}</publication-site-location>
+    <releases-directory>${publication-site-location}/releases</releases-directory>
+    <current-release-directory>${releases-directory}/${qualifiedVersion}</current-release-directory>
+    <!-- The label for the Composite sites -->
+    <site.label>${env.site_label_suffix}EDT Test Runner Repository</site.label>
+    <lombok.version>1.18.16</lombok.version>
   </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>${lombok.version}</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
 
   <build>
     <pluginManagement>
@@ -66,7 +86,7 @@
               <artifact>
                 <groupId>ru.biatech.edt.xtest</groupId>
                 <artifactId>default</artifactId>
-                <version>22.10.0-SNAPSHOT</version>
+                <version>23.04.0-SNAPSHOT</version>
               </artifact>
             </target>
             <dependency-resolution>
@@ -110,18 +130,23 @@
           <configuration>
             <encoding>UTF-8</encoding>
             <strictCompilerTarget>true</strictCompilerTarget>
-            <useProjectSettings>true</useProjectSettings>
+            <useProjectSettings>false</useProjectSettings>
             <showWarnings>true</showWarnings>
             <showDeprecation>true</showDeprecation>
             <verbose>true</verbose>
-            <optimize>true</optimize>
-            <compilerArgs>
-              <!--arg>-Werror</arg-->
-              <arg>-Xlint:all</arg>
-              <arg>-Xlint:serial</arg>
-              <arg>-Xlint:serial</arg>
-            </compilerArgs>
           </configuration>
+          <dependencies>
+            <dependency>
+              <groupId>org.codehaus.plexus</groupId>
+              <artifactId>plexus-compiler-eclipse</artifactId>
+              <version>2.8.6</version>
+            </dependency>
+            <dependency>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+              <version>${lombok.version}</version>
+            </dependency>
+          </dependencies>
         </plugin>
         <plugin>
           <groupId>org.eclipse.tycho</groupId>
@@ -157,8 +182,11 @@
           <artifactId>tycho-packaging-plugin</artifactId>
           <version>${tycho.version}</version>
           <configuration>
-            <format>'v'yyyyMMddHHmm</format>
-          </configuration>
+            <forceContextQualifier>${qualifier}</forceContextQualifier>
+            <archive>
+              <addMavenDescriptor>false</addMavenDescriptor>
+            </archive>
+         </configuration>
         </plugin>
         <plugin>
           <groupId>org.eclipse.tycho</groupId>
@@ -206,7 +234,125 @@
             </excludes>
           </configuration>
         </plugin>
-      </plugins>
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>
+                      org.apache.maven.plugins
+                    </groupId>
+                    <artifactId>
+                      maven-clean-plugin
+                    </artifactId>
+                    <versionRange>
+                      [2.5,)
+                    </versionRange>
+                    <goals>
+                      <goal>clean</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore></ignore>
+                  </action>
+                </pluginExecution>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>
+                      org.codehaus.mojo
+                    </groupId>
+                    <artifactId>
+                      build-helper-maven-plugin
+                    </artifactId>
+                    <versionRange>
+                      [1.9.1,)
+                    </versionRange>
+                    <goals>
+                      <goal>add-resource</goal>
+                      <goal>add-source</goal>
+                      <goal>add-test-resource</goal>
+                      <goal>add-test-source</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore></ignore>
+                  </action>
+                </pluginExecution>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>
+                      org.eclipse.tycho
+                    </groupId>
+                    <artifactId>
+                      tycho-compiler-plugin
+                    </artifactId>
+                    <versionRange>
+                      [0.23.1,)
+                    </versionRange>
+                    <goals>
+                      <goal>compile</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore></ignore>
+                  </action>
+                </pluginExecution>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>
+                      org.eclipse.tycho
+                    </groupId>
+                    <artifactId>
+                      tycho-packaging-plugin
+                    </artifactId>
+                    <versionRange>
+                      [0.23.1,)
+                    </versionRange>
+                    <goals>
+                      <goal>build-qualifier</goal>
+                      <goal>build-qualifier-aggregator</goal>
+                      <goal>validate-id</goal>
+                      <goal>validate-version</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore></ignore>
+                  </action>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+        <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.1.1</version>
+        <executions>
+          <execution>
+            <id>get-lombok</id>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.projectlombok</groupId>
+                  <artifactId>lombok</artifactId>
+                  <version>${lombok.version}</version>
+                  <type>jar</type>
+                  <outputDirectory>${project.build.directory}</outputDirectory>
+                  <destFileName>lombok.jar</destFileName>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+     </plugins>
     </pluginManagement>
 
     <plugins>
@@ -294,5 +440,33 @@
   	    </plugins>
   	  </build>
   	</profile>
+    <profile>
+      <!-- Activate this profile to perform the release to GitHub Pages -->
+      <id>release-composite</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <artifactId>maven-install-plugin</artifactId>
+              <executions>
+                <execution>
+                  <id>default-install</id>
+                  <phase>none</phase>
+                </execution>
+              </executions>
+            </plugin>
+            <plugin>
+              <artifactId>maven-deploy-plugin</artifactId>
+              <configuration>
+                <skip>true</skip>
+              </configuration>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+      </build>
+    </profile>
   </profiles>
 </project>

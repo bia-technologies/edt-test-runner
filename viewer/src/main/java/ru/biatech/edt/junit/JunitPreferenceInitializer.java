@@ -1,6 +1,6 @@
 /*******************************************************************************
  * Copyright (c) 2000, 2022 IBM Corporation and others.
- * Copyright (c) 2022 BIA-Technologies Limited Liability Company.
+ * Copyright (c) 2022-2023 BIA-Technologies Limited Liability Company.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -31,14 +31,9 @@ public class JunitPreferenceInitializer extends AbstractPreferenceInitializer {
   public void initializeDefaultPreferences() {
     IEclipsePreferences prefs = DefaultScope.INSTANCE.getNode(JUnitCore.CORE_PLUGIN_ID);
 
-    prefs.putBoolean(JUnitPreferencesConstants.DO_FILTER_STACK, true);
-
     prefs.putBoolean(JUnitPreferencesConstants.SHOW_ON_ERROR_ONLY, false);
     prefs.putBoolean(JUnitPreferencesConstants.ENABLE_ASSERTIONS, JUnitPreferencesConstants.ENABLE_ASSERTIONS_DEFAULT);
 
-    String[] filters = JUnitPreferencesConstants.createDefaultStackFiltersList();
-    String active = JUnitPreferencesConstants.serializeList(filters);
-    prefs.put(JUnitPreferencesConstants.PREF_ACTIVE_FILTERS_LIST, active);
     prefs.put(JUnitPreferencesConstants.PREF_INACTIVE_FILTERS_LIST, ""); //$NON-NLS-1$
     prefs.putInt(JUnitPreferencesConstants.MAX_TEST_RUNS, 10);
 

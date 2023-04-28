@@ -72,7 +72,7 @@ public class LaunchControl extends Composite {
   void initializeFrom() {
     UtilsUI.setValueSource(usedLaunchConfigurationControl, LaunchHelper.getOnecLaunchConfigurations().collect(Collectors.toList()));
     LabelProvider provider = LabelProvider.createTextProvider(e -> e == null ? "" : ((IExtensionProject) e).getDtProject().getName());
-    UtilsUI.setValueSource(testExtensionControl, LaunchHelper.getExtensions(), provider);
+    UtilsUI.setValueSource(testExtensionControl, LaunchHelper.getTestExtensions(), provider);
   }
 
   void appendLabel(Composite parent, String text){

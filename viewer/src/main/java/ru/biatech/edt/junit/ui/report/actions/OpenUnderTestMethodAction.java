@@ -1,0 +1,45 @@
+/*******************************************************************************
+ * Copyright (c) 2023 BIA-Technologies Limited Liability Company.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+
+package ru.biatech.edt.junit.ui.report.actions;
+
+import ru.biatech.edt.junit.kinds.TestKindRegistry;
+import ru.biatech.edt.junit.model.TestCaseElement;
+import ru.biatech.edt.junit.services.TestsManager;
+import ru.biatech.edt.junit.ui.ImageProvider;
+import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.editor.ReferencedMethodHelper;
+import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
+
+/**
+ * Действие для перехода к проверяемому методу
+ */
+public class OpenUnderTestMethodAction extends OpenEditorAction {
+
+  public OpenUnderTestMethodAction(TestRunnerViewPart testRunnerPart, TestCaseElement testCase) {
+    super(JUnitMessages.OpenUnderTestMethodAction_label, ImageProvider.UNDER_TEST, testRunnerPart, testCase.getClassName());
+  }
+
+  @Override
+  public void run() {
+    var testKind = TestKindRegistry.getContainerTestKind(getLaunchedProject());
+    var moduleName = TestsManager.getTestModuleName(fClassName);
+    var methodName = TestsManager.getTestMethodName(fClassName);
+
+    var list = testKind.getFinder().findTestedMethod(moduleName, methodName);
+    ReferencedMethodHelper.displayMethod(list, JUnitMessages.OpenUnderTestMethodAction_error_not_found);
+  }
+}

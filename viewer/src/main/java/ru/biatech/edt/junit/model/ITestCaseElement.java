@@ -1,6 +1,6 @@
 /*******************************************************************************
  * Copyright (c) 2000, 2008 IBM Corporation and others.
- * Copyright (c) 2022 BIA-Technologies Limited Liability Company.
+ * Copyright (c) 2022-2023 BIA-Technologies Limited Liability Company.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -27,7 +27,7 @@ package ru.biatech.edt.junit.model;
  * @noextend This interface is not intended to be extended by clients.
  * @since 3.3
  */
-public interface ITestCaseElement extends ITestElement {
+public interface ITestCaseElement extends ITestElement, ITraceable {
 
   /**
    * Returns the name of the test method.
@@ -43,6 +43,10 @@ public interface ITestCaseElement extends ITestElement {
    */
   String getTestClassName();
 
+  /**
+   * Возвращает имя контекста исполнения теста
+   *
+   * @return имя контекста исполнения теста
+   */
   String getContext();
-
 }

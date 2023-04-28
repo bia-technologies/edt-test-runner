@@ -1,6 +1,6 @@
 /*******************************************************************************
  * Copyright (c) 2006, 2009 IBM Corporation and others.
- * Copyright (c) 2022 BIA-Technologies Limited Liability Company.
+ * Copyright (c) 2022-2023 BIA-Technologies Limited Liability Company.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -22,7 +22,6 @@ package ru.biatech.edt.junit.kinds;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import ru.biatech.edt.junit.TestViewerPlugin;
-import ru.biatech.edt.junit.yaxunit.Resolver;
 
 public class TestKind implements ITestKind {
 
@@ -66,14 +65,6 @@ public class TestKind implements ITestKind {
       }
     }
     return fLauncher;
-  }
-
-  /*
-   * @see ru.biatech.edt.junit.kinds.ITestKind#getResolver()
-   */
-  @Override
-  public ITestResolver getResolver() {
-    return new Resolver(); // TODO
   }
 
   /*

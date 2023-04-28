@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "ru.biatech.edt.xtest"
-version = "22.10.0"
+version = "23.04.0"
 val vendor = "BIA-Technologies Limited Liability Company"
 val createProjectYear = 2021
 val licenseYear = if (Calendar.getInstance().get(Calendar.YEAR) == createProjectYear) "$createProjectYear"
@@ -19,6 +19,7 @@ val pluginBuildPath = layout.buildDirectory.dir("buildPlugin").get().asFile
 val publishTo = (findProperty("publishTo") ?: "").toString()
 
 var subProjects = arrayOf("viewer")
+val mvnCommand = if (Os.isFamily(Os.FAMILY_WINDOWS)) "mvn.cmd" else "mvn"
 
 repositories {
     mavenCentral()
@@ -91,34 +92,39 @@ tasks.register<Copy>("buildPlugin-copyFiles") {
     group = "build"
 }
 
-tasks.register<Exec>("buildPlugin") {
-    isIgnoreExitValue = true
+tasks.register<Exec>("download-lombok-plugin") {
     workingDir = pluginBuildPath
     standardOutput = System.out
 
-    environment("MAVEN_OPTS", "-Dhttps.protocols=TLSv1.2")
 
-    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-        commandLine("mvn.cmd", "dependency:resolve", "package")
-    } else {
-        commandLine("mvn", "dependency:resolve", "package")
-    }
-
+    environment("MAVEN_OPTS", "")
+    commandLine(mvnCommand, "clean", "dependency:copy@get-lombok")
+    group = "build"
     dependsOn(tasks.named("buildPlugin-copyFiles"))
+}
+
+tasks.register<Exec>("buildPlugin") {
+    workingDir = pluginBuildPath
+    standardOutput = System.out
+
+    environment("MAVEN_OPTS", "-javaagent:target/lombok.jar=ECJ -Dhttps.protocols=TLSv1.2")
+    commandLine(mvnCommand, "dependency:resolve", "package")
+
+    dependsOn(tasks.named("download-lombok-plugin"))
     group = "build"
 }
 
 tasks.register<Copy>("publishToPath") {
-    doFirst{
-        if(publishTo==""){
+    doFirst {
+        if (publishTo == "") {
             throw GradleException("You must specify a property 'publishTo' for the publish task is 'gradle.properties'")
         }
     }
-    from("$pluginBuildPath/repositories/repository/target/repository"){
+    from("$pluginBuildPath/repositories/repository/target/repository") {
         into("$version")
         into("latest")
     }
-    from("$pluginBuildPath/repositories/repository/target/repository.zip"){
+    from("$pluginBuildPath/repositories/repository/target/repository.zip") {
         into("$version")
         into("latest")
     }
@@ -126,9 +132,21 @@ tasks.register<Copy>("publishToPath") {
     group = "publish"
     dependsOn(tasks.named("buildPlugin"))
 
-    doLast{
+    doLast {
         print("Published to: $publishTo")
     }
+}
+
+tasks.register<Exec>("publishPlugin") {
+    isIgnoreExitValue = true
+    workingDir = pluginBuildPath
+    standardOutput = System.out
+
+    val ghPagesPath = layout.buildDirectory.dir("buildPlugin").get().asFile
+    commandLine(mvnCommand, "dependency:resolve", "deploy", "-Prelease-composite")
+
+    dependsOn(tasks.named("buildPlugin-copyFiles"))
+    group = "build"
 }
 
 tasks.wrapper {

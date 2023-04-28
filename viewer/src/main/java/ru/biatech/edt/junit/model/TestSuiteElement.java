@@ -1,6 +1,6 @@
 /*******************************************************************************
  * Copyright (c) 2000, 2017 IBM Corporation and others.
- * Copyright (c) 2022 BIA-Technologies Limited Liability Company.
+ * Copyright (c) 2022-2023 BIA-Technologies Limited Liability Company.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -24,15 +24,15 @@ import java.util.List;
 public class TestSuiteElement extends TestElement implements ITestSuiteElement {
 
   private final List<TestElement> fChildren;
-  private Status fChildrenStatus;
+  private TestStatus fChildrenStatus;
 
-  public TestSuiteElement(TestSuiteElement parent, String testName, int childrenCount, String displayName, String[] parameterTypes, String uniqueId, String context) {
+  public TestSuiteElement(TestSuiteElement parent, String testName, String displayName, String[] parameterTypes, String uniqueId, String context) {
     super(parent, testName, displayName, parameterTypes, uniqueId, context);
-    fChildren = new ArrayList<>(childrenCount);
+    fChildren = new ArrayList<>();
   }
 
   @Override
-  public Result getTestResult(boolean includeChildren) {
+  public TestResult getTestResult(boolean includeChildren) {
     if (includeChildren) {
       return getStatus().convertToResult();
     } else {
@@ -59,35 +59,35 @@ public class TestSuiteElement extends TestElement implements ITestSuiteElement {
   }
 
   @Override
-  public Status getStatus() {
-    Status suiteStatus = getSuiteStatus();
+  public TestStatus getStatus() {
+    TestStatus suiteStatus = getSuiteStatus();
     if (fChildrenStatus != null) {
       // must combine children and suite status here, since failures can occur e.g. in @AfterClass
-      return Status.combineStatus(fChildrenStatus, suiteStatus);
+      return TestStatus.combineStatus(fChildrenStatus, suiteStatus);
     } else {
       return suiteStatus;
     }
   }
 
-  private Status getCumulatedStatus() {
+  private TestStatus getCumulatedStatus() {
     TestElement[] children = fChildren.toArray(new TestElement[fChildren.size()]); // copy list to avoid concurreny problems
     if (children.length == 0)
       return getSuiteStatus();
 
-    Status cumulated = children[0].getStatus();
+    TestStatus cumulated = children[0].getStatus();
 
     for (int i = 1; i < children.length; i++) {
-      Status childStatus = children[i].getStatus();
-      cumulated = Status.combineStatus(cumulated, childStatus);
+      TestStatus childStatus = children[i].getStatus();
+      cumulated = TestStatus.combineStatus(cumulated, childStatus);
     }
     return cumulated;
   }
 
-  public Status getSuiteStatus() {
+  public TestStatus getSuiteStatus() {
     return super.getStatus();
   }
 
-  public void childChangedStatus(TestElement child, Status childStatus) {
+  public void childChangedStatus(TestElement child, TestStatus childStatus) {
     int childCount = fChildren.size();
     if (child == fChildren.get(0) && childStatus.isRunning()) {
       // is first child, and is running -> copy status
@@ -112,31 +112,31 @@ public class TestSuiteElement extends TestElement implements ITestSuiteElement {
     // finally, set RUNNING_FAILURE/ERROR if child has failed but suite has not failed:
     if (childStatus.isFailure()) {
       if (fChildrenStatus == null || !fChildrenStatus.isErrorOrFailure()) {
-        internalSetChildrenStatus(Status.RUNNING_FAILURE);
+        internalSetChildrenStatus(TestStatus.RUNNING_FAILURE);
         return;
       }
     } else if (childStatus.isError()) {
       if (fChildrenStatus == null || !fChildrenStatus.isError()) {
-        internalSetChildrenStatus(Status.RUNNING_ERROR);
+        internalSetChildrenStatus(TestStatus.RUNNING_ERROR);
         return;
       }
     }
   }
 
-  private void internalSetChildrenStatus(Status status) {
+  private void internalSetChildrenStatus(TestStatus status) {
     if (fChildrenStatus == status)
       return;
 
-    if (status == Status.RUNNING) {
-      if (fTime >= 0.0d) {
+    if (status == TestStatus.RUNNING) {
+      if (elapsedTimeInSeconds >= 0.0d) {
         // re-running child: ignore change
       } else {
-        fTime = -System.currentTimeMillis() / 1000d;
+        elapsedTimeInSeconds = -System.currentTimeMillis() / 1000d;
       }
     } else if (status.convertToProgressState() == ProgressState.COMPLETED) {
-      if (fTime < 0) { // assert ! Double.isNaN(fTime)
+      if (elapsedTimeInSeconds < 0) { // assert ! Double.isNaN(fTime)
         double endTime = System.currentTimeMillis() / 1000d;
-        fTime = endTime + fTime;
+        elapsedTimeInSeconds += endTime;
       }
     }
 

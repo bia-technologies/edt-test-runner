@@ -1,6 +1,6 @@
 /*******************************************************************************
  * Copyright (c) 2010, 2017 IBM Corporation and others.
- * Copyright (c) 2022 BIA-Technologies Limited Liability Company.
+ * Copyright (c) 2022-2023 BIA-Technologies Limited Liability Company.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -35,8 +35,6 @@ public class JUnitUIPreferencesConstants {
   public static final String SHOW_IN_ALL_VIEWS = JUnitUI.PLUGIN_ID + ".show_in_all_views"; //$NON-NLS-1$
 
   public static final boolean SHOW_IN_ALL_VIEWS_DEFAULT = false; // would need a PreferenceInitializer if this was changed to true!
-
-  private static final String CODEASSIST_FAVORITE_STATIC_MEMBERS_MIGRATED = JUnitUI.PLUGIN_ID + ".content_assist_favorite_static_members_migrated"; //$NON-NLS-1$
 
   private JUnitUIPreferencesConstants() {
     // no instance

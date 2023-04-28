@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 BIA-Technologies Limited Liability Company.
+ * Copyright (c) 2022-2023 BIA-Technologies Limited Liability Company.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import ru.biatech.edt.junit.kinds.TestKindRegistry;
 import ru.biatech.edt.junit.launcher.v8.LaunchConfigurationAttributes;
 import ru.biatech.edt.junit.launcher.v8.LaunchHelper;
 import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.v8utils.Projects;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -49,6 +50,7 @@ public class Launcher implements IUnitLauncher {
   private static final String RUN_PARAMETERS = "RunUnitTests=";
   private static final String PARAMETERS_FILE_NAME = "xUnitParams.json";
   private static final String REPORT_FORMAT = "jUnit";
+
   @Override
   public void launch(ILaunchConfiguration configuration, String launchMode, ILaunch launch, IProgressMonitor monitor) throws CoreException {
     TestViewerPlugin.log().debug(JUnitMessages.Launcher_Launch, configuration);
@@ -117,7 +119,7 @@ public class Launcher implements IUnitLauncher {
 
     if (extension != null) {
       JsonArray array = new JsonArray();
-      array.add(extension.getConfiguration().getName());
+      array.add(Projects.getProjectName(extension));
       filter.add("extensions", array); //$NON-NLS-1$
     }
 
@@ -128,12 +130,11 @@ public class Launcher implements IUnitLauncher {
     }
 
     config.add("filter", filter); //$NON-NLS-1$
-
   }
 
   protected void copyAttributes(ILaunchConfiguration unitConfiguration, ILaunchConfigurationWorkingCopy oneCConfiguration) {
     String[] attributes = new String[]{
-            LaunchConfigurationAttributes.TEST_EXTENSION
+        LaunchConfigurationAttributes.TEST_EXTENSION
     };
 
     for (String attribute : attributes) {
@@ -143,5 +144,4 @@ public class Launcher implements IUnitLauncher {
       }
     }
   }
-
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 BIA-Technologies Limited Liability Company.
+ * Copyright (c) 2022-2023 BIA-Technologies Limited Liability Company.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package ru.biatech.edt.junit;
 import com._1c.g5.v8.dt.bm.index.emf.IBmEmfIndexManager;
 import com._1c.g5.v8.dt.core.platform.IResourceLookup;
 import com._1c.g5.v8.dt.core.platform.IV8ProjectManager;
+import com._1c.g5.v8.dt.stacktraces.model.IStacktraceParser;
 import com._1c.g5.wiring.AbstractServiceAwareModule;
 import com._1c.g5.wiring.InjectorAwareServiceRegistrator;
 import com.google.inject.Guice;
@@ -31,9 +32,11 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import ru.biatech.edt.junit.services.TestsManager;
+import ru.biatech.edt.junit.launcher.lifecycle.LifecycleMonitor;
 import ru.biatech.edt.junit.ui.JUnitUI;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.text.MessageFormat;
 
@@ -43,17 +46,14 @@ public class TestViewerPlugin extends AbstractUIPlugin {
   private static TestViewerPlugin plugin;
   JUnitCore core;
   JUnitUI ui;
-  TestsManager manager;
   private BundleContext bundleContext;
   private Injector injector;
-  private InjectorAwareServiceRegistrator registrator;
   private Logger logger = null;
 
   public TestViewerPlugin() {
     plugin = this;
     core = new JUnitCore();
     ui = new JUnitUI();
-    manager = new TestsManager();
   }
 
   public static TestViewerPlugin getDefault() {
@@ -81,10 +81,6 @@ public class TestViewerPlugin extends AbstractUIPlugin {
 
   public static JUnitUI ui() {
     return getDefault().ui;
-  }
-
-  public static TestsManager getTestManager() {
-    return getDefault().manager;
   }
 
   public static String getPluginId() {
@@ -129,13 +125,15 @@ public class TestViewerPlugin extends AbstractUIPlugin {
   public void start(BundleContext bundleContext) throws Exception {
     super.start(bundleContext);
 
-    registrator = new InjectorAwareServiceRegistrator(bundleContext, this::getInjector);
+    new InjectorAwareServiceRegistrator(bundleContext, this::getInjector);
     this.bundleContext = bundleContext;
     core().getModel().start();
+    LifecycleMonitor.start();
   }
 
   @Override
   public void stop(BundleContext bundleContext) throws Exception {
+    LifecycleMonitor.stop();
     core().getModel().stop();
     plugin = null;
     super.stop(bundleContext);
@@ -165,6 +163,7 @@ public class TestViewerPlugin extends AbstractUIPlugin {
           bind(IV8ProjectManager.class).toService();
           bind(IBmEmfIndexManager.class).toService();
           bind(IResourceLookup.class).toService();
+          bind(IStacktraceParser.class).toService();
         }
       });
     } catch (Exception e) {
@@ -191,4 +190,12 @@ public class TestViewerPlugin extends AbstractUIPlugin {
     return createImageDescriptor(getBundle(), path, useMissingImageDescriptor);
   }
 
+  public URL getResource(String path) throws IOException {
+    var url = FileLocator.find(getBundle(), new Path(path), null);
+    return FileLocator.toFileURL(url);
+  }
+
+  public InputStream getResourceStream(String path) throws IOException {
+    return FileLocator.openStream(getBundle(), new Path(path), false);
+  }
 }

@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: ru.biatech.edt.junit;singleton:=true
 Automatic-Module-Name: ru.biatech.edt.junit
-Bundle-Version: 22.10.0.qualifier
+Bundle-Version: 23.04.0.qualifier
 Bundle-Activator: ru.biatech.edt.junit.TestViewerPlugin
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: %providerName
@@ -26,20 +26,27 @@ Require-Bundle: org.eclipse.ui.ide;bundle-version="[3.5.0,4.0.0)",
  org.eclipse.handly.xtext.ui;bundle-version="1.5.0",
  org.eclipse.xtext.ui.shared;bundle-version="2.24.0",
  com._1c.g5.v8.dt.bsl.ui;bundle-version="15.0.0",
- com._1c.g5.v8.dt.bsl;bundle-version="19.0.0"
+ com._1c.g5.v8.dt.bsl;bundle-version="19.0.0",
+ org.apache.commons.lang3,
+ com._1c.g5.v8.dt.bsl.core;bundle-version="6.0.300",
+ org.eclipse.handly;bundle-version="1.5.0",
+ com._1c.g5.v8.dt.lcore;bundle-version="3.1.900"
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Import-Package: com._1c.g5.v8.dt.bm.index.emf,
  com._1c.g5.v8.dt.bsl.model,
+ com._1c.g5.v8.dt.stacktraces.model,
  com._1c.g5.wiring,
  com.google.common.base,
  com.google.gson;version="2.8.2",
  javax.xml.parsers,
- org.apache.commons.lang3.concurrent;version="3.3.0",
+ lombok;resolution:=optional,
+ lombok.experimental;resolution:=optional,
  org.eclipse.core.commands,
  org.eclipse.core.runtime,
  org.eclipse.debug.core,
  org.eclipse.debug.ui,
  org.eclipse.emf.ecore,
+ org.eclipse.jface,
  org.eclipse.swt,
  org.eclipse.ui,
  org.osgi.framework,

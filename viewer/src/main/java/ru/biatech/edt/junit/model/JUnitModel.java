@@ -1,6 +1,6 @@
 /*******************************************************************************
  * Copyright (c) 2000, 2016 IBM Corporation and others.
- * Copyright (c) 2022 BIA-Technologies Limited Liability Company.
+ * Copyright (c) 2022-2023 BIA-Technologies Limited Liability Company.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -18,35 +18,30 @@
 
 package ru.biatech.edt.junit.model;
 
+import lombok.NonNull;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
-import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchManager;
-import org.xml.sax.SAXException;
-import ru.biatech.edt.junit.BasicElementLabels;
 import ru.biatech.edt.junit.JUnitCore;
-import ru.biatech.edt.junit.JUnitLaunchListener;
 import ru.biatech.edt.junit.JUnitPreferencesConstants;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.launcher.v8.LaunchConfigurationAttributes;
 import ru.biatech.edt.junit.launcher.v8.LaunchHelper;
-import ru.biatech.edt.junit.model.TestElement.Status;
+import ru.biatech.edt.junit.launcher.lifecycle.LifecycleEvent;
+import ru.biatech.edt.junit.launcher.lifecycle.LifecycleListener;
+import ru.biatech.edt.junit.launcher.lifecycle.LifecycleMonitor;
+import ru.biatech.edt.junit.model.serialize.Serializer;
 import ru.biatech.edt.junit.ui.JUnitMessages;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -62,7 +57,7 @@ public final class JUnitModel {
    * Active test run sessions, youngest first.
    */
   private final LinkedList<TestRunSession> fTestRunSessions = new LinkedList<>();
-  private final JUnitLaunchListener fLaunchListener = new JUnitLaunchListener();
+  private LifecycleListener lifecycleListener;
 
   /**
    * Imports a test run session from the given file.
@@ -72,29 +67,7 @@ public final class JUnitModel {
    * @throws CoreException if the import failed
    */
   public static TestRunSession importTestRunSession(File file, String defaultProjectName) throws CoreException {
-    try {
-      TestViewerPlugin.log().debug("Импорт отчета о тестировании: " + file.getAbsolutePath());
-      SAXParserFactory parserFactory = SAXParserFactory.newInstance();
-      SAXParser parser = parserFactory.newSAXParser();
-      TestRunHandler handler = new TestRunHandler();
-      handler.fDefaultProjectName = defaultProjectName;
-      parser.parse(file, handler);
-      TestRunSession session = handler.getTestRunSession();
-      if(session!=null){
-        TestViewerPlugin.core().getModel().addTestRunSession(session);}
-      else{
-        TestViewerPlugin.log().logError(JUnitMessages.JUnitModel_ReportIsEmpty);
-      }
-      return session;
-    } catch (ParserConfigurationException | SAXException e) {
-      throwImportError(file, e);
-    } catch (IOException e) {
-      throwImportError(file, e);
-    } catch (IllegalArgumentException e) {
-      // Bug in parser: can throw IAE even if file is not null
-      throwImportError(file, e);
-    }
-    return null; // does not happen
+    return Serializer.importTestRunSession(file, defaultProjectName);
   }
 
   /**
@@ -102,98 +75,23 @@ public final class JUnitModel {
    *
    * @param url     an URL to a test run session transcript
    * @param monitor a progress monitor for cancellation
-   * @return the imported test run session
    * @throws InvocationTargetException wrapping a CoreException if the import failed
    * @throws InterruptedException      if the import was cancelled
    * @since 3.6
    */
-  public static TestRunSession importTestRunSession(String url, String defaultProjectName, IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-    monitor.beginTask(JUnitMessages.JUnitModel_importing_from_url, IProgressMonitor.UNKNOWN);
-    final String trimmedUrl = url.trim().replaceAll("\r\n?|\n", ""); //$NON-NLS-1$ //$NON-NLS-2$
-    final TestRunHandler handler = new TestRunHandler(monitor);
-    handler.fDefaultProjectName = defaultProjectName;
-
-    final CoreException[] exception = {null};
-    final TestRunSession[] session = {null};
-
-    Thread importThread = new Thread("JUnit URL importer") { //$NON-NLS-1$
-      @Override
-      public void run() {
-        try {
-          SAXParserFactory parserFactory = SAXParserFactory.newInstance();
-//					parserFactory.setValidating(true); // TODO: add DTD and debug flag
-          SAXParser parser = parserFactory.newSAXParser();
-          parser.parse(trimmedUrl, handler);
-          session[0] = handler.getTestRunSession();
-        } catch (OperationCanceledException e) {
-          // canceled
-        } catch (ParserConfigurationException | SAXException e) {
-          storeImportError(e);
-        } catch (IOException e) {
-          storeImportError(e);
-        } catch (IllegalArgumentException e) {
-          // Bug in parser: can throw IAE even if URL is not null
-          storeImportError(e);
-        }
-      }
-
-      private void storeImportError(Exception e) {
-        exception[0] = new CoreException(new org.eclipse.core.runtime.Status(IStatus.ERROR,
-                TestViewerPlugin.getPluginId(), JUnitMessages.JUnitModel_could_not_import, e));
-      }
-    };
-    importThread.start();
-
-    while (session[0] == null && exception[0] == null && !monitor.isCanceled()) {
-      try {
-        Thread.sleep(100);
-      } catch (InterruptedException e) {
-        // that's OK
-      }
-    }
-    if (session[0] == null) {
-      if (exception[0] != null) {
-        throw new InvocationTargetException(exception[0]);
-      } else {
-        importThread.interrupt(); // have to kill the thread since we don't control URLConnection and XML parsing
-        throw new InterruptedException();
-      }
-    }
-
-    TestViewerPlugin.core().getModel().addTestRunSession(session[0]);
-    monitor.done();
-    return session[0];
-  }
-
-  public static void importIntoTestRunSession(File swapFile, TestRunSession testRunSession) throws CoreException {
-    try {
-      TestViewerPlugin.log().debug("Обновление отчета о тестировании: " + swapFile.getAbsolutePath());
-      SAXParserFactory parserFactory = SAXParserFactory.newInstance();
-//			parserFactory.setValidating(true); // TODO: add DTD and debug flag
-      SAXParser parser = parserFactory.newSAXParser();
-      TestRunHandler handler = new TestRunHandler(testRunSession);
-      parser.parse(swapFile, handler);
-    } catch (ParserConfigurationException | SAXException e) {
-      throwImportError(swapFile, e);
-    } catch (IOException e) {
-      throwImportError(swapFile, e);
-    } catch (IllegalArgumentException e) {
-      // Bug in parser: can throw IAE even if file is not null
-      throwImportError(swapFile, e);
-    }
-  }
-
-  private static void throwImportError(File file, Exception e) throws CoreException {
-    var message = MessageFormat.format(JUnitMessages.JUnitModel_could_not_read, BasicElementLabels.getPathLabel(file));
-    throw new CoreException(TestViewerPlugin.log().createErrorStatus(message, e));
+  public static void importTestRunSession(String url, String defaultProjectName, IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+    Serializer.importTestRunSession(url, defaultProjectName, monitor);
   }
 
   /**
    * Starts the model (called by the {@link JUnitCore} on startup).
    */
   public void start() {
-    DebugPlugin.getDefault().getLaunchManager().addLaunchListener(fLaunchListener);
-    DebugPlugin.getDefault().addDebugEventListener(fLaunchListener);
+    LifecycleMonitor.addListener(lifecycleListener = (eventType, launch) -> {
+      if (LifecycleEvent.isFinished(eventType)) {
+        JUnitModel.loadTestReport(launch);
+      }
+    });
     addTestRunSessionListener(new TestRunSessionListener());
   }
 
@@ -201,9 +99,7 @@ public final class JUnitModel {
    * Stops the model (called by the {@link JUnitCore} on shutdown).
    */
   public void stop() {
-    DebugPlugin.getDefault().removeDebugEventListener(fLaunchListener);
-    DebugPlugin.getDefault().getLaunchManager().removeLaunchListener(fLaunchListener);
-
+    LifecycleMonitor.removeListener(lifecycleListener);
     File historyDirectory = TestViewerPlugin.core().getHistoryDirectory();
     File[] swapFiles = historyDirectory.listFiles();
     if (swapFiles != null) {
@@ -236,8 +132,7 @@ public final class JUnitModel {
    *
    * @param testRunSession the session to add
    */
-  public void addTestRunSession(TestRunSession testRunSession) {
-    Assert.isNotNull(testRunSession);
+  public void addTestRunSession(@NonNull TestRunSession testRunSession) {
     ArrayList<TestRunSession> toRemove = new ArrayList<>();
 
     synchronized (this) {
@@ -318,7 +213,7 @@ public final class JUnitModel {
       TestViewerPlugin.ui().asyncShowTestRunnerViewPart();
 
       Files.deleteIfExists(file.toPath());
-    } catch (CoreException|IOException e) {
+    } catch (CoreException | IOException e) {
       TestViewerPlugin.log().logError(JUnitMessages.JUnitModel_UnknownErrorOnReportLoad, e);
     }
   }
@@ -379,7 +274,7 @@ public final class JUnitModel {
         }
 
         @Override
-        public void testFailed(TestElement testElement, Status status, String trace, String expected, String actual) {
+        public void testFailed(TestElement testElement, TestStatus status, String trace, String expected, String actual) {
           // not fire
 //          TestViewerPlugin.core().getNewTestRunListeners().forEach(it->it.testCaseFinished(testElement));
         }
@@ -391,7 +286,7 @@ public final class JUnitModel {
         }
 
         @Override
-        public void testReran(TestCaseElement testCaseElement, Status status, String trace, String expectedResult, String actualResult) {
+        public void testRerun(TestCaseElement testCaseElement, TestStatus status, String trace, String expectedResult, String actualResult) {
           // not fire
 //          TestViewerPlugin.core().getNewTestRunListeners().forEach(it->it.testCaseRerun(testCaseElement));
         }

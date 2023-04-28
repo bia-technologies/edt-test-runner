@@ -1,6 +1,6 @@
 /*******************************************************************************
  * Copyright (c) 2000, 2008 IBM Corporation and others.
- * Copyright (c) 2022 BIA-Technologies Limited Liability Company.
+ * Copyright (c) 2022-2023 BIA-Technologies Limited Liability Company.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -23,11 +23,10 @@ public interface IJUnitHelpContextIds {
   String PREFIX = JUnitUI.PLUGIN_ID + '.';
 
   // Actions
-  String COPYTRACE_ACTION = PREFIX + "copy_trace_action_context"; //$NON-NLS-1$
-  String COPYFAILURELIST_ACTION = PREFIX + "copy_failure_list_action_context"; //$NON-NLS-1$
-  String ENABLEFILTER_ACTION = PREFIX + "enable_filter_action_context"; //$NON-NLS-1$
-  String OPENEDITORATLINE_ACTION = PREFIX + "open_editor_atline_action_context"; //$NON-NLS-1$
-  String OPENTEST_ACTION = PREFIX + "open_test_action_context"; //$NON-NLS-1$
+  String COPY_TRACE_ACTION = PREFIX + "copy_trace_action_context"; //$NON-NLS-1$
+  String COPY_FAILURE_LIST_ACTION = PREFIX + "copy_failure_list_action_context"; //$NON-NLS-1$
+  String OPEN_EDITOR_AT_LINE_ACTION = PREFIX + "open_editor_atline_action_context"; //$NON-NLS-1$
+  String OPEN_TEST_ACTION = PREFIX + "open_test_action_context"; //$NON-NLS-1$
   String RERUN_ACTION = PREFIX + "rerun_test_action_context"; //$NON-NLS-1$
   String GOTO_REFERENCED_TEST_ACTION_CONTEXT = PREFIX + "goto_referenced_test_action_context"; //$NON-NLS-1$
   String OUTPUT_SCROLL_LOCK_ACTION = PREFIX + "scroll_lock"; //$NON-NLS-1$
@@ -48,5 +47,4 @@ public interface IJUnitHelpContextIds {
   // Dialogs
   String TEST_SELECTION_DIALOG = PREFIX + "test_selection_context"; //$NON-NLS-1$
   String RESULT_COMPARE_DIALOG = PREFIX + "result_compare_context"; //$NON-NLS-1$
-
 }

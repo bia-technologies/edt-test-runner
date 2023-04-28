@@ -1,6 +1,6 @@
 /*******************************************************************************
  * Copyright (c) 2000, 2017 IBM Corporation and others.
- * Copyright (c) 2022 BIA-Technologies Limited Liability Company.
+ * Copyright (c) 2022-2023 BIA-Technologies Limited Liability Company.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -18,7 +18,7 @@
 
 package ru.biatech.edt.junit.model;
 
-import org.eclipse.core.runtime.Assert;
+import lombok.NonNull;
 
 
 public class TestCaseElement extends TestElement implements ITestCaseElement {
@@ -26,9 +26,8 @@ public class TestCaseElement extends TestElement implements ITestCaseElement {
   private boolean fIgnored;
   private final boolean fIsDynamicTest;
 
-  public TestCaseElement(TestSuiteElement parent,  String testName, String displayName, boolean isDynamicTest, String[] parameterTypes, String uniqueId, String context) {
+  public TestCaseElement(@NonNull TestSuiteElement parent, @NonNull String testName, String displayName, boolean isDynamicTest, String[] parameterTypes, String uniqueId, String context) {
     super(parent, testName, displayName, parameterTypes, uniqueId, context);
-    Assert.isNotNull(parent);
     fIsDynamicTest = isDynamicTest;
   }
 
@@ -59,11 +58,12 @@ public class TestCaseElement extends TestElement implements ITestCaseElement {
    * @since 3.6
    */
   @Override
-  public Result getTestResult(boolean includeChildren) {
-    if (fIgnored)
-      return Result.IGNORED;
-    else
+  public TestResult getTestResult(boolean includeChildren) {
+    if (fIgnored) {
+      return TestResult.IGNORED;
+    } else {
       return super.getTestResult(includeChildren);
+    }
   }
 
   public void setIgnored(boolean ignored) {

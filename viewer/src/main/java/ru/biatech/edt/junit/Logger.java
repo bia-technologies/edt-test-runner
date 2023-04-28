@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 BIA-Technologies Limited Liability Company.
+ * Copyright (c) 2022-2023 BIA-Technologies Limited Liability Company.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import org.eclipse.core.runtime.Status;
 import java.text.MessageFormat;
 
 public class Logger {
+
+  private static final boolean debug = Boolean.parseBoolean(System.getProperty("ru.biatech.edt.junit.debug", "false"));
 
   private String getPluginID() {
     return TestViewerPlugin.PLUGIN_ID;
@@ -55,16 +57,21 @@ public class Logger {
     return new Status(IStatus.WARNING, getPluginID(), 0, message, null);
   }
 
-  public IStatus createWarningStatus(final String message, Exception throwable) {
-    return new Status(IStatus.WARNING, getPluginID(), 0, message, throwable);
-  }
-
   public void debug(String message) {
-    log(new Status(IStatus.INFO, getPluginID(), 0, message, null));
-  }
-  public void debug(String template, Object... objects) {
-    String message = MessageFormat.format(template, objects);
-    debug(message);
+    if (debug) {
+      log(new Status(IStatus.OK, getPluginID(), 0, message, null));
+    }
   }
 
+  public void debug(String template, Object... objects) {
+    if (debug) {
+      String message = MessageFormat.format(template, objects);
+      debug(message);
+    }
+  }
+
+  public void warning(String template, Object... objects) {
+    String message = MessageFormat.format(template, objects);
+    log(createWarningStatus(message));
+  }
 }

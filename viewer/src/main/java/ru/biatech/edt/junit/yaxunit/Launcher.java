@@ -50,6 +50,7 @@ public class Launcher implements IUnitLauncher {
   private static final String RUN_PARAMETERS = "RunUnitTests=";
   private static final String PARAMETERS_FILE_NAME = "xUnitParams.json";
   private static final String REPORT_FORMAT = "jUnit";
+
   @Override
   public void launch(ILaunchConfiguration configuration, String launchMode, ILaunch launch, IProgressMonitor monitor) throws CoreException {
     TestViewerPlugin.log().debug(JUnitMessages.Launcher_Launch, configuration);
@@ -129,12 +130,11 @@ public class Launcher implements IUnitLauncher {
     }
 
     config.add("filter", filter); //$NON-NLS-1$
-
   }
 
   protected void copyAttributes(ILaunchConfiguration unitConfiguration, ILaunchConfigurationWorkingCopy oneCConfiguration) {
     String[] attributes = new String[]{
-            LaunchConfigurationAttributes.TEST_EXTENSION
+        LaunchConfigurationAttributes.TEST_EXTENSION
     };
 
     for (String attribute : attributes) {
@@ -144,5 +144,4 @@ public class Launcher implements IUnitLauncher {
       }
     }
   }
-
 }

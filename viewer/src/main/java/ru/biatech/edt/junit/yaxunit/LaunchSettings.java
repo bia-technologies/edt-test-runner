@@ -44,7 +44,7 @@ public class LaunchSettings {
 
   public static class Filter {
     @Expose
-    List<String> extensions;
+    List<String> extensions = new ArrayList<>();;
     @Expose
     List<String> modules = new ArrayList<>();
     @Expose

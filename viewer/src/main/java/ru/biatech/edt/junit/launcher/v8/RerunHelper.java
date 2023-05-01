@@ -17,64 +17,65 @@
 
 package ru.biatech.edt.junit.launcher.v8;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.debug.core.ILaunch;
+import lombok.SneakyThrows;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.DebugUITools;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.kinds.IUnitLauncher;
 import ru.biatech.edt.junit.model.TestRunSession;
+import ru.biatech.edt.junit.ui.JUnitMessages;
 
+import java.text.MessageFormat;
 import java.util.List;
 
 public class RerunHelper {
-  public static ILaunchConfiguration getLaunchConfiguration(TestRunSession testRunSession) {
-    if (testRunSession != null) {
-      ILaunch launch = testRunSession.getLaunch();
-      if (launch != null) {
-        // run the selected test using the previous launch configuration
-        return launch.getLaunchConfiguration();
-      }
-    }
-    return null;
-  }
 
-  public static boolean isRerunConfiguration(ILaunchConfiguration launchConfiguration) {
+  public static boolean isNotRerunConfiguration(ILaunchConfiguration launchConfiguration) {
     var attribute = LaunchConfigurationAttributes.getTestMethods(launchConfiguration);
-    return attribute != null;
+    return attribute == null;
   }
 
-  public static void rerun(TestRunSession testRunSession, String configName, List<String> testClasses) throws CoreException {
-    if (testRunSession == null || testRunSession.getLaunch() == null) {
+  @SneakyThrows
+  public static void rerunTest(TestRunSession session, String testClassName, String launchMode) {
+    if (isBadSession(session)) {
       return;
     }
-    rerun(testRunSession, configName, testClasses, testRunSession.getLaunch().getLaunchMode());
+
+    String configName = MessageFormat.format(JUnitMessages.TestRunnerViewPart_configName, testClassName);
+    rerunTests(session, List.of(testClassName), configName, launchMode);
   }
 
-  public static void rerun(TestRunSession testRunSession, String configName, List<String> testClasses, String launchMode) throws CoreException {
-    if (!canRerun(testRunSession, testClasses)) {
+  @SneakyThrows
+  public static void rerun(TestRunSession session) {
+    if (isBadSession(session)) {
       return;
     }
-    ILaunchConfiguration launchConfiguration = RerunHelper.getLaunchConfiguration(testRunSession);
-    ILaunchConfigurationWorkingCopy tmp = launchConfiguration.copy(configName);
-    tmp.setAttribute(LaunchConfigurationAttributes.TEST_FULL_NAME, testClasses); //$NON-NLS-1$
-    launch(testRunSession, tmp, launchMode);
+
+    var configuration = session.getLaunch().getLaunchConfiguration();
+
+    if (isNotRerunConfiguration(configuration)) {
+      String configName = MessageFormat.format(JUnitMessages.TestRunnerViewPart_configName, configuration.getName());
+      configuration = configuration.copy(configName);
+    }
+    DebugUITools.launch(configuration, session.getLaunch().getLaunchMode());
   }
 
-  public static void launch(TestRunSession testRunSession, ILaunchConfiguration launchConfiguration, String launchMode) {
-    ILaunchConfigurationWorkingCopy workingCopy;
-    if (launchConfiguration.isWorkingCopy()) {
-      workingCopy = (ILaunchConfigurationWorkingCopy) launchConfiguration;
-    } else {
-      try {
-        workingCopy = launchConfiguration.getWorkingCopy();
-      } catch (CoreException e) {
-        TestViewerPlugin.log().logError(e);
-        return;
-      }
+  @SneakyThrows
+  public static void rerunFailures(TestRunSession session) {
+    if (isBadSession(session)) {
+      return;
     }
-    launch(testRunSession, workingCopy, launchMode);
+
+    var configuration = session.getLaunch().getLaunchConfiguration();
+    var failedTest = session.getAllFailedTestNames();
+
+    var configName = configuration.getName();
+    if (isNotRerunConfiguration(configuration)) {
+      configName = MessageFormat.format(JUnitMessages.TestRunnerViewPart_configName, configName);
+    }
+
+    rerunTests(session, failedTest, configName, session.getLaunch().getLaunchMode());
   }
 
   public static void launch(TestRunSession testRunSession, ILaunchConfigurationWorkingCopy launchConfiguration, String launchMode) {
@@ -84,12 +85,30 @@ public class RerunHelper {
 
   }
 
-  private static boolean canRerun(TestRunSession testRunSession, List<String> testClasses) {
-    if (testClasses.isEmpty()) {
-      return false;
+  @SneakyThrows
+  private static boolean isBadSession(TestRunSession session) {
+    if (session == null || session.getLaunch() == null) {
+      return true;
     }
-    ILaunchConfiguration launchConfiguration = RerunHelper.getLaunchConfiguration(testRunSession);
-    return launchConfiguration != null;
+    var configuration = session.getLaunch().getLaunchConfiguration();
+
+    if (!LaunchHelper.isRunTestConfiguration(configuration)) {
+      TestViewerPlugin.log().logError("Некорректная конфигурация запуска. Должна быть передана конфигурация запуска тестов, а пришла " + configuration.getType().getIdentifier());
+      return true;
+    }
+    return false;
   }
 
+  @SneakyThrows
+  private static void rerunTests(TestRunSession session, List<String> tests, String configName, String launchMode) {
+    if (tests == null || tests.isEmpty()) {
+      return;
+    }
+
+    var configurationCopy = session.getLaunch().getLaunchConfiguration().copy(configName);
+    LaunchConfigurationAttributes.setTestMethods(configurationCopy, tests);
+
+    DebugUITools.launch(configurationCopy, launchMode);
+
+  }
 }

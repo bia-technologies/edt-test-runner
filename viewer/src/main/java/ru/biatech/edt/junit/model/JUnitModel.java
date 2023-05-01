@@ -30,6 +30,7 @@ import org.eclipse.debug.core.ILaunchManager;
 import ru.biatech.edt.junit.JUnitCore;
 import ru.biatech.edt.junit.JUnitPreferencesConstants;
 import ru.biatech.edt.junit.TestViewerPlugin;
+import ru.biatech.edt.junit.launcher.lifecycle.LifecycleItem;
 import ru.biatech.edt.junit.launcher.v8.LaunchConfigurationAttributes;
 import ru.biatech.edt.junit.launcher.v8.LaunchHelper;
 import ru.biatech.edt.junit.launcher.lifecycle.LifecycleEvent;
@@ -87,9 +88,9 @@ public final class JUnitModel {
    * Starts the model (called by the {@link JUnitCore} on startup).
    */
   public void start() {
-    LifecycleMonitor.addListener(lifecycleListener = (eventType, launch) -> {
+    LifecycleMonitor.addListener(lifecycleListener = (eventType, item) -> {
       if (LifecycleEvent.isFinished(eventType)) {
-        JUnitModel.loadTestReport(launch);
+        JUnitModel.loadTestReport(item);
       }
     });
     addTestRunSessionListener(new TestRunSessionListener());
@@ -191,16 +192,19 @@ public final class JUnitModel {
     fTestRunSessionListeners.forEach(it -> it.sessionAdded(testRunSession));
   }
 
-  public static void loadTestReport(ILaunch launch) {
+  public static void loadTestReport(LifecycleItem item) {
     TestViewerPlugin.log().debug(JUnitMessages.JUnitModel_LoadReport);
 
     try {
+      var launch = item.getMainLaunch();
+
       var configuration = launch.getLaunchConfiguration();
       String workPath = configuration.getAttribute(LaunchConfigurationAttributes.WORK_PATH, (String) null);
       String project = configuration.getAttribute(LaunchConfigurationAttributes.PROJECT, (String) null);
 
-      File file = new File(workPath, LaunchHelper.REPORT_FILE_NAME); //$NON-NLS-1$
+      File file = new File(workPath, LaunchHelper.REPORT_FILE_NAME);
       TestViewerPlugin.log().debug(JUnitMessages.JUnitModel_ReportFile, file.getAbsolutePath());
+
       if (!file.exists()) {
         TestViewerPlugin.log().logError(JUnitMessages.JUnitModel_ReportFileNotFound);
         return;
@@ -208,7 +212,7 @@ public final class JUnitModel {
 
       TestRunSession session = JUnitModel.importTestRunSession(file, project);
       assert session != null;
-      session.setLaunch(launch);
+      session.setLaunch(item.getTestLaunch());
 
       TestViewerPlugin.ui().asyncShowTestRunnerViewPart();
 

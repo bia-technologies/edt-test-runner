@@ -140,8 +140,8 @@ public class LaunchHelper {
         .collect(Collectors.toList());
   }
 
-  public Path getWorkPath(ILaunchConfiguration configuration) {
-    var reportLocation = Platform.getStateLocation(TestViewerPlugin.getBundleContext().getBundle()).append(configuration.getName());
+  public Path getWorkPath(String name) {
+    var reportLocation = Platform.getStateLocation(TestViewerPlugin.getBundleContext().getBundle()).append(name);
     var path = reportLocation.toFile().toPath();
     try {
       Files.createDirectories(path);

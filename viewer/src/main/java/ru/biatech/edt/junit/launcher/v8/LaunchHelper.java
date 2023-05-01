@@ -181,6 +181,11 @@ public class LaunchHelper {
     return ITestKind.NULL;
   }
 
+  public Path getReportPath(ILaunchConfiguration configuration) {
+    var workPath = LaunchConfigurationAttributes.getWorkPath(configuration);
+    return Path.of(workPath, REPORT_FILE_NAME);
+  }
+
   public IV8Project getProject(ILaunchConfiguration configuration) {
     // TODO
 //		try {

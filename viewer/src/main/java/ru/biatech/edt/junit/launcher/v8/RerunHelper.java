@@ -19,17 +19,15 @@ package ru.biatech.edt.junit.launcher.v8;
 
 import lombok.SneakyThrows;
 import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.DebugUITools;
 import ru.biatech.edt.junit.TestViewerPlugin;
-import ru.biatech.edt.junit.kinds.IUnitLauncher;
 import ru.biatech.edt.junit.model.TestRunSession;
-import ru.biatech.edt.junit.ui.JUnitMessages;
 
-import java.text.MessageFormat;
 import java.util.List;
 
 public class RerunHelper {
+
+  public static final String PREFIX_RERUN = "Rerun ";
 
   public static boolean isNotRerunConfiguration(ILaunchConfiguration launchConfiguration) {
     var attribute = LaunchConfigurationAttributes.getTestMethods(launchConfiguration);
@@ -42,7 +40,7 @@ public class RerunHelper {
       return;
     }
 
-    String configName = MessageFormat.format(JUnitMessages.TestRunnerViewPart_configName, testClassName);
+    var configName = PREFIX_RERUN + testClassName;
     rerunTests(session, List.of(testClassName), configName, launchMode);
   }
 
@@ -55,7 +53,7 @@ public class RerunHelper {
     var configuration = session.getLaunch().getLaunchConfiguration();
 
     if (isNotRerunConfiguration(configuration)) {
-      String configName = MessageFormat.format(JUnitMessages.TestRunnerViewPart_configName, configuration.getName());
+      var configName = PREFIX_RERUN + configuration.getName();
       configuration = configuration.copy(configName);
     }
     DebugUITools.launch(configuration, session.getLaunch().getLaunchMode());
@@ -72,17 +70,10 @@ public class RerunHelper {
 
     var configName = configuration.getName();
     if (isNotRerunConfiguration(configuration)) {
-      configName = MessageFormat.format(JUnitMessages.TestRunnerViewPart_configName, configName);
+      configName = PREFIX_RERUN + configName;
     }
 
     rerunTests(session, failedTest, configName, session.getLaunch().getLaunchMode());
-  }
-
-  public static void launch(TestRunSession testRunSession, ILaunchConfigurationWorkingCopy launchConfiguration, String launchMode) {
-    IUnitLauncher launcherKind = testRunSession.getTestRunnerKind().getLauncher();
-    launcherKind.configure(launchConfiguration, launchConfiguration);
-    DebugUITools.launch(launchConfiguration, launchMode);
-
   }
 
   @SneakyThrows

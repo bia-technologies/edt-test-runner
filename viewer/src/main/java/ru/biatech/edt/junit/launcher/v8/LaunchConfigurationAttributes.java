@@ -102,4 +102,12 @@ public final class LaunchConfigurationAttributes {
       throw new RuntimeException(e);
     }
   }
+
+  public static String getWorkPath(ILaunchConfiguration configuration){
+    return getAttribute(configuration, WORK_PATH);
+  }
+
+  public static String getProject(ILaunchConfiguration configuration){
+    return getAttribute(configuration, PROJECT);
+  }
 }

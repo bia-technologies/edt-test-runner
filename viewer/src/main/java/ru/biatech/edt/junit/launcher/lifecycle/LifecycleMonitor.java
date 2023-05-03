@@ -31,7 +31,6 @@ import ru.biatech.edt.junit.launcher.v8.LaunchConfigurationAttributes;
 import ru.biatech.edt.junit.launcher.v8.LaunchHelper;
 import ru.biatech.edt.junit.ui.JUnitMessages;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -194,6 +193,9 @@ public class LifecycleMonitor {
     }
 
     private void handleProcesses(LifecycleItem item) {
+      if (item.getMainLaunch() == null) {
+        return;
+      }
       if (item.getTestLaunch().getProcesses().length < item.getMainLaunch().getProcesses().length) {
         var processes = new HashSet<>(List.of(item.getTestLaunch().getProcesses()));
         for (var process : item.getMainLaunch().getProcesses()) {

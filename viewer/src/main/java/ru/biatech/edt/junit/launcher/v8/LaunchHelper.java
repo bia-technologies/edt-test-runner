@@ -165,7 +165,7 @@ public class LaunchHelper {
       TestViewerPlugin.log().logError(e);
       return;
     }
-
+    LaunchConfigurationAttributes.clearFilter(copy);
     LaunchConfigurationAttributes.setTestMethods(copy, List.of(methodFullName));
     DebugUITools.launch(copy, launchMode);
   }

@@ -75,6 +75,12 @@ public final class LaunchConfigurationAttributes {
     configuration.setAttribute(TEST_FULL_NAME, value);
   }
 
+  public static void clearFilter(ILaunchConfigurationWorkingCopy configuration) {
+    configuration.removeAttribute(TEST_FULL_NAME);
+    configuration.removeAttribute(TEST_MODULE);
+    configuration.removeAttribute(TEST_EXTENSION);
+  }
+
   public static List<String> getTestMethods(ILaunchConfiguration configuration) {
     try {
       return configuration.getAttribute(TEST_FULL_NAME, (List<String>) null);
@@ -91,7 +97,7 @@ public final class LaunchConfigurationAttributes {
     return getAttribute(configuration, TEST_MODULE);
   }
 
-  public static String getTestKind(ILaunchConfiguration configuration){
+  public static String getTestKind(ILaunchConfiguration configuration) {
     return getAttribute(configuration, ATTR_TEST_RUNNER_KIND);
   }
 
@@ -103,11 +109,11 @@ public final class LaunchConfigurationAttributes {
     }
   }
 
-  public static String getWorkPath(ILaunchConfiguration configuration){
+  public static String getWorkPath(ILaunchConfiguration configuration) {
     return getAttribute(configuration, WORK_PATH);
   }
 
-  public static String getProject(ILaunchConfiguration configuration){
+  public static String getProject(ILaunchConfiguration configuration) {
     return getAttribute(configuration, PROJECT);
   }
 }

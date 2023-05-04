@@ -16,8 +16,34 @@
 
 package ru.biatech.edt.junit.launcher.lifecycle;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.eclipse.debug.core.ILaunch;
 
-public interface LifecycleListener {
-  void handle(int eventType, LifecycleItem item);
+import java.time.Instant;
+
+@Getter
+public class LifecycleItem {
+  private final ILaunch testLaunch;
+  @Setter
+  private ILaunch mainLaunch;
+  private final String name;
+  private boolean active = true;
+  private Instant start;
+  private Instant end;
+
+  public LifecycleItem(ILaunch testLaunch, String name) {
+    this.testLaunch = testLaunch;
+    this.name = name;
+  }
+
+  public void onStop() {
+    active = true;
+    end = Instant.now();
+  }
+
+  public void onStart() {
+    active = true;
+    start = Instant.now();
+  }
 }

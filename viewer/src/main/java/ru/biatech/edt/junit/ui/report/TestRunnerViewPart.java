@@ -40,9 +40,6 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ILock;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.debug.core.ILaunch;
-import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -50,8 +47,6 @@ import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -97,8 +92,6 @@ import ru.biatech.edt.junit.BasicElementLabels;
 import ru.biatech.edt.junit.JUnitPreferencesConstants;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.kinds.ITestKind;
-import ru.biatech.edt.junit.launcher.v8.LaunchConfigurationAttributes;
-import ru.biatech.edt.junit.launcher.v8.RerunHelper;
 import ru.biatech.edt.junit.model.ITestCaseElement;
 import ru.biatech.edt.junit.model.ITestRunSessionListener;
 import ru.biatech.edt.junit.model.ITestSessionListener;
@@ -114,6 +107,8 @@ import ru.biatech.edt.junit.ui.JUnitUIPreferencesConstants;
 import ru.biatech.edt.junit.ui.report.actions.ActivateOnErrorAction;
 import ru.biatech.edt.junit.ui.report.actions.FailuresOnlyFilterAction;
 import ru.biatech.edt.junit.ui.report.actions.IgnoredOnlyFilterAction;
+import ru.biatech.edt.junit.ui.report.actions.RerunLastAction;
+import ru.biatech.edt.junit.ui.report.actions.RerunLastFailedFirstAction;
 import ru.biatech.edt.junit.ui.report.actions.ScrollLockAction;
 import ru.biatech.edt.junit.ui.report.actions.ShowNextFailureAction;
 import ru.biatech.edt.junit.ui.report.actions.ShowPreviousFailureAction;
@@ -129,9 +124,7 @@ import ru.biatech.edt.junit.ui.stacktrace.actions.CopyTraceAction;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * A ViewPart that shows the results of a test run.
@@ -147,8 +140,8 @@ public class TestRunnerViewPart extends ViewPart {
   public static final int VIEW_ORIENTATION_VERTICAL = 0;
   public static final int VIEW_ORIENTATION_HORIZONTAL = 1;
   public static final int VIEW_ORIENTATION_AUTOMATIC = 2;
-  private static final String RERUN_LAST_COMMAND = "ru.biatech.edt.junit.junitShortcut.rerunLast"; //$NON-NLS-1$
-  private static final String RERUN_FAILED_FIRST_COMMAND = "ru.biatech.edt.junit.junitShortcut.rerunFailedFirst"; //$NON-NLS-1$
+  public static final String RERUN_LAST_COMMAND = "ru.biatech.edt.junit.junitShortcut.rerunLast"; //$NON-NLS-1$
+  public static final String RERUN_FAILED_FIRST_COMMAND = "ru.biatech.edt.junit.junitShortcut.rerunFailedFirst"; //$NON-NLS-1$
 
   /**
    * @since 3.5
@@ -215,30 +208,6 @@ public class TestRunnerViewPart extends ViewPart {
   private ILock fJUnitIsRunningLock;
   private final IPartListener2 fPartListener = new IPartListener2() {
     @Override
-    public void partActivated(IWorkbenchPartReference ref) {
-    }
-
-    @Override
-    public void partBroughtToTop(IWorkbenchPartReference ref) {
-    }
-
-    @Override
-    public void partInputChanged(IWorkbenchPartReference ref) {
-    }
-
-    @Override
-    public void partClosed(IWorkbenchPartReference ref) {
-    }
-
-    @Override
-    public void partDeactivated(IWorkbenchPartReference ref) {
-    }
-
-    @Override
-    public void partOpened(IWorkbenchPartReference ref) {
-    }
-
-    @Override
     public void partVisible(IWorkbenchPartReference ref) {
       if (getSite().getId().equals(ref.getId())) {
         fPartIsVisible = true;
@@ -299,67 +268,6 @@ public class TestRunnerViewPart extends ViewPart {
         setContentDescription(JUnitMessages.TestRunnerViewPart_message_stopping);
       }
       fTestRunSession.stopTestRun();
-    }
-  }
-
-  /**
-   * Stops the currently running test and shuts down the RemoteTestRunner
-   */
-  public void rerunTestRun() {
-    if (lastLaunchIsKeptAlive()) {
-      // prompt for terminating the existing run
-      var answer = MessageDialog.openQuestion(getSite().getShell(),
-          JUnitMessages.TestRunnerViewPart_terminate_title,
-          JUnitMessages.TestRunnerViewPart_terminate_message);
-      if (answer) {
-        stopTest(); // TODO: wait for termination
-      }
-    }
-
-    ILaunchConfiguration launchConfiguration;
-    ILaunch launch;
-    if (fTestRunSession == null
-        || ((launch = fTestRunSession.getLaunch()) == null)
-        || ((launchConfiguration = launch.getLaunchConfiguration()) == null)) {
-      return;
-    }
-
-    ILaunchConfiguration configuration = prepareLaunchConfigForRelaunch(launchConfiguration);
-    RerunHelper.launch(fTestRunSession, configuration, launch.getLaunchMode());
-  }
-
-  public void rerunTest(String className, String launchMode) {
-    try {
-      String configName = MessageFormat.format(JUnitMessages.TestRunnerViewPart_configName, className);
-      RerunHelper.rerun(fTestRunSession, configName, List.of(className), launchMode);
-      return;
-    } catch (CoreException e) {
-      ErrorDialog.openError(getSite().getShell(), JUnitMessages.TestRunnerViewPart_error_cannotrerun, e.getMessage(), e.getStatus());
-    }
-    MessageDialog.openInformation(getSite().getShell(),
-        JUnitMessages.TestRunnerViewPart_cannotrerun_title,
-        JUnitMessages.TestRunnerViewPart_cannotrerurn_message);
-  }
-
-  public void rerunTestFailedFirst() {
-    ILaunchConfiguration launchConfiguration = RerunHelper.getLaunchConfiguration(fTestRunSession);
-    if (launchConfiguration != null) {
-      try {
-        String configName;
-        if (RerunHelper.isRerunConfiguration(launchConfiguration)) {
-          configName = launchConfiguration.getName();
-        } else {
-          configName = MessageFormat.format(JUnitMessages.TestRunnerViewPart_rerunFailedFirstLaunchConfigName, launchConfiguration.getName());
-        }
-        RerunHelper.rerun(fTestRunSession, configName, createFailureNamesFile());
-        return;
-      } catch (CoreException e) {
-        ErrorDialog.openError(getSite().getShell(), JUnitMessages.TestRunnerViewPart_error_cannotrerun, e.getMessage(), e.getStatus());
-      }
-
-      MessageDialog.openInformation(getSite().getShell(),
-          JUnitMessages.TestRunnerViewPart_cannotrerun_title,
-          JUnitMessages.TestRunnerViewPart_cannotrerurn_message);
     }
   }
 
@@ -579,28 +487,6 @@ action enablement
     boolean hasErrorsOrFailures = !settings.isShowIgnoredOnly() && hasErrorsOrFailures();
     fNextAction.setEnabled(hasErrorsOrFailures);
     fPreviousAction.setEnabled(hasErrorsOrFailures);
-  }
-
-  private ILaunchConfiguration prepareLaunchConfigForRelaunch(ILaunchConfiguration configuration) {
-    try {
-      if (RerunHelper.isRerunConfiguration(configuration)) {
-        String configName = MessageFormat.format(JUnitMessages.TestRunnerViewPart_configName, configuration.getName());
-        ILaunchConfigurationWorkingCopy tmp = configuration.copy(configName);
-        LaunchConfigurationAttributes.clearTestMethods(tmp);
-        return tmp;
-      }
-    } catch (CoreException e) {
-      // fall through
-    }
-    return configuration;
-  }
-
-  private List<String> createFailureNamesFile() throws CoreException {
-    return Arrays.stream(fTestRunSession.getAllFailedTestElements())
-        .filter(ITestCaseElement.class::isInstance)
-        .map(ITestCaseElement.class::cast)
-        .map(ITestCaseElement::getTestClassName)
-        .collect(Collectors.toList());
   }
 
   private void selectFirstFailure() {
@@ -1012,7 +898,7 @@ action enablement
     fStopAction = new StopAction();
     fStopAction.setEnabled(false);
 
-    fRerunLastTestAction = new RerunLastAction();
+    fRerunLastTestAction = new RerunLastAction(this);
     IHandlerService handlerService = getSite().getWorkbenchWindow().getService(IHandlerService.class);
     IHandler handler = new AbstractHandler() {
       @Override
@@ -1028,7 +914,7 @@ action enablement
     };
     fRerunLastActivation = handlerService.activateHandler(RERUN_LAST_COMMAND, handler);
 
-    fRerunFailedFirstAction = new RerunLastFailedFirstAction();
+    fRerunFailedFirstAction = new RerunLastFailedFirstAction(this);
     handler = new AbstractHandler() {
       @Override
       public Object execute(ExecutionEvent event) {
@@ -1410,36 +1296,6 @@ action enablement
     public void run() {
       stopTest();
       setEnabled(false);
-    }
-  }
-
-  private class RerunLastAction extends Action {
-    public RerunLastAction() {
-      setText(JUnitMessages.TestRunnerViewPart_rerunaction_label);
-      setToolTipText(JUnitMessages.TestRunnerViewPart_rerunaction_tooltip);
-      TestViewerPlugin.ui().setLocalImageDescriptors(this, "relaunch.png"); //$NON-NLS-1$
-      setEnabled(false);
-      setActionDefinitionId(RERUN_LAST_COMMAND);
-    }
-
-    @Override
-    public void run() {
-      rerunTestRun();
-    }
-  }
-
-  private class RerunLastFailedFirstAction extends Action {
-    public RerunLastFailedFirstAction() {
-      setText(JUnitMessages.TestRunnerViewPart_rerunfailuresaction_label);
-      setToolTipText(JUnitMessages.TestRunnerViewPart_rerunfailuresaction_tooltip);
-      TestViewerPlugin.ui().setLocalImageDescriptors(this, "relaunchf.png"); //$NON-NLS-1$
-      setEnabled(false);
-      setActionDefinitionId(RERUN_FAILED_FIRST_COMMAND);
-    }
-
-    @Override
-    public void run() {
-      rerunTestFailedFirst();
     }
   }
 

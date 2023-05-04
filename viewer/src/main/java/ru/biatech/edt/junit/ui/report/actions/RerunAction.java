@@ -20,6 +20,7 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jface.action.Action;
 import org.eclipse.ui.PlatformUI;
 import ru.biatech.edt.junit.TestViewerPlugin;
+import ru.biatech.edt.junit.launcher.v8.RerunHelper;
 import ru.biatech.edt.junit.ui.IJUnitHelpContextIds;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
 
@@ -54,6 +55,6 @@ public class RerunAction extends Action {
 
   @Override
   public void run() {
-    fTestRunner.rerunTest(fClassName, fLaunchMode);
+    RerunHelper.rerunTest(fTestRunner.getTestRunSession(), fClassName, fLaunchMode);
   }
 }

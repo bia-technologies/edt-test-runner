@@ -36,7 +36,9 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 
 /**
@@ -210,9 +212,9 @@ public class TestRunSession implements ITestRunSession {
     return this;
   }
 
-  public void setLaunch(ILaunch pLaunch) {
-    launch = pLaunch;
-    var launchConfiguration = launch.getLaunchConfiguration();
+  public void setLaunch(ILaunch launch) {
+    this.launch = launch;
+    var launchConfiguration = this.launch.getLaunchConfiguration();
     if (launchConfiguration != null) {
       testRunName = launchConfiguration.getName();
       testRunnerKind = LaunchHelper.getTestRunnerKind(launchConfiguration);
@@ -342,6 +344,14 @@ public class TestRunSession implements ITestRunSession {
     var failures = new ArrayList<ITestCaseElement>();
     addFailures(failures, getTestRoot());
     return failures.toArray(ITestCaseElement[]::new);
+  }
+
+  public List<String> getAllFailedTestNames() {
+    var failures = new ArrayList<ITestCaseElement>();
+    addFailures(failures, getTestRoot());
+    return failures.stream()
+        .map(ITestCaseElement::getTestClassName)
+        .collect(Collectors.toList());
   }
 
   private void addFailures(ArrayList<ITestCaseElement> failures, ITestElement testElement) {

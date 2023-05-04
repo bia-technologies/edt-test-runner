@@ -17,7 +17,6 @@
 package ru.biatech.edt.junit.launcher.lifecycle;
 
 import com.google.common.base.Strings;
-import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 import org.eclipse.debug.core.DebugEvent;
@@ -32,7 +31,6 @@ import ru.biatech.edt.junit.launcher.v8.LaunchConfigurationAttributes;
 import ru.biatech.edt.junit.launcher.v8.LaunchHelper;
 import ru.biatech.edt.junit.ui.JUnitMessages;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -76,8 +74,8 @@ public class LifecycleMonitor {
 
     for (var item : monitor.monitoringItems.values()) {
       if (!item.isActive()) {
-        removed.add(item.mainLaunch);
-        removed.add(item.testLaunch);
+        removed.add(item.getMainLaunch());
+        removed.add(item.getTestLaunch());
       }
     }
 
@@ -93,34 +91,32 @@ public class LifecycleMonitor {
     TestViewerPlugin.log().debug(message);
   }
 
-  private void riseEvent(int eventType, MonitoringItem item) {
-    TestViewerPlugin.log().debug("Launch event: {0} for {1}", LifecycleEvent.getPresent(eventType), item.name);
+  private void riseEvent(int eventType, LifecycleItem item) {
+    TestViewerPlugin.log().debug("Launch event: {0} for {1}", LifecycleEvent.getPresent(eventType), item.getName());
     if (LifecycleEvent.isStop(eventType)) {
       try {
-        item.testLaunch.terminate();
+        item.getTestLaunch().terminate();
       } catch (DebugException e) {
         TestViewerPlugin.log().logError("Terminate test launch", e);
       }
     }
-    listeners.forEach(l -> l.handle(eventType, item.mainLaunch));
+    listeners.forEach(l -> l.handle(eventType, item));
   }
 
-  private void onItemStart(MonitoringItem item) {
-    item.active = true;
-    item.start = Instant.now();
+  private void onItemStart(LifecycleItem item) {
+    item.onStart();
     riseEvent(LifecycleEvent.START, item);
     removeTerminated();
   }
 
-  private void onItemStop(MonitoringItem item, int eventType) {
-    item.active = false;
-    item.end = Instant.now();
+  private void onItemStop(LifecycleItem item, int eventType) {
+    item.onStop();
     riseEvent(eventType, item);
   }
 
   private static class LaunchMonitor implements ILaunchListener, IDebugEventSetListener {
     ReentrantLock lock = new ReentrantLock();
-    Map<ILaunch, MonitoringItem> monitoringItems = new HashMap<>();
+    Map<ILaunch, LifecycleItem> monitoringItems = new HashMap<>();
 
     @Override
     public void handleDebugEvents(DebugEvent[] events) {
@@ -136,9 +132,8 @@ public class LifecycleMonitor {
           if (monitoringItems.containsKey(launch)) {
             var item = monitoringItems.get(launch);
             handleProcesses(item);
-            if (item.active) {
-              debug("Finish " + item.name);
-              item.active = false;
+            if (item.isActive()) {
+              debug("Finish " + item.getName());
               onTerminate(item, process);
             }
           }
@@ -156,8 +151,8 @@ public class LifecycleMonitor {
         if (monitoringItems.containsKey(launch)) {
           var item = monitoringItems.get(launch);
           handleProcesses(item);
-          if (item.active) {
-            debug("canceled " + item.name);
+          if (item.isActive()) {
+            debug("canceled " + item.getName());
             onItemStop(item, LifecycleEvent.CANCELED);
           }
         }
@@ -172,16 +167,14 @@ public class LifecycleMonitor {
       var configuration = launch.getLaunchConfiguration();
 
       if (LaunchHelper.isRunTestConfiguration(configuration)) {
-        var item = new MonitoringItem();
-        item.testLaunch = launch;
-        item.name = configuration.getName();
+        var item = new LifecycleItem(launch, configuration.getName());
         monitoringItems.put(launch, item);
         onItemStart(item);
       } else if (LaunchHelper.isOnecConfiguration(configuration) && !Strings.isNullOrEmpty(LaunchConfigurationAttributes.getTestKind(configuration))) {
         var name = configuration.getName();
         for (var item : monitoringItems.values()) {
-          if (name.contains(item.name)) {
-            item.mainLaunch = launch;
+          if (name.contains(item.getName())) {
+            item.setMainLaunch(launch);
             handleProcesses(item);
             monitoringItems.put(launch, item);
             break;
@@ -199,12 +192,15 @@ public class LifecycleMonitor {
       }
     }
 
-    private void handleProcesses(MonitoringItem item) {
-      if (item.testLaunch.getProcesses().length < item.mainLaunch.getProcesses().length) {
-        var processes = new HashSet<>(List.of(item.testLaunch.getProcesses()));
-        for (var process : item.mainLaunch.getProcesses()) {
+    private void handleProcesses(LifecycleItem item) {
+      if (item.getMainLaunch() == null) {
+        return;
+      }
+      if (item.getTestLaunch().getProcesses().length < item.getMainLaunch().getProcesses().length) {
+        var processes = new HashSet<>(List.of(item.getTestLaunch().getProcesses()));
+        for (var process : item.getMainLaunch().getProcesses()) {
           if (!processes.contains(process)) {
-            item.testLaunch.addProcess(process);
+            item.getTestLaunch().addProcess(process);
           }
         }
       }
@@ -218,13 +214,13 @@ public class LifecycleMonitor {
       debug(message);
     }
 
-    private void onTerminate(MonitoringItem item, IProcess process) {
+    private void onTerminate(LifecycleItem item, IProcess process) {
       int exitCode = 0;
       try {
         exitCode = process.getExitValue();
       } catch (DebugException e) { /* do nothing*/ }
       if (exitCode != 0) {
-        TestViewerPlugin.log().warning(JUnitMessages.JUnitLaunchListener_ProcessError, item.name, process.getLabel(), exitCode);
+        TestViewerPlugin.log().warning(JUnitMessages.JUnitLaunchListener_ProcessError, item.getName(), process.getLabel(), exitCode);
         onItemStop(item, LifecycleEvent.FINISHED_WITH_ERROR);
       } else {
         onItemStop(item, LifecycleEvent.FINISHED);
@@ -232,13 +228,4 @@ public class LifecycleMonitor {
     }
   }
 
-  @Getter
-  private static class MonitoringItem {
-    private ILaunch testLaunch;
-    private ILaunch mainLaunch;
-    private String name;
-    private boolean active = true;
-    private Instant start;
-    private Instant end;
-  }
 }

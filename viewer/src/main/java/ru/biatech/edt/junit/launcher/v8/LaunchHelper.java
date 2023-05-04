@@ -140,8 +140,8 @@ public class LaunchHelper {
         .collect(Collectors.toList());
   }
 
-  public Path getWorkPath(ILaunchConfiguration configuration) {
-    var reportLocation = Platform.getStateLocation(TestViewerPlugin.getBundleContext().getBundle()).append(configuration.getName());
+  public Path getWorkPath(String name) {
+    var reportLocation = Platform.getStateLocation(TestViewerPlugin.getBundleContext().getBundle()).append(name);
     var path = reportLocation.toFile().toPath();
     try {
       Files.createDirectories(path);
@@ -165,7 +165,7 @@ public class LaunchHelper {
       TestViewerPlugin.log().logError(e);
       return;
     }
-
+    LaunchConfigurationAttributes.clearFilter(copy);
     LaunchConfigurationAttributes.setTestMethods(copy, List.of(methodFullName));
     DebugUITools.launch(copy, launchMode);
   }
@@ -179,6 +179,11 @@ public class LaunchHelper {
     } catch (CoreException e) {
     }
     return ITestKind.NULL;
+  }
+
+  public Path getReportPath(ILaunchConfiguration configuration) {
+    var workPath = LaunchConfigurationAttributes.getWorkPath(configuration);
+    return Path.of(workPath, REPORT_FILE_NAME);
   }
 
   public IV8Project getProject(ILaunchConfiguration configuration) {

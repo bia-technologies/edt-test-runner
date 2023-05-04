@@ -1,11 +1,12 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <?compositeMetadataRepository version='1.0.0'?>
-<repository name='DEV. EDT Test Runner Repository for 23.4.x' type='org.eclipse.equinox.internal.p2.metadata.repository.CompositeMetadataRepository' version='1'>
+<repository name='DEV. EDT Test Runner Repository for 23.4.x' type='org.eclipse.equinox.internal.p2.metadata.repository.CompositeMetadataRepository' version='1.0.0'>
   <properties size='2'>
-    <property name='p2.timestamp' value='1682690172000'/>
+    <property name='p2.timestamp' value='1683233134692'/>
     <property name='p2.atomic.composite.loading' value='false'/>
   </properties>
-  <children size='1'>
+  <children size='2'>
     <child location='../../../releases/23.4.0.v20230428-1355'/>
+    <child location='../../../releases/23.4.0.v20230504-2045'/>
   </children>
 </repository>

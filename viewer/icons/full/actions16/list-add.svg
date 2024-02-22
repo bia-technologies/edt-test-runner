@@ -1,0 +1,13 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+<!-- Copyright 2000-2023 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="12.8pt" height="12.8pt">
+    <defs/>
+    <g id="layer0">
+        <rect id="shape0" transform="translate(3, 3)" fill="#6e6e6e" width="8.00000000000pt" height="1.60000000000pt"/>
+        <rect id="shape1" transform="translate(3, 7)" fill="#2b8467" width="5.60000000000pt" height="1.60000000000pt"/>
+        <rect id="shape2" transform="translate(3, 11)" fill="#6e6e6e" width="3.20000000000pt" height="1.60000000000pt"/>
+        <path id="shape3" transform="translate(8, 8)" fill="#2b8467" fill-rule="evenodd"
+              d="M5 0L3 0L3 3L0 3L0 5L3 5L3 8L5 8L5 5L8 5L8 3L5 3Z"/>
+    </g>
+</svg>

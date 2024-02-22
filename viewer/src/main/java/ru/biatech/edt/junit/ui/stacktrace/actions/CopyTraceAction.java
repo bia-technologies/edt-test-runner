@@ -27,8 +27,8 @@ import org.eclipse.ui.actions.SelectionListenerAction;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.model.ITraceable;
 import ru.biatech.edt.junit.ui.IJUnitHelpContextIds;
-import ru.biatech.edt.junit.ui.ImageProvider;
 import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
 import ru.biatech.edt.junit.utils.ClipboardHelper;
 import ru.biatech.edt.junit.utils.StringUtilities;
 

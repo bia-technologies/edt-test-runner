@@ -1,0 +1,16 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+<!-- Copyright 2000-2023 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="12.8pt" height="12.8pt">
+    <defs/>
+    <g id="layer0">
+        <g id="group0" transform="translate(0.375, 2.375)" fill="none">
+            <rect id="shape0" transform="translate(4.79167, -1.175)" fill="#6e6e6e" fill-rule="evenodd"
+                  width="1.60000000000pt" height="8.00000000000pt"/>
+            <rect id="shape1" transform="translate(0.791667, 2.825)" fill="#6e6e6e" fill-rule="evenodd"
+                  width="8.00000000000pt" height="1.60000000000pt"/>
+        </g>
+        <circle id="shape2" transform="translate(9, 9)" r="2.80000000000pt" cx="2.80000000000pt" cy="2.80000000000pt"
+                fill="#2b8467" fill-rule="evenodd"/>
+    </g>
+</svg>

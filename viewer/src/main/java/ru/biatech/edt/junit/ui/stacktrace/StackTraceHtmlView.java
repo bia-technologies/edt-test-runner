@@ -33,10 +33,10 @@ import org.eclipse.swt.widgets.Control;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.model.TestElement;
 import ru.biatech.edt.junit.model.TestErrorInfo;
-import ru.biatech.edt.junit.ui.Colors;
 import ru.biatech.edt.junit.ui.stacktrace.actions.CompareResultsAction;
 import ru.biatech.edt.junit.ui.stacktrace.actions.CopyTraceAction;
 import ru.biatech.edt.junit.ui.stacktrace.events.Listener;
+import ru.biatech.edt.junit.ui.viewsupport.Colors;
 
 import java.io.IOException;
 import java.io.InputStreamReader;

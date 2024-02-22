@@ -16,6 +16,7 @@
 
 package ru.biatech.edt.junit.yaxunit;
 
+import com._1c.g5.v8.dt.bsl.model.Module;
 import com._1c.g5.v8.dt.bsl.model.ModuleType;
 import com._1c.g5.v8.dt.metadata.mdclass.MdClassPackage;
 import com._1c.g5.v8.dt.metadata.mdclass.MdObject;
@@ -23,114 +24,135 @@ import lombok.AllArgsConstructor;
 import lombok.Value;
 import org.eclipse.emf.ecore.EClass;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Pattern;
+import java.text.MessageFormat;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Схема наименования тестовых модулей
  */
 public class NamingScheme {
+  private static final Map<EClass, String> MDO_CLASS_PREFIXES = createPrefixes();
+  private static final Map<String, EClass> PREFIXES = MDO_CLASS_PREFIXES.entrySet().stream()
+      .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
+  private static final Map<ModuleType, String> MODULE_SUFFIXES = createSuffixes();
+  private static final Map<String, ModuleType> SUFFIXES = MODULE_SUFFIXES.entrySet().stream()
+      .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
+  private static final String SEPARATOR = "_"; //$NON-NLS-1$
 
-  private static final List<Item> schema = createScheme();
-
-  /**
-   * Возвращает соответствующее схеме имя тестового модуля для объекта
-   * @param object объект, для которого нужен тестовый модуль
-   * @return имя тестового модуля, сформированное по схеме
-   */
-  public String getTestModuleName(MdObject object) {
-    var templates = getTemplates(object);
-
-    if (templates.length > 0) {
-      return String.format(templates[0], object.getName());
-    } else {
-      return null;
-    }
+  private static Map<EClass, String> createPrefixes() {
+    var prefixes = new HashMap<EClass, String>();
+    prefixes.put(MdClassPackage.Literals.COMMON_MODULE, "ОМ"); //$NON-NLS-1$
+    prefixes.put(MdClassPackage.Literals.ACCOUNTING_REGISTER, "РБ"); //$NON-NLS-1$
+    prefixes.put(MdClassPackage.Literals.ACCUMULATION_REGISTER, "РН"); //$NON-NLS-1$
+    prefixes.put(MdClassPackage.Literals.CALCULATION_REGISTER, "РР"); //$NON-NLS-1$
+    prefixes.put(MdClassPackage.Literals.INFORMATION_REGISTER, "РС"); //$NON-NLS-1$
+    prefixes.put(MdClassPackage.Literals.BUSINESS_PROCESS, "БП"); //$NON-NLS-1$
+    prefixes.put(MdClassPackage.Literals.CATALOG, "Спр"); //$NON-NLS-1$
+    prefixes.put(MdClassPackage.Literals.CHART_OF_ACCOUNTS, "ПС"); //$NON-NLS-1$
+    prefixes.put(MdClassPackage.Literals.CHART_OF_CALCULATION_TYPES, "ПВР"); //$NON-NLS-1$
+    prefixes.put(MdClassPackage.Literals.CHART_OF_CHARACTERISTIC_TYPES, "ПВХ"); //$NON-NLS-1$
+    prefixes.put(MdClassPackage.Literals.DOCUMENT, "Док"); //$NON-NLS-1$
+    prefixes.put(MdClassPackage.Literals.ENUM, "Пер"); //$NON-NLS-1$
+    prefixes.put(MdClassPackage.Literals.EXCHANGE_PLAN, "ПО"); //$NON-NLS-1$
+    prefixes.put(MdClassPackage.Literals.TASK, "Зад"); //$NON-NLS-1$
+    prefixes.put(MdClassPackage.Literals.DATA_PROCESSOR, "Обр"); //$NON-NLS-1$
+    prefixes.put(MdClassPackage.Literals.REPORT, "Отч"); //$NON-NLS-1$
+    prefixes.put(MdClassPackage.Literals.BOT, "Бот"); //$NON-NLS-1$
+    prefixes.put(MdClassPackage.Literals.INTEGRATION_SERVICE, "Инт"); //$NON-NLS-1$
+    prefixes.put(MdClassPackage.Literals.EXTERNAL_DATA_SOURCE, "ВИД"); //$NON-NLS-1$
+    return prefixes;
   }
 
-  /**
-   * Возвращает все возможные имена тестовых модулей соответствующие схеме
-   * @param object объект, для которого нужен тестовый модуль
-   * @return имена тестовых модулей
-   */
-  public String[] getTestModuleNames(MdObject object) {
-    var templates = getTemplates(object);
-    var names = new String[templates.length];
+  private static Map<ModuleType, String> createSuffixes() {
+    var suffixes = new HashMap<ModuleType, String>();
+    suffixes.put(ModuleType.MANAGER_MODULE, "ММ"); //$NON-NLS-1$
+    suffixes.put(ModuleType.OBJECT_MODULE, "МО"); //$NON-NLS-1$
+    suffixes.put(ModuleType.RECORDSET_MODULE, "НЗ"); //$NON-NLS-1$
 
-    for (int i = 0; i < names.length; i++) {
-      names[i] = String.format(templates[i], object.getName());
-    }
-    return names;
+    return suffixes;
   }
 
   /**
    * На основании имени тестового модуля возвращает информацию о тестируемом объекте
+   *
    * @param testModuleName имя тестового модуля
    * @return информация о тестируемом объекте
    */
   public ModuleInfo getBaseModuleName(String testModuleName) {
-    for (var item : schema) {
-      for (var template : item.getTemplates()) {
-        var matcher = getPattern(template).matcher(testModuleName);
-        if (matcher.matches()) {
-          return new ModuleInfo(item.mdClass, null, matcher.group(1));
-        }
-      }
+    var chunks = testModuleName.split(SEPARATOR);
+
+    if (chunks.length == 1) {
+      return new ModuleInfo(null, null, chunks[0]);
     }
-    return null;
+
+    var mdClass = PREFIXES.getOrDefault(chunks[0], null);
+    var moduleType = chunks.length == 3 ? SUFFIXES.getOrDefault(chunks[2], null) : null;
+    return new ModuleInfo(mdClass, moduleType, chunks[1]);
   }
 
-  private Pattern getPattern(String template) {
-    return Pattern.compile(template.replace("%s", "(.+)"));
-  }
+  /**
+   * Возвращает соответствующее схеме имя тестового модуля для объекта
+   *
+   * @param module объект, для которого нужен тестовый модуль
+   * @return имя тестового модуля, сформированное по схеме
+   */
+  public String getTestSuiteName(Module module) {
+    var prefix = MDO_CLASS_PREFIXES.getOrDefault(module.getOwner().eClass(), null);
+    var suffix = MODULE_SUFFIXES.getOrDefault(module.getModuleType(), null);
 
-  private String[] getTemplates(MdObject object) {
-    var objClass = object.eClass();
-    var templates = new String[0];
-    for (var item : schema) {
-      if (item.getMdClass() == objClass) {
-        templates = item.getTemplates();
-        break;
-      }
+    StringBuilder sb = new StringBuilder();
+    if (prefix != null) {
+      sb.append(prefix).append(SEPARATOR);
     }
-    return templates;
-  }
-
-  private static List<Item> createScheme() {
-    var result = new ArrayList<Item>();
-
-    result.add(new Item(MdClassPackage.Literals.COMMON_MODULE, "ОМ_%s"));
-
-    result.add(new Item(MdClassPackage.Literals.ACCOUNTING_REGISTER, "РБ_%s_MM", "РБ_%s_НЗ", "РБ_%s"));
-    result.add(new Item(MdClassPackage.Literals.ACCUMULATION_REGISTER, "РН_%s_MM", "РН_%s_НЗ", "РН_%s"));
-    result.add(new Item(MdClassPackage.Literals.CALCULATION_REGISTER, "РР_%s_MM", "РР_%s_НЗ", "РР_%s"));
-    result.add(new Item(MdClassPackage.Literals.INFORMATION_REGISTER, "РС_%s_MM", "РС_%s_НЗ", "РС_%s"));
-
-    result.add(new Item(MdClassPackage.Literals.BUSINESS_PROCESS, "БП_%s_ММ", "БП_%s_МО", "БП_%s"));
-    result.add(new Item(MdClassPackage.Literals.CATALOG, "Спр_%s_ММ", "Спр_%s_МО", "Спр_%s"));
-    result.add(new Item(MdClassPackage.Literals.CHART_OF_ACCOUNTS, "ПС_%s_ММ", "ПС_%s_МО", "ПС_%s"));
-    result.add(new Item(MdClassPackage.Literals.CHART_OF_CALCULATION_TYPES, "ПВР_%s_ММ", "ПВР_%s_МО", "ПВР_%s"));
-    result.add(new Item(MdClassPackage.Literals.CHART_OF_CHARACTERISTIC_TYPES, "ПВХ_%s_ММ", "ПВХ_%s_МО", "ПВХ_%s"));
-    result.add(new Item(MdClassPackage.Literals.DOCUMENT, "Док_%s_ММ", "Док_%s_МО", "Док_%s"));
-    result.add(new Item(MdClassPackage.Literals.ENUM, "Пер_%s_ММ", "Пер_%s_МО", "Пер_%s"));
-    result.add(new Item(MdClassPackage.Literals.EXCHANGE_PLAN, "ПО_%s_ММ", "ПО_%s_МО", "ПО_%s"));
-    result.add(new Item(MdClassPackage.Literals.TASK, "Зад_%s_ММ", "Зад_%s_МО", "Зад_%s"));
-
-    result.add(new Item(MdClassPackage.Literals.DATA_PROCESSOR, "Обр_%s_ММ", "Обр_%s_МО", "Обр_%s"));
-    result.add(new Item(MdClassPackage.Literals.REPORT, "Отч_%s_ММ", "Отч_%s_МО", "Отч_%s"));
-    return result;
-  }
-
-  @Value
-  private static class Item {
-    EClass mdClass;
-    String[] templates;
-
-    private Item(EClass mdClass, String... templates) {
-      this.mdClass = mdClass;
-      this.templates = templates;
+    sb.append(((MdObject) module.getOwner()).getName());
+    if (suffix != null) {
+      sb.append(SEPARATOR).append(suffix);
     }
+
+    return sb.toString();
+  }
+
+  /**
+   * Возвращает все возможные имена тестовых модулей соответствующие схеме
+   *
+   * @param object объект, для которого нужен тестовый модуль
+   * @return имена тестовых модулей
+   */
+  public String[] getTestSuiteNames(MdObject object) {
+    var prefixe = MDO_CLASS_PREFIXES.getOrDefault(object.eClass(), null);
+    if (prefixe == null) {
+      return new String[0];
+    }
+    return Stream
+        .concat(Stream.of(MessageFormat.format("{0}{1}{2}", prefixe, SEPARATOR, object.getName())), //$NON-NLS-1$
+            SUFFIXES.keySet()
+                .stream().map(s -> MessageFormat.format("{0}{1}{2}{1}{3}", prefixe, SEPARATOR, object.getName(), s))) //$NON-NLS-1$
+        .toArray(String[]::new);
+  }
+
+  public String[] getTestSuiteNames(Module module) {
+    var prefix = MDO_CLASS_PREFIXES.getOrDefault(module.getOwner().eClass(), null);
+    var suffix = MODULE_SUFFIXES.getOrDefault(module.getModuleType(), null);
+
+    String[] values = new String[suffix == null ? 1 : 2];
+    StringBuilder sb = new StringBuilder();
+    if (prefix != null) {
+      sb.append(prefix).append(SEPARATOR);
+    }
+    sb.append(((MdObject) module.getOwner()).getName());
+
+    if (suffix != null) {
+      values[1] = sb.toString();
+      sb.append(SEPARATOR).append(suffix);
+      values[0] = sb.toString();
+    } else {
+      values[0] = sb.toString();
+    }
+
+    return values;
   }
 
   @Value

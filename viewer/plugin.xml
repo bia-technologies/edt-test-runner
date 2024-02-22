@@ -79,48 +79,6 @@
         </view>
     </extension>
     <extension
-            point="org.eclipse.ui.perspectiveExtensions">
-        <perspectiveExtension
-                targetID="com._1c.g5.v8.dt.ui2.perspective">
-            <view
-                    relative="com._1c.g5.v8.dt.team.ui.development.view"
-                    visible="true"
-                    id="ru.biatech.edt.junit.ResultView"
-                    relationship="stack">
-            </view>
-            <newWizardShortcut
-                    id="ru.biatech.edt.junit.wizards.NewTestCaseCreationWizard">
-            </newWizardShortcut>
-        </perspectiveExtension>
-        <perspectiveExtension
-                targetID="com._1c.g5.v8.dt.ui2.perspective">
-            <actionSet
-                    id="ru.biatech.edt.junit.JUnitActionSet">
-            </actionSet>
-        </perspectiveExtension>
-        <perspectiveExtension
-                targetID="org.eclipse.jdt.ui.JavaBrowsingPerspective">
-            <actionSet
-                    id="ru.biatech.edt.junit.JUnitActionSet">
-            </actionSet>
-            <newWizardShortcut
-                    id="ru.biatech.edt.junit.wizards.NewTestCaseCreationWizard">
-            </newWizardShortcut>
-        </perspectiveExtension>
-        <perspectiveExtension
-                targetID="org.eclipse.debug.ui.DebugPerspective">
-            <view
-                    relative="org.eclipse.debug.ui.DebugView"
-                    visible="false"
-                    id="ru.biatech.edt.junit.ResultView"
-                    relationship="stack">
-            </view>
-            <viewShortcut
-                    id="ru.biatech.edt.junit.ResultView">
-            </viewShortcut>
-        </perspectiveExtension>
-    </extension>
-    <extension
             point="org.eclipse.ui.preferencePages">
         <page
                 name="%PreferencePage.label"
@@ -140,89 +98,7 @@
                 label="%preferenceKeywords.wizards.java"/>
     </extension>
     <extension
-            point="org.eclipse.ui.newWizards">
-        <category
-                name="%WizardCategory.name"
-                parentCategory="com._1c.g5.v8.dt.ui.v8category"
-                id="ru.biatech.edt.junit">
-        </category>
-        <wizard
-                name="%TestCaseWizard.name"
-                icon="$nl$/icons/full/etool16/new_testcase.png"
-                category="org.eclipse.jdt.ui.java/org.eclipse.jdt.junit"
-                id="ru.biatech.edt.junit.wizards.NewTestCaseCreationWizard">
-            <class
-                    class="org.eclipse.jdt.internal.junit.wizards.NewTestCaseCreationWizard">
-                <parameter
-                        name="javatype"
-                        value="true">
-                </parameter>
-            </class>
-            <!-- see bug 48164 for wrong pde compiler warnings -->
-            <description>
-                %TestWizard.description
-            </description>
-            <keywordReference id="ru.biatech.edt.junit.wizards.java"/>
-        </wizard>
-        <wizard
-                name="%TestSuiteWizard.name"
-                icon="$nl$/icons/full/etool16/new_testsuite.png"
-                category="org.eclipse.jdt.ui.java/org.eclipse.jdt.junit"
-                class="org.eclipse.jdt.internal.junit.wizards.NewTestSuiteCreationWizard"
-                id="ru.biatech.edt.junit.wizards.NewTestSuiteCreationWizard">
-            <description>
-                %SuiteWizard.description
-            </description>
-            <keywordReference id="ru.biatech.edt.junit.wizards.java"/>
-        </wizard>
-    </extension>
-    <extension
-            point="org.eclipse.ui.popupMenus">
-        <objectContribution
-                objectClass="org.eclipse.jdt.core.ICompilationUnit"
-                nameFilter="*.bsl"
-                id="ru.biatech.edt.junit.wizards.UpdateTestSuite">
-            <action
-                    label="%UpdateSuiteAction.label"
-                    class="org.eclipse.jdt.internal.junit.wizards.UpdateTestSuite"
-                    tooltip="%UpdateSuiteAction.tooltip"
-                    enablesFor="1"
-                    id="updateTestSuite">
-            </action>
-        </objectContribution>
-    </extension>
-    <extension
             point="org.eclipse.ui.actionSetPartAssociations">
-        <actionSetPartAssociation
-                targetID="ru.biatech.edt.junit.JUnitActionSet">
-            <part
-                    id="org.eclipse.jdt.ui.PackageExplorer">
-            </part>
-            <part
-                    id="org.eclipse.jdt.ui.TypeHierarchy">
-            </part>
-            <part
-                    id="org.eclipse.jdt.ui.CompilationUnitEditor">
-            </part>
-            <part
-                    id="org.eclipse.jdt.ui.ClassFileEditor">
-            </part>
-            <part
-                    id="org.eclipse.jdt.ui.ProjectsView">
-            </part>
-            <part
-                    id="org.eclipse.jdt.ui.PackagesView">
-            </part>
-            <part
-                    id="org.eclipse.jdt.ui.TypesView">
-            </part>
-            <part
-                    id="org.eclipse.jdt.ui.MembersView">
-            </part>
-            <part
-                    id="org.eclipse.search.SearchResultView">
-            </part>
-        </actionSetPartAssociation>
         <actionSetPartAssociation
                 targetID="com._1c.g5.v8.dt.debug.ui.actionSet">
             <part
@@ -270,7 +146,7 @@
                 textStylePreferenceValue="BOX"
                 textPreferenceValue="true"
                 highlightPreferenceValue="true"
-                icon="icons/full/etool16/run_exc.png"
+                icon="icons/full/actions16/run.png"
                 verticalRulerPreferenceValue="true">
         </specification>
     </extension>
@@ -302,7 +178,7 @@
                 targetID="#TextRulerContext">
             <action
                   class="ru.biatech.edt.junit.ui.editor.ruler.TestMethodActionDelegate"
-                  icon="icons/full/etool16/run_exc.png"
+                  icon="icons/full/actions16/run.png"
                   id="ru.biatech.edt.junit.ui.editor.ruler.test.run"
                   label="Run test method"
                   menubarPath="debug">
@@ -333,20 +209,20 @@
              </separator>
           </menu>
           <action
-                class="ru.biatech.edt.junit.ui.editor.RunTestAction"
-                icon="icons/full/etool16/run_exc.png"
-                id="ru.biatech.edt.junit.outline.RunTest"
-                label="%JUnitShortcut.description.run"
-                menubarPath="tests"
-                style="push">
+                  class="ru.biatech.edt.junit.ui.commands.RunTestOutlineAction"
+                  icon="icons/full/actions16/run.png"
+                  id="ru.biatech.edt.junit.outline.RunTest"
+                  label="%JUnitShortcut.description.run"
+                  menubarPath="tests"
+                  style="push">
           </action>
           <action
-                class="ru.biatech.edt.junit.ui.editor.DebugTestAction"
-                icon="icons/full/etool16/debug_exc.png"
-                id="ru.biatech.edt.junit.outline.DebugTest"
-                label="%JUnitShortcut.description.debug"
-                menubarPath="tests"
-                style="push">
+                  class="ru.biatech.edt.junit.ui.commands.DebugTestOutlineAction"
+                  icon="icons/full/actions16/debug.png"
+                  id="ru.biatech.edt.junit.outline.DebugTest"
+                  label="%JUnitShortcut.description.debug"
+                  menubarPath="tests"
+                  style="push">
           </action>
        </objectContribution>
     </extension>
@@ -355,59 +231,63 @@
     
     <extension point="org.eclipse.ui.commands">
         <command
-                name="%GotoTestAction.label"
-                id="ru.biatech.edt.junit.GotoTest">
+                categoryId="org.eclipse.ui.category.edit"
+                description="%UnitTestSelectAction.tooltip"
+                id="ru.biatech.edt.junit.OpenTestActions"
+                name="%UnitTestSelectAction.label">
         </command>
     </extension>
      
 	<extension
        point="org.eclipse.ui.handlers">
-	    <handler
-	          class="ru.biatech.edt.junit.ui.editor.GotoReferencedTestHandler"
-	          commandId="ru.biatech.edt.junit.GotoTest">
-	       <activeWhen>
-	          <reference
-	                definitionId="com._1c.g5.v8.dt.bsl.Bsl.Editor.opened">
-	          </reference>
-	       </activeWhen>
-	    </handler>
+        <handler
+                class="ru.biatech.edt.junit.ui.commands.OpenTestActionsFromEditor"
+                commandId="ru.biatech.edt.junit.OpenTestActions">
+            <activeWhen>
+                <reference
+                        definitionId="com._1c.g5.v8.dt.bsl.Bsl.Editor.opened">
+                </reference>
+            </activeWhen>
+        </handler>
 	</extension>
 	 
     <extension point="org.eclipse.ui.menus">
        <menuContribution
              locationURI="popup:#BslEditorContext?after=additions">
           <command
-                commandId="ru.biatech.edt.junit.GotoTest"
-                icon="icons/full/eview16/referring.png"
-                style="push">
+                  commandId="ru.biatech.edt.junit.OpenTestActions"
+                  icon="icons/full/eview16/logo.png"
+                  style="push"
+                  tooltip="%UnitTestSelectAction.tooltip">
           </command>
        </menuContribution>
     </extension>
-    
+
+    <extension
+            point="org.eclipse.ui.bindings">
+        <key
+                commandId="ru.biatech.edt.junit.OpenTestActions"
+                contextId="org.eclipse.ui.contexts.window"
+                schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+                sequence="M1+M2+T">
+        </key>
+    </extension>
+
     <extension point="org.eclipse.ui.popupMenus">
        <objectContribution
              adaptable="false"
              id="com._1c.g5.v8.dt.bsl.ui.extension.objectContribution2"
              objectClass="com._1c.g5.v8.dt.bsl.core.IMethod">
           <action
-                class="ru.biatech.edt.junit.ui.editor.GotoReferencedTestAction"
-                icon="icons/full/eview16/referring.png"
+                  class="ru.biatech.edt.junit.ui.commands.OpenTestActionsFromOutline"
+                  icon="icons/full/eview16/logo.png"
                 id="ru.biatech.edt.junit.outline.Goto"
-                label="%GotoTestAction.label"
+                  label="%UnitTestSelectAction.label"
                 menubarPath="tests"
                 style="push"
-                tooltip="%GotoTestAction.tooltip">
+                  tooltip="%UnitTestSelectAction.tooltip">
           </action>
        </objectContribution>
     </extension>
 
-    <extension
-            point="org.eclipse.ui.bindings">
-        <key
-                commandId="ru.biatech.edt.junit.GotoTest"
-                contextId="org.eclipse.ui.contexts.window"
-                schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-                sequence="M1+M2+T">
-        </key>
-    </extension>
 </plugin>

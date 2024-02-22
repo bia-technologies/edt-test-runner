@@ -19,6 +19,8 @@ package ru.biatech.edt.junit.v8utils;
 import com._1c.g5.v8.dt.bm.index.emf.IBmEmfIndexManager;
 import com._1c.g5.v8.dt.bsl.model.resource.owner.IBslOwnerComputerService;
 import com._1c.g5.v8.dt.core.filesystem.IQualifiedNameFilePathConverter;
+import com._1c.g5.v8.dt.core.naming.ITopObjectFqnGenerator;
+import com._1c.g5.v8.dt.core.platform.IBmModelManager;
 import com._1c.g5.v8.dt.core.platform.IResourceLookup;
 import com._1c.g5.v8.dt.core.platform.IV8ProjectManager;
 import com._1c.g5.v8.dt.stacktraces.model.IStacktraceParser;
@@ -37,6 +39,7 @@ public class VendorServices {
 
   /**
    * Возвращает сервис работы с проктами
+   *
    * @return сервис работы с проктами
    */
   public IV8ProjectManager getProjectManager() {
@@ -53,6 +56,7 @@ public class VendorServices {
 
   /**
    * Возвращает помощник открытия редакторов
+   *
    * @return помощник открытия редакторов
    */
   public synchronized OpenHelper getOpenHelper() {
@@ -61,6 +65,7 @@ public class VendorServices {
 
   /**
    * Возвращает парсер стека ошибки
+   *
    * @return парсер стека ошибки
    */
   public IStacktraceParser getStacktraceParser() {
@@ -73,5 +78,13 @@ public class VendorServices {
 
   public IBslOwnerComputerService getBslOwnerComputerService() {
     return TestViewerPlugin.getService(IBslOwnerComputerService.class);
+  }
+
+  public static IBmModelManager getBmModelManager() {
+    return TestViewerPlugin.getService(IBmModelManager.class);
+  }
+
+  public static ITopObjectFqnGenerator getTopObjectFqnGenerator() {
+    return TestViewerPlugin.getService(ITopObjectFqnGenerator.class);
   }
 }

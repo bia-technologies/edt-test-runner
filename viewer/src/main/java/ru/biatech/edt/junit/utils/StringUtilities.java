@@ -33,6 +33,7 @@ import java.io.StringWriter;
  */
 @UtilityClass
 public class StringUtilities {
+  public final String EMPTY_STRING = ""; //$NON-NLS-1$
 
   /**
    * Формирует текстовое представление стека ошибок

@@ -16,8 +16,6 @@
 
 package ru.biatech.edt.junit.launcher.lifecycle;
 
-import org.eclipse.debug.core.ILaunch;
-
 public interface LifecycleListener {
   void handle(int eventType, LifecycleItem item);
 }

@@ -257,9 +257,6 @@ public final class JUnitMessages extends NLS {
   public static String JUnitModel_could_not_read;
   public static String JUnitModel_importing_from_url;
   public static String TestRunHandler_lines_read;
-  public static String Launcher_ConfigurationLocation;
-  public static String Launcher_Launch;
-
   public static String TestMethodActionDelegate_CollectingMarkers;
   public static String TestMethodActionDelegate_Debug;
   public static String TestMethodActionDelegate_Run;

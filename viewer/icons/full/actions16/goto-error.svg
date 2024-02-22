@@ -1,0 +1,15 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+<!-- Copyright 2000-2023 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="12.8pt" height="12.8pt">
+    <defs/>
+    <g id="areas">
+        <rect id="shape0" transform="" fill="#ffe5ff" opacity="0.00000000000" width="12.80000000000pt"
+              height="12.80000000000pt"/>
+    </g>
+    <g id="icons">
+        <path id="shape1" transform="translate(3, 11)" fill="#db5860" d="M0 0L10 0L10 2L0 2Z"/>
+        <path id="shape2" transform="matrix(0.707107 -0.707107 0.707107 0.707107 0.364973 5.26608)" fill="#6e6e6e"
+              d="M4 5L4 0L2 0L2 5L0 5L3 8L6 5Z"/>
+    </g>
+</svg>

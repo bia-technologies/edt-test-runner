@@ -22,19 +22,11 @@ import org.eclipse.jface.viewers.IDecorationContext;
 import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
-import org.eclipse.jface.viewers.StyledString;
-import org.eclipse.jface.viewers.StyledString.Styler;
 import org.eclipse.jface.viewers.ViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 
 public class ColoringLabelProvider extends DecoratingStyledCellLabelProvider implements ILabelProvider {
-
-  public static final Styler HIGHLIGHT_STYLE = StyledString.createColorRegistryStyler(null, ColoredViewersManager.HIGHLIGHT_BG_COLOR_NAME);
-  public static final Styler HIGHLIGHT_WRITE_STYLE = StyledString.createColorRegistryStyler(null, ColoredViewersManager.HIGHLIGHT_WRITE_BG_COLOR_NAME);
-
-  public static final Styler INHERITED_STYLER = StyledString.createColorRegistryStyler(ColoredViewersManager.INHERITED_COLOR_NAME, null);
-
   public ColoringLabelProvider(IStyledLabelProvider labelProvider) {
     this(labelProvider, null, null);
   }

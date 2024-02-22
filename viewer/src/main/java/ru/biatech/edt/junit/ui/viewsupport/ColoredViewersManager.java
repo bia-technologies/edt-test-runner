@@ -27,13 +27,7 @@ import org.eclipse.ui.PlatformUI;
 import java.util.HashSet;
 import java.util.Set;
 
-
 public class ColoredViewersManager implements IPropertyChangeListener {
-
-  public static final String INHERITED_COLOR_NAME = "ru.biatech.edt.junit.ui.ColoredLabels.inherited"; //$NON-NLS-1$
-
-  public static final String HIGHLIGHT_BG_COLOR_NAME = "ru.biatech.edt.junit.ui.ColoredLabels.match_highlight"; //$NON-NLS-1$
-  public static final String HIGHLIGHT_WRITE_BG_COLOR_NAME = "ru.biatech.edt.junit.ui.ColoredLabels.writeaccess_highlight"; //$NON-NLS-1$
 
   private static final ColoredViewersManager fgInstance = new ColoredViewersManager();
 
@@ -41,50 +35,6 @@ public class ColoredViewersManager implements IPropertyChangeListener {
 
   public ColoredViewersManager() {
     fManagedLabelProviders = new HashSet<>();
-  }
-
-  public void installColoredLabels(ColoringLabelProvider labelProvider) {
-    if (fManagedLabelProviders.contains(labelProvider))
-      return;
-
-    if (fManagedLabelProviders.isEmpty()) {
-      // first lp installed
-      PlatformUI.getPreferenceStore().addPropertyChangeListener(this);
-      JFaceResources.getColorRegistry().addListener(this);
-    }
-    fManagedLabelProviders.add(labelProvider);
-  }
-
-  public void uninstallColoredLabels(ColoringLabelProvider labelProvider) {
-    if (!fManagedLabelProviders.remove(labelProvider))
-      return; // not installed
-
-    if (fManagedLabelProviders.isEmpty()) {
-      PlatformUI.getPreferenceStore().removePropertyChangeListener(this);
-      JFaceResources.getColorRegistry().removeListener(this);
-      // last viewer uninstalled
-    }
-  }
-
-  @Override
-  public void propertyChange(PropertyChangeEvent event) {
-    String property = event.getProperty();
-    if (JFacePreferences.QUALIFIER_COLOR.equals(property)
-                || JFacePreferences.COUNTER_COLOR.equals(property)
-                || JFacePreferences.DECORATIONS_COLOR.equals(property)
-                || HIGHLIGHT_BG_COLOR_NAME.equals(property)
-                || HIGHLIGHT_WRITE_BG_COLOR_NAME.equals(property)
-                || INHERITED_COLOR_NAME.equals(property)
-                || IWorkbenchPreferenceConstants.USE_COLORED_LABELS.equals(property)
-    ) {
-      Display.getDefault().asyncExec(this::updateAllViewers);
-    }
-  }
-
-  protected final void updateAllViewers() {
-    for (ColoringLabelProvider lp : fManagedLabelProviders) {
-      lp.update();
-    }
   }
 
   public static boolean showColoredLabels() {
@@ -97,6 +47,48 @@ public class ColoredViewersManager implements IPropertyChangeListener {
 
   public static void uninstall(ColoringLabelProvider labelProvider) {
     fgInstance.uninstallColoredLabels(labelProvider);
+  }
+
+  public void installColoredLabels(ColoringLabelProvider labelProvider) {
+    if (fManagedLabelProviders.contains(labelProvider)) {
+      return;
+    }
+
+    if (fManagedLabelProviders.isEmpty()) {
+      // first lp installed
+      PlatformUI.getPreferenceStore().addPropertyChangeListener(this);
+      JFaceResources.getColorRegistry().addListener(this);
+    }
+    fManagedLabelProviders.add(labelProvider);
+  }
+
+  public void uninstallColoredLabels(ColoringLabelProvider labelProvider) {
+    if (!fManagedLabelProviders.remove(labelProvider)) {
+      return; // not installed
+    }
+
+    if (fManagedLabelProviders.isEmpty()) {
+      PlatformUI.getPreferenceStore().removePropertyChangeListener(this);
+      JFaceResources.getColorRegistry().removeListener(this);
+      // last viewer uninstalled
+    }
+  }
+
+  @Override
+  public void propertyChange(PropertyChangeEvent event) {
+    String property = event.getProperty();
+    if (JFacePreferences.QUALIFIER_COLOR.equals(property)
+        || JFacePreferences.COUNTER_COLOR.equals(property)
+        || JFacePreferences.DECORATIONS_COLOR.equals(property)
+        || IWorkbenchPreferenceConstants.USE_COLORED_LABELS.equals(property)) {
+      Display.getDefault().asyncExec(this::updateAllViewers);
+    }
+  }
+
+  protected final void updateAllViewers() {
+    for (ColoringLabelProvider lp : fManagedLabelProviders) {
+      lp.update();
+    }
   }
 
 }

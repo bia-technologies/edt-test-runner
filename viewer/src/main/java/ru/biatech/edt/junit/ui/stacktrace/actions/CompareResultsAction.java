@@ -22,6 +22,7 @@ import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.model.TestErrorInfo;
 import ru.biatech.edt.junit.ui.JUnitMessages;
 import ru.biatech.edt.junit.ui.dialogs.CompareResultDialog;
+import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
 
 /**
  * Action to enable/disable stack trace filtering.
@@ -37,9 +38,8 @@ public class CompareResultsAction extends Action {
     setDescription(JUnitMessages.CompareResultsAction_description);
     setToolTipText(JUnitMessages.CompareResultsAction_tooltip);
 
-    setDisabledImageDescriptor(TestViewerPlugin.ui().getImageDescriptor("dlcl16/compare.png"));  //$NON-NLS-1$
-    setHoverImageDescriptor(TestViewerPlugin.ui().getImageDescriptor("elcl16/compare.png"));  //$NON-NLS-1$
-    setImageDescriptor(TestViewerPlugin.ui().getImageDescriptor("elcl16/compare.png"));  //$NON-NLS-1$
+    setImageDescriptor(ImageProvider.getImageDescriptor(ImageProvider.ACTION_COMPARE));
+    setDisabledImageDescriptor(ImageProvider.getImageDescriptor(ImageProvider.ACTION_COMPARE_DISABLED));
   }
 
   /*

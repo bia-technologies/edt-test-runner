@@ -70,6 +70,7 @@ public class ImageProvider {
   public static final String ACTION_GOTO_METHOD = "actions16/goto-method.png"; //$NON-NLS-1$
   public static final String ACTION_COMPARE = "actions16/compare.png"; //$NON-NLS-1$
   public static final String ACTION_COMPARE_DISABLED = "actions16/compare-disable.png"; //$NON-NLS-1$
+  public static final String ACTION_NEW_MOCK = "actions16/mock.png"; //$NON-NLS-1$
 
   @Getter
   private final ImageDescriptor suiteIconDescriptor = getImageDescriptor(SUITE_ICON);
@@ -138,6 +139,8 @@ public class ImageProvider {
   private final Image newTestSuite = createManagedImage(ACTION_NEW_TESTSUITE);
   @Getter(lazy = true)
   private final Image actionNewTestCase = createManagedImage(ACTION_NEW_TESTCASE);
+  @Getter(lazy = true)
+  private final Image actionNewMock = createManagedImage(ACTION_NEW_MOCK);
 
   public static ImageDescriptor getImageDescriptor(String relativePath) {
     return TestViewerPlugin.ui().getImageDescriptor(relativePath);

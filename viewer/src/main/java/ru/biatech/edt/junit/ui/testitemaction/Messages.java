@@ -32,6 +32,7 @@ public class Messages extends NLS {
   public static String UpdateTestSuiteAction_Description;
   public static String UpdateTestSuiteAction_NoMethodsToAdd;
   public static String UpdateTestSuiteAction_Present;
+  public static String GenerateMock_Present;
 
   static {
     // initialize resource bundle

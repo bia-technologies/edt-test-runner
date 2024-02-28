@@ -33,7 +33,6 @@ import org.eclipse.handly.buffer.BufferChange;
 import org.eclipse.handly.snapshot.NonExpiringSnapshot;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
-import org.eclipse.text.edits.InsertEdit;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.ui.IEditorInput;
@@ -174,7 +173,7 @@ public class EditorHelper {
         && "SL_COMMENT".equalsIgnoreCase(((TerminalRule) leafNode.getGrammarElement()).getName()); //$NON-NLS-1$
   }
 
-  public boolean applyChanges(IDocument document, List<InsertEdit> changes) {
+  public boolean applyChanges(IDocument document, List<TextEdit> changes) {
 
     var textEdit = new MultiTextEdit();
     changes.stream()

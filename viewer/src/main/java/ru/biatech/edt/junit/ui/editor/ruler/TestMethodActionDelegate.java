@@ -157,14 +157,14 @@ public class TestMethodActionDelegate extends AbstractRulerActionDelegate implem
     };
 
     var menuItem = new MenuItem(menu, SWT.NONE);
-    menuItem.setText(JUnitMessages.TestMethodActionDelegate_Run);
+    menuItem.setText(JUnitMessages.Run_Test_Label);
     menuItem.setData(MODE_ATTRIBUTE, ILaunchManager.RUN_MODE);
 
     menuItem.setImage(imageProvider.getRunTestIcon());
     menuItem.addSelectionListener(listener);
 
     menuItem = new MenuItem(menu, SWT.NONE);
-    menuItem.setText(JUnitMessages.TestMethodActionDelegate_Debug);
+    menuItem.setText(JUnitMessages.Debug_Test_Label);
     menuItem.setData(MODE_ATTRIBUTE, ILaunchManager.DEBUG_MODE);
     menuItem.setImage(imageProvider.getDebugTestIcon());
     menuItem.addSelectionListener(listener);

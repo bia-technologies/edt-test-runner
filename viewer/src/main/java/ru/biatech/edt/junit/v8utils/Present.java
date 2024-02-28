@@ -19,6 +19,7 @@ package ru.biatech.edt.junit.v8utils;
 import com._1c.g5.v8.dt.bsl.model.Method;
 import com._1c.g5.v8.dt.bsl.model.Module;
 import com._1c.g5.v8.dt.metadata.mdclass.CommonModule;
+import com._1c.g5.v8.dt.metadata.mdclass.MdObject;
 import com._1c.g5.v8.dt.ui.util.Labeler;
 import lombok.experimental.UtilityClass;
 import org.eclipse.core.resources.IProject;
@@ -33,7 +34,7 @@ public class Present {
 
     } else if (item instanceof Module) {
       return getPresent((Module) item);
-    } else if (item instanceof CommonModule) {
+    } else if (item instanceof MdObject) {
       return getPresent((CommonModule) item);
     }
     return item.toString();
@@ -46,14 +47,14 @@ public class Present {
   public String getPresent(Module item) {
     return Labeler.path(item, '.')
         .skipCommonNode()
-        .stopAfter(IProject.class)
+        .stopBefore(IProject.class)
         .label();
   }
 
-  public String getPresent(CommonModule item) {
+  public String getPresent(MdObject item) {
     return Labeler.path(item, '.')
         .skipCommonNode()
-        .stopAfter(IProject.class)
+        .stopBefore(IProject.class)
         .label();
   }
   public String getShortPresent(CommonModule item) {

@@ -54,30 +54,30 @@ import java.util.stream.Collectors;
 @UtilityClass
 public class Dialogs {
 
-  public Optional<IExtensionProject> selectTestProject(EObject source, String sourceName) {
-    var projectsStream = source != null ? Engine.getTestProjects(source) : Engine.getTestProjects();
-    var projects = projectsStream.collect(Collectors.toMap(IV8Project::getProject, Function.identity()));
-
+  public Optional<IExtensionProject> selectProject(List<IExtensionProject> projects, String message) {
     if (projects.size() == 1) {
-      return Optional.of(projects.values().iterator().next());
+      return Optional.of(projects.get(0));
     }
 
+    var projectsMap = projects.stream().collect(Collectors.toMap(IV8Project::getProject, Function.identity()));
     var shell = TestViewerPlugin.ui().getActiveWorkbenchShell();
     if (projects.size() > 1) {
-      var message = MessageFormat.format(Messages.Dialogs_Select_TestProjects_ForTestSuite, sourceName);
-      var result = selectItem(projects.keySet(), Messages.Dialogs_Select_Projects_Title, message, null);
+      var result = selectItem(projectsMap.keySet(), Messages.Dialogs_Select_Project_Title, message, null);
       if (result != null) {
-        return Optional.of(projects.get(result));
+        return Optional.of(projectsMap.get(result));
       }
     } else {
-      var message = Messages.Message_RelatedProjectsNotFound;
-      if (source != null) {
-        message += source.toString();
-      }
-      MessageDialog.openInformation(shell, Messages.Dialogs_Information_Title, message);
+      var notFoundMessage = Messages.Message_RelatedProjectsNotFound;
+      MessageDialog.openInformation(shell, Messages.Dialogs_Information_Title, notFoundMessage);
     }
 
     return Optional.empty();
+  }
+
+  public Optional<IExtensionProject> selectTestProject(EObject source) {
+    var projectsStream = source != null ? Engine.getTestProjects(source) : Engine.getTestProjects();
+    String message = MessageFormat.format(Messages.Dialogs_Select_TestProject_ForTestSuite, Present.getPresent(source));
+    return selectProject(projectsStream.collect(Collectors.toList()), message);
   }
 
   public MethodReference selectMethodReference(List<MethodReference> items) {

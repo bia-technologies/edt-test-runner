@@ -27,13 +27,14 @@ public class Messages extends NLS {
   public static String Dialogs_Select_Module_Title;
   public static String Dialogs_Select_Module_Message;
 
-  public static String Dialogs_Select_TestProjects_ForTestSuite;
+  public static String Dialogs_Select_TestProject_ForTestSuite;
   public static String Message_RelatedProjectsNotFound;
   public static String Dialogs_Select_Action_Message;
   public static String Dialogs_Select_Action_Title;
   public static String Dialogs_Select_Method_Message;
   public static String Dialogs_Select_Method_Title;
-  public static String Dialogs_Select_Projects_Title;
+  public static String Dialogs_Select_Project_Title;
+  public static String Dialogs_Select_Project_ForMock;
 
   static {
     NLS.initializeMessages(BUNDLE_NAME, Messages.class);

@@ -23,6 +23,7 @@ import com._1c.g5.v8.dt.core.naming.ITopObjectFqnGenerator;
 import com._1c.g5.v8.dt.core.platform.IBmModelManager;
 import com._1c.g5.v8.dt.core.platform.IResourceLookup;
 import com._1c.g5.v8.dt.core.platform.IV8ProjectManager;
+import com._1c.g5.v8.dt.md.extension.adopt.IModelObjectAdopter;
 import com._1c.g5.v8.dt.stacktraces.model.IStacktraceParser;
 import com._1c.g5.v8.dt.ui.util.OpenHelper;
 import lombok.experimental.UtilityClass;
@@ -86,5 +87,9 @@ public class VendorServices {
 
   public static ITopObjectFqnGenerator getTopObjectFqnGenerator() {
     return TestViewerPlugin.getService(ITopObjectFqnGenerator.class);
+  }
+
+  public static IModelObjectAdopter getModelObjectAdopter() {
+    return TestViewerPlugin.getService(IModelObjectAdopter.class);
   }
 }

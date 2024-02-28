@@ -23,33 +23,26 @@ import com._1c.g5.v8.dt.bsl.model.Method;
 import com._1c.g5.v8.dt.bsl.model.Module;
 import com._1c.g5.v8.dt.bsl.model.SimpleStatement;
 import com._1c.g5.v8.dt.bsl.model.StaticFeatureAccess;
-import com._1c.g5.v8.dt.bsl.ui.editor.BslXtextDocument;
 import com._1c.g5.v8.dt.core.platform.IExtensionProject;
-import com._1c.g5.v8.dt.core.platform.IV8Project;
 import com._1c.g5.v8.dt.metadata.mdclass.CommonModule;
 import lombok.experimental.UtilityClass;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.text.edits.InsertEdit;
-import org.eclipse.text.edits.TextEdit;
 import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 import org.eclipse.xtext.parser.IParseResult;
-import org.eclipse.xtext.parser.IParser;
 import org.eclipse.xtext.ui.editor.XtextEditor;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.ui.dialogs.Dialogs;
+import ru.biatech.edt.junit.ui.editor.EditionContext;
 import ru.biatech.edt.junit.ui.editor.EditorHelper;
 import ru.biatech.edt.junit.ui.editor.UIHelper;
 import ru.biatech.edt.junit.v8utils.Modules;
-import ru.biatech.edt.junit.v8utils.Projects;
 
 import java.io.StringReader;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -63,7 +56,7 @@ import java.util.stream.Collectors;
 public class TestCreator {
 
   public void createNewTestCase(Module module, String methodName) throws InterruptedException {
-    var testSuite = Dialogs.selectTestProject(module, null)
+    var testSuite = Dialogs.selectTestProject(module)
         .flatMap(p -> getOrCreateTestSuite(p, module));
 
     if (testSuite.isPresent()) {
@@ -81,7 +74,7 @@ public class TestCreator {
   }
 
   public void createTestSuite(Module module, String[] methodsName) throws InterruptedException {
-    var testSuite = Dialogs.selectTestProject(module, null)
+    var testSuite = Dialogs.selectTestProject(module)
         .flatMap(p -> getOrCreateTestSuite(p, module));
 
     if (testSuite.isPresent()) {
@@ -101,7 +94,7 @@ public class TestCreator {
   private String newTestSuiteRegistrationMethod(EditionContext context, String[] methodNames) {
     var testCasesRegistration = CodeGenerator.testCasesRegistration(methodNames);
     String content = null;
-    var template = CodeGenerator.testSuiteTemplate(context.project);
+    var template = CodeGenerator.testSuiteTemplate(context.getProject());
     var registrationMethod = template
         .map(StringReader::new)
         .map(context.getParser()::parse)
@@ -135,7 +128,7 @@ public class TestCreator {
 
   private boolean createTestSuiteRegistrationMethod(EditionContext context, String[] methodNames) {
     String content = newTestSuiteRegistrationMethod(context, methodNames);
-    var offset = EditorHelper.getStartContentOffset(context.module);
+    var offset = EditorHelper.getStartContentOffset(context.getModule());
     context.insert(offset, content);
     return true;
   }
@@ -143,7 +136,7 @@ public class TestCreator {
   private void appendTestMethods(String[] methodNames, XtextEditor editor) {
     var context = new EditionContext(editor);
 
-    var registrationMethod = getRegistrationMethod(context.module);
+    var registrationMethod = getRegistrationMethod(context.getModule());
     var registrationSuccess = registrationMethod.isEmpty() ?
         createTestSuiteRegistrationMethod(context, methodNames) :
         appendTestMethodsRegistration(context, methodNames);
@@ -170,7 +163,7 @@ public class TestCreator {
       MessageDialog.openWarning(null, Messages.TestsFactory_TestImplementation_Failed, messages.toString());
     }
     if (applySuccess) {
-      editor.selectAndReveal(context.lastOffset(), 0);
+      context.revealLast();
     }
   }
 
@@ -179,8 +172,8 @@ public class TestCreator {
   }
 
   private boolean appendTestMethodsImplementation(EditionContext context, String[] methodsNames) {
-    var offset = getTestMethodInsertOffset(context.module);
-    var content = CodeGenerator.testCasesImplementation(context.project, methodsNames);
+    var offset = getTestMethodInsertOffset(context.getModule());
+    var content = CodeGenerator.testCasesImplementation(context.getProject(), methodsNames);
     if (content == null) {
       return false;
     }
@@ -190,7 +183,7 @@ public class TestCreator {
   }
 
   private boolean appendTestMethodsRegistration(EditionContext context, String[] methodNames) {
-    var offset = getRegistrationOffset(context.module);
+    var offset = getRegistrationOffset(context.getModule());
     if (offset.isEmpty()) {
       return false;
     }
@@ -321,42 +314,5 @@ public class TestCreator {
     }
     CodeGenerator.createTestSuiteStructure(testsProject, newTestSuite, monitor);
     return newTestSuite;
-  }
-
-  private static class EditionContext {
-    private final BslXtextDocument document;
-    private final Module module;
-    private final IV8Project project;
-    private final List<InsertEdit> changes = new ArrayList<>();
-    private IParser parser;
-
-    public EditionContext(XtextEditor editor) {
-      document = EditorHelper.getDocument(editor);
-      module = EditorHelper.getParsedModule(document);
-      project = Projects.getParentProject(module);
-    }
-
-    public IParser getParser() {
-      if (parser == null) {
-        document.readOnly(state -> parser = state.getParser());
-      }
-      return parser;
-    }
-
-    public void insert(int offset, String text) {
-      changes.add(new InsertEdit(offset, text));
-    }
-
-    public int lastOffset() {
-      var ordered = changes.stream()
-          .sorted(Comparator.comparingInt(TextEdit::getOffset))
-          .toArray(TextEdit[]::new);
-      return ordered[ordered.length - 1].getOffset() + 2;
-
-    }
-
-    public boolean apply() {
-      return EditorHelper.applyChanges(document, changes);
-    }
   }
 }

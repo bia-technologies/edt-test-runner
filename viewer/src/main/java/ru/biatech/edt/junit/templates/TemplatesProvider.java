@@ -39,6 +39,8 @@ public class TemplatesProvider {
 
   public static final String TEST_MODULE = "module"; //$NON-NLS-1$
   public static final String TEST_METHOD = "method"; //$NON-NLS-1$
+  public static final String MOCK_FUNCTION = "mock_function"; //$NON-NLS-1$
+  public static final String MOCK_PROCEDURE = "mock_procedure"; //$NON-NLS-1$
   private static final String BSL_FILE_EXTENSION = "bsl"; //$NON-NLS-1$
   private static final String FOLDER_RU = "/templates/ru/"; //$NON-NLS-1$
   private static final String FOLDER_EN = "/templates/en/"; //$NON-NLS-1$
@@ -55,6 +57,14 @@ public class TemplatesProvider {
 
   public Optional<String> getTestSuiteStructureTemplateString(IV8Project project) {
     return Optional.ofNullable(getStringTemplate(project, TEST_MODULE));
+  }
+
+  public Optional<String> getMockFunctionTemplateString(IV8Project project) {
+    return Optional.ofNullable(getStringTemplate(project, MOCK_FUNCTION));
+  }
+
+  public Optional<String> getMockProcedureTemplateString(IV8Project project) {
+    return Optional.ofNullable(getStringTemplate(project, MOCK_PROCEDURE));
   }
 
   private Optional<URL> getBundleEntry(String path) {

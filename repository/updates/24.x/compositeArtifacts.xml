@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <?compositeArtifactRepository version='1.0.0'?>
-<repository name='DEV. EDT Test Runner Repository for 24.x' type='org.eclipse.equinox.internal.p2.artifact.repository.CompositeArtifactRepository' version='1'>
+<repository name='${env.site_label_suffix}EDT Test Runner Repository for 24.x' type='org.eclipse.equinox.internal.p2.artifact.repository.CompositeArtifactRepository' version='1'>
   <properties size='2'>
-    <property name='p2.timestamp' value='1709224980842'/>
+    <property name='p2.timestamp' value='1709225205782'/>
     <property name='p2.atomic.composite.loading' value='false'/>
   </properties>
   <children size='1'>

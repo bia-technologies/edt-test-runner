@@ -18,9 +18,9 @@ package ru.biatech.edt.junit.ui.report.actions;
 
 import org.eclipse.jface.action.IAction;
 import ru.biatech.edt.junit.TestViewerPlugin;
-import ru.biatech.edt.junit.ui.ImageProvider;
 import ru.biatech.edt.junit.ui.JUnitMessages;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
+import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
 
 public class FailuresOnlyFilterAction extends SettingsChangeAction {
   public FailuresOnlyFilterAction(TestRunnerViewPart.ReportSettings settings) {

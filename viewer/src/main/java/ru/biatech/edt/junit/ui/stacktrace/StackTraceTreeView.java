@@ -39,8 +39,8 @@ import org.eclipse.swt.widgets.Menu;
 import ru.biatech.edt.junit.model.TestElement;
 import ru.biatech.edt.junit.model.TestErrorInfo;
 import ru.biatech.edt.junit.model.TestStatus;
-import ru.biatech.edt.junit.ui.ImageProvider;
 import ru.biatech.edt.junit.ui.stacktrace.events.Listener;
+import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
 
 import java.util.List;
 

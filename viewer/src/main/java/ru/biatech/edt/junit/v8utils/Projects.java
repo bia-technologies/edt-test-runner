@@ -16,6 +16,7 @@
 
 package ru.biatech.edt.junit.v8utils;
 
+import com._1c.g5.v8.dt.core.platform.IConfigurationAware;
 import com._1c.g5.v8.dt.core.platform.IConfigurationProject;
 import com._1c.g5.v8.dt.core.platform.IExtensionProject;
 import com._1c.g5.v8.dt.core.platform.IV8Project;
@@ -23,6 +24,8 @@ import lombok.experimental.UtilityClass;
 import org.eclipse.emf.ecore.EObject;
 
 import java.util.Collection;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 /**
  * Помощник работы с проектами
@@ -32,6 +35,7 @@ public class Projects {
 
   /**
    * Возвращает проект по имени
+   *
    * @param name имя проекта
    * @return проект
    */
@@ -54,6 +58,7 @@ public class Projects {
 
   /**
    * Возвращает проект, к которому принадлежит объект
+   *
    * @param object объект проекта
    * @return проект
    */
@@ -63,6 +68,7 @@ public class Projects {
 
   /**
    * Возвращает проект конфигурации рабочей области
+   *
    * @return проект конфигурации
    */
   public IConfigurationProject getConfiguration() {
@@ -76,6 +82,7 @@ public class Projects {
 
   /**
    * Возвращает проекты расширения рабочей области
+   *
    * @return
    */
   public Collection<IExtensionProject> getExtensions() {
@@ -84,16 +91,23 @@ public class Projects {
 
   /**
    * Возвращает имя проекта, как обо будет выглядеть в конфигураторе
+   *
    * @param project проект
    * @return имя проекта
    */
   public String getProjectName(IV8Project project) {
-    if (project instanceof IExtensionProject) {
-      return ((IExtensionProject) project).getConfiguration().getName();
-    } else if (project instanceof IConfigurationProject) {
-      return ((IConfigurationProject) project).getConfiguration().getName();
+    if (project instanceof IConfigurationAware) {
+      return ((IConfigurationAware) project).getConfiguration().getName();
     } else {
       return project.getDtProject().getName();
     }
+  }
+
+  public Stream<IExtensionProject> getRelatedExtensions(IConfigurationProject project) {
+    var v8projectManager = VendorServices.getProjectManager();
+
+    return v8projectManager.getProjects(IExtensionProject.class)
+        .stream()
+        .filter((candidate) -> Objects.equals(candidate.getParentProject(), project.getProject()));
   }
 }

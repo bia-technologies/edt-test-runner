@@ -29,11 +29,11 @@ import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.kinds.ITestFinder;
 import ru.biatech.edt.junit.kinds.TestKindRegistry;
 import ru.biatech.edt.junit.launcher.v8.LaunchHelper;
-import ru.biatech.edt.junit.ui.editor.Helper;
+import ru.biatech.edt.junit.ui.editor.EditorHelper;
 import ru.biatech.edt.junit.v8utils.MethodReference;
 import ru.biatech.edt.junit.v8utils.Modules;
-import ru.biatech.edt.junit.v8utils.Projects;
 
+import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -43,8 +43,11 @@ import java.util.Collections;
 @UtilityClass
 public class TestsManager {
 
+  private final char METHOD_NAME_SEPARATOR = '.';
+  private final String METHOD_NAME_SEPARATOR_PATTERN = "\\.";
   /**
    * Проверяет, является ли проектом с тестами
+   *
    * @param project проект для проверки
    * @return признак, это тестовый проект
    */
@@ -54,6 +57,7 @@ public class TestsManager {
 
   /**
    * Проверяет, является ли модулем с тестами
+   *
    * @param module модуль для проверки
    * @return признак, это тестовый модуль
    */
@@ -63,6 +67,7 @@ public class TestsManager {
 
   /**
    * Проверяет, является ли модулем с тестами
+   *
    * @param commonModule модуль для проверки
    * @return признак, это тестовый модуль
    */
@@ -72,7 +77,8 @@ public class TestsManager {
 
   /**
    * Проверяет, является ли метод модуля тестом
-   * @param module модуль, которому принадлежит метод
+   *
+   * @param module     модуль, которому принадлежит метод
    * @param methodName имя метода
    * @return признак, это тест
    */
@@ -82,6 +88,7 @@ public class TestsManager {
 
   /**
    * Возвращает список тестов модуля
+   *
    * @param module модуль с тестами
    * @return список тестов модуля
    */
@@ -96,66 +103,76 @@ public class TestsManager {
 
   /**
    * Возвращает ссылку на метод по полному имени метода
-   * @param project проект, в котором выполняется поиск
+   *
+   * @param project        проект, в котором выполняется поиск
    * @param fullMethodName полное имя метода. Шаблон: ИмяОбъектаМетаданны.ИмяМетода.
    *                       Например: ОбщийМодуль.Метод, Справочник.ИмяСправочника.ИмяМетода
    * @return ссылка на метода
    */
   public MethodReference getMethodReference(IV8Project project, String fullMethodName) {
+    if (project == null) {
+      return null;
+    }
     var moduleName = getTestModuleName(fullMethodName);
     var methodName = getTestMethodName(fullMethodName);
 
-    var moduleOwner = Modules.findCommonModule(project, moduleName); // TODO
-
-    if (moduleOwner == null) {
-      TestViewerPlugin.log().logError("Не удалось найти модуль " + moduleName);
-      return null;
-    }
-    return new MethodReference(moduleOwner.getModule(), methodName);
+    return Modules.findCommonModule(project, moduleName)
+        .map(owner -> new MethodReference(owner.getModule(), methodName))
+        .orElseGet(() -> {
+          TestViewerPlugin.log().logError(MessageFormat.format(Messages.TestsManager_ModuleNotFound, moduleName));
+          return null;
+        });
   }
 
   /**
    * Извлекает имя метода из полного имени метода
+   *
    * @param fullMethodName полное имя метода. Шаблон: ИмяОбъектаМетаданны.ИмяМетода.
    *                       Например: ОбщийМодуль.Метод, Справочник.ИмяСправочника.ИмяМетода
    * @return имя метода
    */
   public String getTestMethodName(String fullMethodName) {
-    var chunks = fullMethodName.split("\\.");
-    if (chunks.length != 3 && chunks.length != 2) {
-      throw new IllegalArgumentException("Полное имя теста должно состоять из 2 или 3 блоков");
-    }
+    checkFullMethodName(fullMethodName);
+    var chunks = fullMethodName.split(METHOD_NAME_SEPARATOR_PATTERN);
     return chunks[chunks.length - 1];
   }
 
   /**
    * Извлекает имя объекта методанных из полного имени метода
+   *
    * @param fullMethodName полное имя метода. Шаблон: ИмяОбъектаМетаданны.ИмяМетода.
    *                       Например: ОбщийМодуль.Метод, Справочник.ИмяСправочника.ИмяМетода
    * @return имя объекта метаданных
    */
   public String getTestModuleName(String fullMethodName) {
-    var chunks = fullMethodName.split("\\.");
-    if (chunks.length != 3 && chunks.length != 2) {
-      throw new IllegalArgumentException("Полное имя теста должно состоять из 2 или 3 блоков");
+    checkFullMethodName(fullMethodName);
+    var chunks = fullMethodName.split(METHOD_NAME_SEPARATOR_PATTERN);
+    return chunks.length == 2 ? chunks[0] : chunks[0] + METHOD_NAME_SEPARATOR + chunks[1];
+  }
+
+  private void checkFullMethodName(String fullMethodName) {
+    var l = fullMethodName.split(METHOD_NAME_SEPARATOR_PATTERN).length;
+    if (l != 3 && l != 2) {
+      throw new IllegalArgumentException(Messages.TestsManager_InvalidFullMethodName);
     }
-    return chunks.length == 2 ? chunks[0] : chunks[0] + "." + chunks[1];
   }
 
   /**
    * Запускает тест из редактора
-   * @param editor редактор
+   *
+   * @param editor     редактор
    * @param methodName имя теста
    * @param launchMode режим запуска
    */
   public void runTestMethod(XtextEditor editor, String methodName, String launchMode) {
-    var moduleName = ((CommonModule) Helper.getModule(editor).getOwner()).getName();
+    var moduleName = ((CommonModule) EditorHelper.getModule(editor).getOwner()).getName();
     LaunchHelper.runTestMethod(moduleName, methodName, launchMode);
   }
 
   /**
    * Запускает тест модуля
-   * @param module модуль
+   *
+   * @param module     модуль
    * @param methodName имя теста
    * @param launchMode режим запуска
    */

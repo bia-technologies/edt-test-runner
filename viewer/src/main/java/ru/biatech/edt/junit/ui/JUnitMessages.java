@@ -63,16 +63,6 @@ public final class JUnitMessages extends NLS {
   public static String CollapseAllAction_text;
   public static String CollapseAllAction_tooltip;
 
-  // GotoReferencedTestAction
-  public static String GotoReferencedTestAction_dialog_error;
-  public static String GotoReferencedTestAction_dialog_error_nomethod;
-  public static String GotoReferencedTestAction_dialog_message;
-  public static String GotoReferencedTestAction_dialog_select_message;
-  public static String GotoReferencedTestAction_dialog_title;
-  public static String GotoReferencedTestAction_selectdialog_title;
-
-  public static String GotoReferencedTestAction_error_model_not_available;
-
   // JUnitContainerWizardPage
   public static String JUnitContainerWizardPage_combo_label;
   public static String JUnitContainerWizardPage_error_problem_configuring_container;
@@ -164,8 +154,8 @@ public final class JUnitMessages extends NLS {
   public static String LaunchConfigRenameChange_name;
   public static String LaunchConfigSetAttributeChange_name;
 
-  public static String RerunAction_label_debug;
-  public static String RerunAction_label_run;
+  public static String Debug_Test_Label;
+  public static String Run_Test_Label;
   public static String RerunAction_label_rerun;
   public static String ScrollLockAction_action_label;
   public static String ScrollLockAction_action_tooltip;
@@ -211,11 +201,8 @@ public final class JUnitMessages extends NLS {
   public static String TestRunnerViewPart_rerunaction_tooltip;
   public static String TestRunnerViewPart_rerunfailuresaction_label;
   public static String TestRunnerViewPart_rerunfailuresaction_tooltip;
-  public static String TestRunnerViewPart_rerunFailedFirstLaunchConfigName;
   public static String TestRunnerViewPart_stopaction_text;
   public static String TestRunnerViewPart_stopaction_tooltip;
-  public static String TestRunnerViewPart_terminate_message;
-  public static String TestRunnerViewPart_terminate_title;
   public static String TestRunnerViewPart_toggle_automatic_label;
   public static String TestRunnerViewPart_toggle_horizontal_label;
   public static String TestRunnerViewPart_toggle_vertical_label;
@@ -242,7 +229,6 @@ public final class JUnitMessages extends NLS {
   public static String TestSessionLabelProvider_testName_elapsedTimeInSeconds;
   public static String TestSessionLabelProvider_testName_JUnitVersion;
   public static String TestSessionLabelProvider_testMethodName_className;
-  public static String TestRunSession_unrootedTests;
 
   public static String LaunchConfigurationDelegate_Launching;
 
@@ -257,12 +243,7 @@ public final class JUnitMessages extends NLS {
   public static String JUnitModel_could_not_read;
   public static String JUnitModel_importing_from_url;
   public static String TestRunHandler_lines_read;
-  public static String Launcher_ConfigurationLocation;
-  public static String Launcher_Launch;
-
   public static String TestMethodActionDelegate_CollectingMarkers;
-  public static String TestMethodActionDelegate_Debug;
-  public static String TestMethodActionDelegate_Run;
   public static String TestMethodMarker_LaunchTest;
   public static String TestMethodMarker_MarkerCreationError;
   public static String TestMethodMarker_MarkersCleanError;

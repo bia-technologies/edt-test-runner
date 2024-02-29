@@ -17,7 +17,7 @@
 package ru.biatech.edt.junit.ui.stacktrace;
 
 import org.eclipse.swt.graphics.Color;
-import ru.biatech.edt.junit.ui.Colors;
+import ru.biatech.edt.junit.ui.viewsupport.Colors;
 
 /**
  * Помощник формирования HTML

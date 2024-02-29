@@ -24,7 +24,7 @@ import com._1c.g5.v8.dt.bsl.model.Module;
 import com._1c.g5.v8.dt.bsl.model.SimpleStatement;
 import com._1c.g5.v8.dt.bsl.model.StaticFeatureAccess;
 import com._1c.g5.v8.dt.bsl.model.StringLiteral;
-import com._1c.g5.v8.dt.core.platform.IExtensionProject;
+import com._1c.g5.v8.dt.core.platform.IConfigurationAware;
 import com._1c.g5.v8.dt.core.platform.IV8Project;
 import com._1c.g5.v8.dt.metadata.mdclass.MdObject;
 import org.eclipse.core.runtime.CoreException;
@@ -33,6 +33,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.kinds.ITestFinder;
 import ru.biatech.edt.junit.launcher.v8.LaunchHelper;
+import ru.biatech.edt.junit.utils.StringUtilities;
 import ru.biatech.edt.junit.v8utils.MethodReference;
 import ru.biatech.edt.junit.v8utils.Modules;
 import ru.biatech.edt.junit.v8utils.Projects;
@@ -45,7 +46,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -54,30 +54,14 @@ import java.util.stream.Collectors;
  */
 public class TestFinder implements ITestFinder {
 
-  /**
-   * Имя метода регистрации тестов в yaxUnit
-   */
-  public static final String REGISTRATION_METHOD_NAME = "ИсполняемыеСценарии".toLowerCase();
-
-  private static final String REGISTRATION_MODULE_NAME = "ЮТТесты";
-
-  private static final Set<String> TEST_REGISTRATION_METHOD_NAMES = Set.of(
-      "Тест".toLowerCase(),
-      "ТестКлиент".toLowerCase(),
-      "ТестСервер".toLowerCase(),
-      "ДобавитьТест".toLowerCase(),
-      "ДобавитьКлиентскийТест".toLowerCase(),
-      "ДобавитьСерверныйТест".toLowerCase()
-  );
-
-  private static final NamingScheme NAMING_SCHEME = new NamingScheme();
+  public static final NamingScheme NAMING_SCHEME = new NamingScheme();
 
   /**
    * @inheritDoc
    */
   @Override
   public boolean isTestProject(IV8Project project) {
-    return project instanceof IExtensionProject;
+    return Engine.isTestProject(project);
   }
 
   /**
@@ -85,16 +69,7 @@ public class TestFinder implements ITestFinder {
    */
   @Override
   public boolean isTestModule(Module module) {
-    var project = Projects.getParentProject(module);
-    if (!isTestProject(project)) {
-      return false;
-    }
-    for (Method m : module.allMethods()) {
-      if (isRootTestMethod(m)) {
-        return true;
-      }
-    }
-    return false;
+    return Engine.isTestModule(module);
   }
 
   /**
@@ -125,7 +100,7 @@ public class TestFinder implements ITestFinder {
         continue;
       }
       moduleMethods.put(method.getName().toLowerCase(), method);
-      if (isRootTestMethod(method)) {
+      if (Engine.isRegistrationTestsMethod(method)) {
         rootMethod = method;
       }
     }
@@ -162,7 +137,7 @@ public class TestFinder implements ITestFinder {
     var owner = (MdObject) module.getOwner();
     var names = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
     var result = new ArrayList<MethodReference>();
-    names.addAll(Arrays.asList(NAMING_SCHEME.getTestModuleNames(owner)));
+    names.addAll(Arrays.asList(NAMING_SCHEME.getTestSuiteNames(owner)));
 
     var testModules = LaunchHelper.getTestExtensions()
         .stream()
@@ -208,12 +183,23 @@ public class TestFinder implements ITestFinder {
 
     var baseModuleInfo = NAMING_SCHEME.getBaseModuleName(testModuleName);
 
-    var baseProject = Projects.getConfiguration();
-    var baseModule = Modules.findModule(baseProject, baseModuleInfo.getMdClass(), baseModuleInfo.getObjectName());
+    IV8Project baseProject = Projects.getConfiguration();
+    MdObject baseModule = Modules.findModule(baseProject, baseModuleInfo.getMdClass(), baseModuleInfo.getObjectName());
 
-    if (baseModule != null) {
-      baseModule = (MdObject) EcoreUtil.resolve(baseModule, baseProject.getConfiguration());
+    if (baseModule == null) {
+      for (var p : Projects.getExtensions()) {
+        baseModule = Modules.findModule(p, baseModuleInfo.getMdClass(), baseModuleInfo.getObjectName());
+        if (baseModule != null) {
+          baseProject = p;
+          break;
+        }
+      }
     }
+    if (baseModule == null) {
+      return Collections.emptyList();
+    }
+
+    baseModule = (MdObject) EcoreUtil.resolve(baseModule, ((IConfigurationAware) baseProject).getConfiguration());
 
     var testModules = Modules.getObjectModules(baseModule);
     for (var testModule : testModules) {
@@ -228,15 +214,11 @@ public class TestFinder implements ITestFinder {
     return result;
   }
 
-  private boolean isRootTestMethod(Method method) {
-    return method.isExport() && method.getName().equalsIgnoreCase(REGISTRATION_METHOD_NAME);
-  }
-
   private boolean fill(Invocation invocation, List<String> names) {
     var ma = invocation.getMethodAccess();
     String methodName = invocation.getMethodAccess().getName();
-    if (TEST_REGISTRATION_METHOD_NAMES.contains(methodName.toLowerCase()) && !invocation.getParams().isEmpty()) {
-      String param = String.join("", ((StringLiteral) invocation.getParams().get(0)).lines(false));
+    if (Constants.TEST_REGISTRATION_METHOD_NAMES.contains(methodName.toLowerCase()) && !invocation.getParams().isEmpty()) {
+      String param = String.join(StringUtilities.EMPTY_STRING, ((StringLiteral) invocation.getParams().get(0)).lines(false));
       names.add(param);
     }
     Expression source = null;
@@ -247,13 +229,12 @@ public class TestFinder implements ITestFinder {
     }
 
     if (source instanceof StaticFeatureAccess) {
-      return ((StaticFeatureAccess) source).getName().equalsIgnoreCase(REGISTRATION_MODULE_NAME);
+      return ((StaticFeatureAccess) source).getName().equalsIgnoreCase(Constants.REGISTRATION_MODULE_NAME);
     } else if (source instanceof Invocation) {
       return fill((Invocation) source, names);
     } else {
       return false;
     }
-
   }
 
   private List<String> fill(Invocation invocation) {

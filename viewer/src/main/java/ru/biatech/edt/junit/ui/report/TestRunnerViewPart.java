@@ -101,7 +101,6 @@ import ru.biatech.edt.junit.model.TestElement;
 import ru.biatech.edt.junit.model.TestRunSession;
 import ru.biatech.edt.junit.model.TestStatus;
 import ru.biatech.edt.junit.ui.IJUnitHelpContextIds;
-import ru.biatech.edt.junit.ui.ImageProvider;
 import ru.biatech.edt.junit.ui.JUnitMessages;
 import ru.biatech.edt.junit.ui.JUnitUIPreferencesConstants;
 import ru.biatech.edt.junit.ui.report.actions.ActivateOnErrorAction;
@@ -120,6 +119,7 @@ import ru.biatech.edt.junit.ui.report.actions.ToggleSortingAction;
 import ru.biatech.edt.junit.ui.report.history.RunnerViewHistory;
 import ru.biatech.edt.junit.ui.stacktrace.FailureViewer;
 import ru.biatech.edt.junit.ui.stacktrace.actions.CopyTraceAction;
+import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
 
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;

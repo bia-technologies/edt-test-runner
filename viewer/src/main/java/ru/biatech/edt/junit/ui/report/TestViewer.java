@@ -58,12 +58,12 @@ import ru.biatech.edt.junit.model.TestRunSession;
 import ru.biatech.edt.junit.model.TestStatus;
 import ru.biatech.edt.junit.model.TestSuiteElement;
 import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.labelProvider.TestSessionLabelProvider;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart.SortingCriterion;
 import ru.biatech.edt.junit.ui.report.actions.CopyFailureListAction;
-import ru.biatech.edt.junit.ui.report.actions.OpenUnderTestMethodAction;
 import ru.biatech.edt.junit.ui.report.actions.OpenTestAction;
+import ru.biatech.edt.junit.ui.report.actions.OpenUnderTestMethodAction;
 import ru.biatech.edt.junit.ui.report.actions.RerunAction;
-import ru.biatech.edt.junit.ui.report.contentProviders.TestSessionLabelProvider;
 import ru.biatech.edt.junit.ui.report.contentProviders.TestSessionTableContentProvider;
 import ru.biatech.edt.junit.ui.report.contentProviders.TestSessionTreeContentProvider;
 import ru.biatech.edt.junit.ui.stacktrace.actions.CopyTraceAction;
@@ -428,11 +428,12 @@ public class TestViewer {
         }
       } else {
         TestCaseElement testCaseElement = (TestCaseElement) testElement;
-        manager.add(getOpenTestAction(testCaseElement));
 
-        manager.add(new OpenUnderTestMethodAction(fTestRunnerPart, testCaseElement));
-        manager.add(new Separator());
         addRerunActions(manager, testCaseElement);
+        manager.add(new Separator());
+        manager.add(getOpenTestAction(testCaseElement));
+        manager.add(new OpenUnderTestMethodAction(fTestRunnerPart, testCaseElement));
+
       }
       if (fLayoutMode == TestRunnerViewPart.LAYOUT_HIERARCHICAL) {
         manager.add(new Separator());
@@ -457,8 +458,8 @@ public class TestViewer {
     if (fTestRunnerPart.lastLaunchIsKeptAlive()) {
       manager.add(new RerunAction(JUnitMessages.RerunAction_label_rerun, fTestRunnerPart, className, ILaunchManager.RUN_MODE));
     } else {
-      manager.add(new RerunAction(JUnitMessages.RerunAction_label_run, fTestRunnerPart, className, ILaunchManager.RUN_MODE));
-      manager.add(new RerunAction(JUnitMessages.RerunAction_label_debug, fTestRunnerPart, className, ILaunchManager.DEBUG_MODE));
+      manager.add(new RerunAction(JUnitMessages.Run_Test_Label, fTestRunnerPart, className, ILaunchManager.RUN_MODE));
+      manager.add(new RerunAction(JUnitMessages.Debug_Test_Label, fTestRunnerPart, className, ILaunchManager.DEBUG_MODE));
     }
   }
 

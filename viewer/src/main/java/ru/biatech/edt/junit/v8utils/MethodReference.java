@@ -19,9 +19,7 @@ package ru.biatech.edt.junit.v8utils;
 import com._1c.g5.v8.dt.bsl.model.Method;
 import com._1c.g5.v8.dt.bsl.model.Module;
 import com.google.common.base.Strings;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Value;
 
 /**
  * Ссылка на метод, включает в себя ссылку на модуль.

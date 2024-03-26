@@ -2,11 +2,12 @@
 <?compositeMetadataRepository version='1.0.0'?>
 <repository name='DEV. EDT Test Runner Repository. All Versions' type='org.eclipse.equinox.internal.p2.metadata.repository.CompositeMetadataRepository' version='1.0.0'>
   <properties size='2'>
-    <property name='p2.timestamp' value='1682690171981'/>
+    <property name='p2.timestamp' value='1711496655752'/>
     <property name='p2.atomic.composite.loading' value='false'/>
   </properties>
-  <children size='2'>
+  <children size='3'>
     <child location='updates/22.x'/>
     <child location='updates/23.x'/>
+    <child location='updates/24.x'/>
   </children>
 </repository>

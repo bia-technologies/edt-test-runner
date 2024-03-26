@@ -110,7 +110,7 @@ public class Engine {
 
     if (owner instanceof CommonModule) {
       var commonModule = (CommonModule) owner;
-      if (commonModule.isClientManagedApplication()) {
+      if (commonModule.isClientManagedApplication() || commonModule.isServerCall()) {
         testSuiteModule.setClientManagedApplication(true);
       }
       if (commonModule.isClientOrdinaryApplication()) {

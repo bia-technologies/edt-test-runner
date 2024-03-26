@@ -100,7 +100,7 @@ public class MockCreator {
 
     var editorContext = new EditionContext(editor);
     if (existMethod.isPresent()) {
-      var node = NodeModelUtils.findActualNodeFor(extensionModule);
+      var node = NodeModelUtils.findActualNodeFor(existMethod.get());
       editorContext.replace(node.getOffset(), node.getLength(), content);
     } else {
       editorContext.append(content);

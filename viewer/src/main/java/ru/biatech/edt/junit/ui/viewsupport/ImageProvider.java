@@ -18,6 +18,8 @@ package ru.biatech.edt.junit.ui.viewsupport;
 
 import lombok.Getter;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.DecorationOverlayIcon;
+import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbench;
@@ -39,25 +41,19 @@ public class ImageProvider {
   public static final String SUITE_FAIL_ICON = "obj16/tsuitefail.png"; //$NON-NLS-1$
   public static final String SUITE_RUNNING_ICON = "obj16/tsuiterun.png"; //$NON-NLS-1$
 
-  // TEST RUN
-  public static final String TEST_RUN_OK_ICON = "eview16/junitsucc.png"; //$NON-NLS-1$
-  public static final String TEST_RUN_FAIL_ICON = "eview16/juniterr.png"; //$NON-NLS-1$
-
   // TEST
-  public static final String TEST_ICON = "obj16/test.png"; //$NON-NLS-1$
-  public static final String TEST_OK_ICON = "obj16/testok.png"; //$NON-NLS-1$
-  public static final String TEST_ERROR_ICON = "obj16/testerr.png"; //$NON-NLS-1$
-  public static final String TEST_FAIL_ICON = "obj16/testfail.png"; //$NON-NLS-1$
-  public static final String TEST_RUNNING_ICON = "obj16/testrun.png"; //$NON-NLS-1$
-  public static final String TEST_IGNORED_ICON = "obj16/testignored.png"; //$NON-NLS-1$
-  public static final String TEST_ASSUMPTION_FAILURE_ICON = "obj16/testassumptionfailed.png"; //$NON-NLS-1$
+  public static final String TEST_ICON = "test-state/testError.png"; //$NON-NLS-1$
+  public static final String TEST_OK_ICON = "test-state/testPassed.png"; //$NON-NLS-1$
+  public static final String TEST_ERROR_ICON = "test-state/testError.png"; //$NON-NLS-1$
+  public static final String TEST_FAIL_ICON = "test-state/testFailed.png"; //$NON-NLS-1$
+  public static final String TEST_IGNORED_ICON = "test-state/testIgnored.png"; //$NON-NLS-1$
+  public static final String TEST_SKIPPED_ICON = "test-state/testSkipped.png"; //$NON-NLS-1$
+  public static final String TEST_ASSUMPTION_FAILURE_ICON = "test-state/testSkipped.png"; //$NON-NLS-1$
 
   // COMMON
   public static final String FAILURES_ICON = "obj16/failures.png"; //$NON-NLS-1$
-  public static final String EXCEPTION_ICON = "obj16/exc_catch.png"; //$NON-NLS-1$
   public static final String STACK_ICON = "obj16/stkfrm_obj.png"; //$NON-NLS-1$
   public static final String ERROR_ICON = "obj16/error.png"; //$NON-NLS-1$
-  public static final String TARGET_ICON = "obj16/target.png"; //$NON-NLS-1$
 
   // ACTIONS
   public static final String ACTION_NEW_TESTCASE = "actions16/item-add.png"; //$NON-NLS-1$
@@ -71,6 +67,14 @@ public class ImageProvider {
   public static final String ACTION_COMPARE = "actions16/compare.png"; //$NON-NLS-1$
   public static final String ACTION_COMPARE_DISABLED = "actions16/compare-disable.png"; //$NON-NLS-1$
   public static final String ACTION_NEW_MOCK = "actions16/mock.png"; //$NON-NLS-1$
+
+  public static final String ICONS_COLLAPSE_ALL = "elcl16/collapseall.png"; //$NON-NLS-1$
+  public static final String ICONS_EXPAND_ALL = "elcl16/expandall.png"; //$NON-NLS-1$
+
+  // OVERLAY
+  public static final String OVERLAY_ERROR = "ovr16/error_ovr.png"; //$NON-NLS-1$
+  public static final String OVERLAY_FAILED = "ovr16/failed_ovr.png"; //$NON-NLS-1$
+  public static final String OVERLAY_SUCCESS = "ovr16/success_ovr.png"; //$NON-NLS-1$
 
   @Getter
   private final ImageDescriptor suiteIconDescriptor = getImageDescriptor(SUITE_ICON);
@@ -86,9 +90,9 @@ public class ImageProvider {
   @Getter(lazy = true)
   private final Image logo = createManagedImage(LOGO);
   @Getter(lazy = true)
-  private final Image testRunOKIcon = createManagedImage(TEST_RUN_OK_ICON);
+  private final Image testRunOKIcon = createOverlayIcon(getLogo(), OVERLAY_SUCCESS);
   @Getter(lazy = true)
-  private final Image testRunFailIcon = createManagedImage(TEST_RUN_FAIL_ICON);
+  private final Image testRunFailIcon = createOverlayIcon(getLogo(), OVERLAY_FAILED);
   @Getter(lazy = true)
   private final Image testIcon = createManagedImage(TEST_ICON);
   @Getter(lazy = true)
@@ -99,8 +103,6 @@ public class ImageProvider {
   private final Image testFailIcon = createManagedImage(TEST_FAIL_ICON);
   @Getter(lazy = true)
   private final Image testAssumptionFailureIcon = createManagedImage(TEST_ASSUMPTION_FAILURE_ICON);
-  @Getter(lazy = true)
-  private final Image testRunningIcon = createManagedImage(TEST_RUNNING_ICON);
   @Getter(lazy = true)
   private final Image testIgnoredIcon = createManagedImage(TEST_IGNORED_ICON);
   @Getter(lazy = true)
@@ -119,8 +121,6 @@ public class ImageProvider {
   private final Image errorIcon = createManagedImage(ERROR_ICON);
   @Getter(lazy = true)
   private final Image stackIcon = createManagedImage(STACK_ICON);
-  @Getter(lazy = true)
-  private final Image targetIcon = createManagedImage(TARGET_ICON);
   @Getter(lazy = true)
   private final Image messageIcon = createManagedImage(getSharedImage(ISharedImages.IMG_OBJS_INFO_TSK));
 
@@ -143,7 +143,7 @@ public class ImageProvider {
   private final Image actionNewMock = createManagedImage(ACTION_NEW_MOCK);
 
   public static ImageDescriptor getImageDescriptor(String relativePath) {
-    return TestViewerPlugin.ui().getImageDescriptor(relativePath);
+    return TestViewerPlugin.getDefault().createImageDescriptor(relativePath, true);
   }
 
   public static ImageDescriptor getSharedImage(String imageID) {
@@ -169,5 +169,13 @@ public class ImageProvider {
 
   private Image createManagedImage(String path) {
     return createManagedImage(getImageDescriptor(path));
+  }
+
+  private Image createOverlayIcon(Image base, String second) {
+    return createOverlayIcon(base, getImageDescriptor(second));
+  }
+
+  private Image createOverlayIcon(Image base, ImageDescriptor second) {
+    return new DecorationOverlayIcon(base, second, IDecoration.BOTTOM_RIGHT).createImage();
   }
 }

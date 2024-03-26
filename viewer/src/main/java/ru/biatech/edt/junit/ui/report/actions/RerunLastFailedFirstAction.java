@@ -17,7 +17,6 @@
 package ru.biatech.edt.junit.ui.report.actions;
 
 import org.eclipse.jface.action.Action;
-import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.launcher.v8.RerunHelper;
 import ru.biatech.edt.junit.ui.JUnitMessages;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
@@ -29,7 +28,7 @@ public class RerunLastFailedFirstAction extends Action {
     this.testRunnerViewPart = testRunnerViewPart;
     setText(JUnitMessages.TestRunnerViewPart_rerunfailuresaction_label);
     setToolTipText(JUnitMessages.TestRunnerViewPart_rerunfailuresaction_tooltip);
-    TestViewerPlugin.ui().setLocalImageDescriptors(this, "relaunchf.png"); //$NON-NLS-1$
+    ActionsSupport.setLocalImageDescriptors(this, "rerun-failed.png"); //$NON-NLS-1$
     setEnabled(false);
     setActionDefinitionId(TestRunnerViewPart.RERUN_FAILED_FIRST_COMMAND);
   }

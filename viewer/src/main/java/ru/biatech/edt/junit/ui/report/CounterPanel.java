@@ -24,8 +24,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
 
 import java.text.MessageFormat;
 
@@ -39,9 +39,7 @@ public class CounterPanel extends Composite {
   protected int fTotal;
   protected int fIgnoredCount;
   protected int fAssumptionFailedCount;
-
-  private final Image fErrorIcon = TestViewerPlugin.ui().createImage("ovr16/error_ovr.png"); //$NON-NLS-1$
-  private final Image fFailureIcon = TestViewerPlugin.ui().createImage("ovr16/failed_ovr.png"); //$NON-NLS-1$
+  private final ImageProvider provider = new ImageProvider();
 
   public CounterPanel(Composite parent) {
     super(parent, SWT.WRAP);
@@ -52,15 +50,10 @@ public class CounterPanel extends Composite {
     setLayout(gridLayout);
 
     fNumberOfRuns = createLabel(JUnitMessages.CounterPanel_label_runs, null, " 0/0  "); //$NON-NLS-1$
-    fNumberOfErrors = createLabel(JUnitMessages.CounterPanel_label_errors, fErrorIcon, " 0 "); //$NON-NLS-1$
-    fNumberOfFailures = createLabel(JUnitMessages.CounterPanel_label_failures, fFailureIcon, " 0 "); //$NON-NLS-1$
+    fNumberOfErrors = createLabel(JUnitMessages.CounterPanel_label_errors, provider.getTestErrorIcon(), " 0 "); //$NON-NLS-1$
+    fNumberOfFailures = createLabel(JUnitMessages.CounterPanel_label_failures, provider.getTestFailIcon(), " 0 "); //$NON-NLS-1$
 
-    addDisposeListener(e -> disposeIcons());
-  }
-
-  private void disposeIcons() {
-    fErrorIcon.dispose();
-    fFailureIcon.dispose();
+    addDisposeListener(e -> provider.dispose());
   }
 
   private Text createLabel(String name, Image image, String init) {
@@ -84,19 +77,8 @@ public class CounterPanel extends Composite {
     return value;
   }
 
-  public void reset() {
-    setErrorValue(0);
-    setFailureValue(0);
-    setRunValue(0, 0, 0);
-    fTotal = 0;
-  }
-
   public void setTotal(int value) {
     fTotal = value;
-  }
-
-  public int getTotal() {
-    return fTotal;
   }
 
   public void setRunValue(int value, int ignoredCount, int assumptionFailureCount) {

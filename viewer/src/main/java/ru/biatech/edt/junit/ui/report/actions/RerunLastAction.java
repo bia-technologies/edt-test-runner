@@ -17,7 +17,6 @@
 package ru.biatech.edt.junit.ui.report.actions;
 
 import org.eclipse.jface.action.Action;
-import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.launcher.v8.RerunHelper;
 import ru.biatech.edt.junit.ui.JUnitMessages;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
@@ -29,9 +28,12 @@ public class RerunLastAction extends Action {
     this.testRunnerViewPart = testRunnerViewPart;
     setText(JUnitMessages.TestRunnerViewPart_rerunaction_label);
     setToolTipText(JUnitMessages.TestRunnerViewPart_rerunaction_tooltip);
-    TestViewerPlugin.ui().setLocalImageDescriptors(this, "relaunch.png"); //$NON-NLS-1$
+
     setEnabled(false);
+
     setActionDefinitionId(TestRunnerViewPart.RERUN_LAST_COMMAND);
+
+    ActionsSupport.setLocalImageDescriptors(this, "rerun.png"); //$NON-NLS-1$
   }
 
   @Override

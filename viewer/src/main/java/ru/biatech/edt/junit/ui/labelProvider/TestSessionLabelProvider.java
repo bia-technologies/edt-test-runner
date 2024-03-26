@@ -201,7 +201,7 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
       if (status.isNotRun())
         return imageProvider.getTestIcon();
       else if (status.isRunning())
-        return imageProvider.getTestRunningIcon();
+        throw new IllegalStateException("Running tests not supported");
       else if (status.isError())
         return imageProvider.getTestErrorIcon();
       else if (status.isFailure())

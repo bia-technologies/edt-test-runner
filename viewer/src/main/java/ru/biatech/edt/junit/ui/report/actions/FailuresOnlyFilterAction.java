@@ -17,7 +17,6 @@
 package ru.biatech.edt.junit.ui.report.actions;
 
 import org.eclipse.jface.action.IAction;
-import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.ui.JUnitMessages;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
 import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
@@ -26,7 +25,7 @@ public class FailuresOnlyFilterAction extends SettingsChangeAction {
   public FailuresOnlyFilterAction(TestRunnerViewPart.ReportSettings settings) {
     super(settings, JUnitMessages.TestRunnerViewPart_show_failures_only, IAction.AS_CHECK_BOX);
     setToolTipText(JUnitMessages.TestRunnerViewPart_show_failures_only);
-    setImageDescriptor(TestViewerPlugin.ui().getImageDescriptor(ImageProvider.FAILURES_ICON));
+    setImageDescriptor(ImageProvider.getImageDescriptor(ImageProvider.FAILURES_ICON));
   }
 
   @Override

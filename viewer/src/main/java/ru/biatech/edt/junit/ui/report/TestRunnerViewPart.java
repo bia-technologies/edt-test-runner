@@ -149,9 +149,9 @@ public class TestRunnerViewPart extends ViewPart {
   public static final String PREF_LAST_PATH = "lastImportExportPath"; //$NON-NLS-1$
 
   private FailureViewer failureViewer;
+  @Getter
   private final ImageProvider imageProvider;
   private ProgressBar fProgressBar;
-  private ProgressImages fProgressImages;
   private Image fViewImage;
   private CounterPanel fCounterPanel;
   private volatile String fInfoMessage;
@@ -172,7 +172,6 @@ public class TestRunnerViewPart extends ViewPart {
    */
   private Action fNextAction;
   private Action fPreviousAction;
-  private StopAction fStopAction;
   private CopyTraceAction fCopyAction;
   private Action fRerunLastTestAction;
   private IHandlerActivation fRerunLastActivation;
@@ -259,18 +258,6 @@ public class TestRunnerViewPart extends ViewPart {
     return getSite().getAdapter(IWorkbenchSiteProgressService.class);
   }
 
-  /**
-   * Stops the currently running test and shuts down the RemoteTestRunner
-   */
-  public void stopTest() {
-    if (fTestRunSession != null) {
-      if (fTestRunSession.isRunning()) {
-        setContentDescription(JUnitMessages.TestRunnerViewPart_message_stopping);
-      }
-      fTestRunSession.stopTestRun();
-    }
-  }
-
   public void selectNextFailure() {
     fTestViewer.selectFailure(true);
   }
@@ -306,9 +293,6 @@ public class TestRunnerViewPart extends ViewPart {
     handlerService.deactivateHandler(fRerunFailedFirstActivation);
     setActiveTestRunSession(null);
 
-    if (fProgressImages != null) {
-      fProgressImages.dispose();
-    }
     getViewSite().getPage().removePartListener(fPartListener);
 
     imageProvider.dispose();
@@ -318,14 +302,11 @@ public class TestRunnerViewPart extends ViewPart {
     if (failureViewer != null) {
       failureViewer.dispose();
     }
+    fTestViewer.dispose();
   }
 
   public IV8Project getLaunchedProject() {
     return fTestRunSession == null ? null : fTestRunSession.getLaunchedProject();
-  }
-
-  public ImageProvider getImageProvider() {
-    return imageProvider;
   }
 
   public boolean lastLaunchIsKeptAlive() {
@@ -387,15 +368,10 @@ action enablement
       registerInfoMessage(" "); //$NON-NLS-1$
       stopUpdateJobs();
 
-      fStopAction.setEnabled(false);
       fRerunFailedFirstAction.setEnabled(false);
       fRerunLastTestAction.setEnabled(false);
 
     } else {
-      if (fTestRunSession.isStarting() || fTestRunSession.isRunning() || fTestRunSession.isKeptAlive()) {
-        fTestSessionListener = new TestSessionListener();
-        fTestRunSession.addTestSessionListener(fTestSessionListener);
-      }
       if (!fTestRunSession.isStarting() && !settings.isShowOnErrorOnly()) {
         showTestResultsView();
       }
@@ -409,19 +385,10 @@ action enablement
       updateRerunFailedFirstAction();
       fRerunLastTestAction.setEnabled(fTestRunSession.getLaunch() != null);
 
-      if (fTestRunSession.isRunning()) {
-        startUpdateJobs();
+      stopUpdateJobs();
 
-        fStopAction.setEnabled(true);
-        fTestViewer.setSortingCriterion(SortingCriterion.SORT_BY_EXECUTION_ORDER);
-
-      } else /* old or fresh session: don't want jobs at this stage */ {
-        stopUpdateJobs();
-
-        fStopAction.setEnabled(fTestRunSession.isKeptAlive());
-        fTestViewer.expandFirstLevel();
-        settings.setSortingCriterion(settings.getSortingCriterion());
-      }
+      fTestViewer.expandFirstLevel();
+      settings.setSortingCriterion(settings.getSortingCriterion());
     }
     return deactivatedSession;
   }
@@ -515,7 +482,6 @@ action enablement
         return;
       }
       resetViewIcon();
-      fStopAction.setEnabled(false);
       updateRerunFailedFirstAction();
     });
     stopUpdateJobs();
@@ -535,7 +501,7 @@ action enablement
   }
 
   private void updateViewIcon() {
-    if (fTestRunSession == null || fTestRunSession.isStopped() || fTestRunSession.isRunning() || fTestRunSession.getStartedCount() == 0) {
+    if (fTestRunSession == null || fTestRunSession.getStartedCount() == 0) {
       fViewImage = fOriginalViewImage;
     } else if (hasErrorsOrFailures()) {
       fViewImage = imageProvider.getTestRunFailIcon();
@@ -547,18 +513,7 @@ action enablement
 
   private void updateViewTitleProgress() {
     if (fTestRunSession != null) {
-      if (fTestRunSession.isRunning()) {
-        Image progress = fProgressImages.getImage(fTestRunSession.getStartedCount(),
-            fTestRunSession.getTotalCount(),
-            fTestRunSession.getErrorCount(),
-            fTestRunSession.getFailureCount());
-        if (progress != fViewImage) {
-          fViewImage = progress;
-          firePropertyChange(IWorkbenchPart.PROP_TITLE);
-        }
-      } else {
-        updateViewIcon();
-      }
+      updateViewIcon();
     } else {
       resetViewIcon();
     }
@@ -635,10 +590,8 @@ action enablement
     int ticksDone;
     if (startedCount == 0) {
       ticksDone = 0;
-    } else if (startedCount == totalCount && !fTestRunSession.isRunning()) {
-      ticksDone = totalCount;
     } else {
-      ticksDone = startedCount - 1;
+      ticksDone = totalCount;
     }
 
     fProgressBar.reset(hasErrorsOrFailures, stopped, ticksDone, totalCount);
@@ -749,7 +702,6 @@ action enablement
     addDropAdapter(parent);
 
     fOriginalViewImage = getTitleImage();
-    fProgressImages = new ProgressImages();
     PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IJUnitHelpContextIds.RESULTS_VIEW);
 
     getViewSite().getPage().addPartListener(fPartListener);
@@ -895,9 +847,6 @@ action enablement
     fPreviousAction.setEnabled(false);
     actionBars.setGlobalActionHandler(ActionFactory.PREVIOUS.getId(), fPreviousAction);
 
-    fStopAction = new StopAction();
-    fStopAction.setEnabled(false);
-
     fRerunLastTestAction = new RerunLastAction(this);
     IHandlerService handlerService = getSite().getWorkbenchWindow().getService(IHandlerService.class);
     IHandler handler = new AbstractHandler() {
@@ -937,7 +886,6 @@ action enablement
     toolBar.add(new Separator());
     toolBar.add(fRerunLastTestAction);
     toolBar.add(fRerunFailedFirstAction);
-    toolBar.add(fStopAction);
     toolBar.add(fViewHistory.createHistoryDropDownAction());
 
 
@@ -1121,7 +1069,6 @@ action enablement
 
       startUpdateJobs();
 
-      fStopAction.setEnabled(true);
       fRerunLastTestAction.setEnabled(true);
 
       // While tests are running, always use the execution order
@@ -1141,7 +1088,6 @@ action enablement
         if (isDisposed()) {
           return;
         }
-        fStopAction.setEnabled(lastLaunchIsKeptAlive());
         updateRerunFailedFirstAction();
         processChangesInUI();
         if (hasErrorsOrFailures()) {
@@ -1285,20 +1231,7 @@ action enablement
     }
   }
 
-  private class StopAction extends Action {
-    public StopAction() {
-      setText(JUnitMessages.TestRunnerViewPart_stopaction_text);
-      setToolTipText(JUnitMessages.TestRunnerViewPart_stopaction_tooltip);
-      TestViewerPlugin.ui().setLocalImageDescriptors(this, "stop.png"); //$NON-NLS-1$
-    }
-
-    @Override
-    public void run() {
-      stopTest();
-      setEnabled(false);
-    }
-  }
-
+  @Getter
   public class ReportSettings {
     // TODO В будущем сделать рефакторинг вынеся в самостоятельный класс
     private static final String TAG_RATIO = "ratio"; //$NON-NLS-1$
@@ -1315,30 +1248,25 @@ action enablement
      * The current orientation; either <code>VIEW_ORIENTATION_HORIZONTAL</code>
      * <code>VIEW_ORIENTATION_VERTICAL</code>, or <code>VIEW_ORIENTATION_AUTOMATIC</code>.
      */
-    @Getter
     private int orientation = VIEW_ORIENTATION_AUTOMATIC;
 
     /**
      * The current layout mode (LAYOUT_FLAT or LAYOUT_HIERARCHICAL).
      */
-    @Getter
     private int layoutMode = LAYOUT_HIERARCHICAL;
 
     /**
      * Whether the output scrolls and reveals tests as they are executed.
      */
-    @Getter
     @Setter
     boolean autoScroll;
 
-    @Getter
     @Setter
     boolean showOnErrorOnly;
 
     /**
      * The current sorting criterion.
      */
-    @Getter
     private SortingCriterion sortingCriterion = SortingCriterion.SORT_BY_EXECUTION_ORDER;
 
     public boolean isShowFailuresOnly() {
@@ -1401,7 +1329,7 @@ action enablement
 
     public void setSortingCriterion(SortingCriterion sortingCriterion) {
       this.sortingCriterion = sortingCriterion;
-      if (fTestRunSession != null && !fTestRunSession.isStarting() && !fTestRunSession.isRunning()) {
+      if (fTestRunSession != null) {
         fTestViewer.setSortingCriterion(this.sortingCriterion);
       }
     }

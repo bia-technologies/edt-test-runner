@@ -196,11 +196,6 @@ public class TestViewerPlugin extends AbstractUIPlugin {
     return createImageDescriptor(getBundle(), path, useMissingImageDescriptor);
   }
 
-  public URL getResource(String path) throws IOException {
-    var url = FileLocator.find(getBundle(), new Path(path), null);
-    return FileLocator.toFileURL(url);
-  }
-
   public InputStream getResourceStream(String path) throws IOException {
     return FileLocator.openStream(getBundle(), new Path(path), false);
   }

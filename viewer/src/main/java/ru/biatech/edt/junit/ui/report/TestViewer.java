@@ -48,7 +48,6 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.part.PageBook;
-import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.model.ITestElement;
 import ru.biatech.edt.junit.model.TestCaseElement;
 import ru.biatech.edt.junit.model.TestElement;
@@ -68,6 +67,7 @@ import ru.biatech.edt.junit.ui.report.contentProviders.TestSessionTableContentPr
 import ru.biatech.edt.junit.ui.report.contentProviders.TestSessionTreeContentProvider;
 import ru.biatech.edt.junit.ui.stacktrace.actions.CopyTraceAction;
 import ru.biatech.edt.junit.ui.viewsupport.ColoringLabelProvider;
+import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
 import ru.biatech.edt.junit.ui.viewsupport.SelectionProviderMediator;
 
 import java.util.AbstractList;
@@ -110,6 +110,7 @@ public class TestViewer {
 
   private LinkedList<TestSuiteElement> fAutoClose;
   private HashSet<TestSuiteElement> fAutoExpand;
+  private final ImageProvider imageProvider = new ImageProvider();
 
   public TestViewer(Composite parent, TestRunnerViewPart runner) {
     fTestRunnerPart = runner;
@@ -770,6 +771,9 @@ public class TestViewer {
     fAutoExpand.clear();
   }
 
+  public void dispose() {
+    imageProvider.dispose();
+  }
 
   private final class TestSelectionListener implements ISelectionChangedListener {
     @Override
@@ -853,7 +857,7 @@ public class TestViewer {
     public ExpandAllAction() {
       setText(JUnitMessages.ExpandAllAction_text);
       setToolTipText(JUnitMessages.ExpandAllAction_tooltip);
-      setImageDescriptor(TestViewerPlugin.ui().getImageDescriptor("elcl16/expandall.png")); //$NON-NLS-1$
+      setImageDescriptor(ImageProvider.getImageDescriptor(ImageProvider.ICONS_EXPAND_ALL));
     }
 
     @Override
@@ -866,7 +870,7 @@ public class TestViewer {
     public CollapseAllAction() {
       setText(JUnitMessages.CollapseAllAction_text);
       setToolTipText(JUnitMessages.CollapseAllAction_tooltip);
-      setImageDescriptor(TestViewerPlugin.ui().getImageDescriptor("elcl16/collapseall.png")); //$NON-NLS-1$
+      setImageDescriptor(ImageProvider.getImageDescriptor(ImageProvider.ICONS_COLLAPSE_ALL));
     }
 
     @Override

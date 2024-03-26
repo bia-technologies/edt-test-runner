@@ -18,7 +18,6 @@ package ru.biatech.edt.junit.ui.report.actions;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.ui.PlatformUI;
-import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.ui.IJUnitHelpContextIds;
 import ru.biatech.edt.junit.ui.JUnitMessages;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
@@ -31,15 +30,15 @@ public class ToggleOrientationAction extends SettingsChangeAction {
     switch (orientation) {
       case TestRunnerViewPart.VIEW_ORIENTATION_HORIZONTAL:
         setText(JUnitMessages.TestRunnerViewPart_toggle_horizontal_label);
-        setImageDescriptor(TestViewerPlugin.ui().getImageDescriptor("elcl16/th_horizontal.png")); //$NON-NLS-1$
+        ActionsSupport.setLocalImageDescriptors(this, "th_horizontal.png"); //$NON-NLS-1$
         break;
       case TestRunnerViewPart.VIEW_ORIENTATION_VERTICAL:
         setText(JUnitMessages.TestRunnerViewPart_toggle_vertical_label);
-        setImageDescriptor(TestViewerPlugin.ui().getImageDescriptor("elcl16/th_vertical.png")); //$NON-NLS-1$
+        ActionsSupport.setLocalImageDescriptors(this, "th_vertical.png"); //$NON-NLS-1$
         break;
       case TestRunnerViewPart.VIEW_ORIENTATION_AUTOMATIC:
         setText(JUnitMessages.TestRunnerViewPart_toggle_automatic_label);
-        setImageDescriptor(TestViewerPlugin.ui().getImageDescriptor("elcl16/th_automatic.png")); //$NON-NLS-1$
+        ActionsSupport.setLocalImageDescriptors(this, "th_automatic.png"); //$NON-NLS-1$
         break;
       default:
         break;

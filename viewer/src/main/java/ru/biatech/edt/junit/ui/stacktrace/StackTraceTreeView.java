@@ -234,7 +234,7 @@ public class StackTraceTreeView extends TreeViewer implements StackTraceView {
       } else if (element instanceof IStacktraceFrame) {
         return imageProvider.getStackIcon();
       } else {
-        return imageProvider.getTargetIcon();
+        return null;
       }
     }
   }

@@ -27,6 +27,7 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 import ru.biatech.edt.junit.launcher.v8.LaunchHelper;
 import ru.biatech.edt.junit.ui.JUnitMessages;
 
@@ -37,13 +38,8 @@ public class LaunchControl extends Composite {
   ComboViewer usedLaunchConfigurationControl;
   ComboViewer testExtensionControl;
   ComboViewer testModuleControl;
+  Text projectPathControl;
 
-  /**
-   * Create the composite.
-   *
-   * @param parent
-   * @param style
-   */
   public LaunchControl(Composite parent, int style) {
     super(parent, style);
 
@@ -63,6 +59,18 @@ public class LaunchControl extends Composite {
 
     appendLabel(grpFilter, JUnitMessages.LaunchConfigurationTab_filter_test_module);
     testModuleControl = appendAutoCompleteComboViewer(grpFilter);
+
+    appendLabel(grpFilter, JUnitMessages.LaunchConfigurationTab_filter_test_module);
+    testModuleControl = appendAutoCompleteComboViewer(grpFilter);
+
+    Group grpSettings = new Group(this, SWT.NONE);
+    grpSettings.setText(JUnitMessages.LaunchConfigurationTab_SettingsTab);
+    grpSettings.setLayout(new GridLayout(3, false));
+    grpSettings.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 2));
+
+    appendLabel(grpSettings, JUnitMessages.LaunchConfigurationTab_ProjectPath);
+    projectPathControl = new Text(grpSettings, SWT.BORDER);
+    projectPathControl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
   }
 
   @Override
@@ -71,17 +79,17 @@ public class LaunchControl extends Composite {
 
   void initializeFrom() {
     UtilsUI.setValueSource(usedLaunchConfigurationControl, LaunchHelper.getOnecLaunchConfigurations().collect(Collectors.toList()));
-    LabelProvider provider = LabelProvider.createTextProvider(e -> e == null ? "" : ((IExtensionProject) e).getDtProject().getName());
+    LabelProvider provider = LabelProvider.createTextProvider(e -> e == null ? "" : ((IExtensionProject) e).getDtProject().getName()); //$NON-NLS-1$
     UtilsUI.setValueSource(testExtensionControl, LaunchHelper.getTestExtensions(), provider);
   }
 
-  void appendLabel(Composite parent, String text){
+  private void appendLabel(Composite parent, String text) {
     Label label = new Label(parent, SWT.NONE);
     label.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
     label.setText(text);
   }
 
-  AutoCompleteComboViewer appendAutoCompleteComboViewer(Composite parent){
+  private AutoCompleteComboViewer appendAutoCompleteComboViewer(Composite parent) {
     AutoCompleteComboViewer auto = new AutoCompleteComboViewer(parent, SWT.NONE);
     Combo combo = auto.getCombo();
     combo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));

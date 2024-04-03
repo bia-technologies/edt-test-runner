@@ -33,6 +33,8 @@ public class LaunchSettings {
   String name;
   String workPath;
   @Expose
+  String projectPath;
+  @Expose
   String reportPath;
   @Expose
   String reportFormat = Constants.REPORT_FORMAT;
@@ -88,6 +90,7 @@ public class LaunchSettings {
     settings.workPath = LaunchHelper.getWorkPath(settings.name).toString();
     settings.reportPath = settings.workPath;
     settings.filter = filter;
+    settings.projectPath = LaunchConfigurationAttributes.getProjectPath(configuration);
 
     return settings;
   }

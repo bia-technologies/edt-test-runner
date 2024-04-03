@@ -30,6 +30,7 @@ public final class LaunchConfigurationAttributes {
   public static final String TEST_EXTENSION = "ru.biatech.edt.junit.launcher.TEST_EXTENSION"; //$NON-NLS-1$
 
   public static final String TEST_MODULE = "ru.biatech.edt.junit.launcher.TEST_MODULE"; //$NON-NLS-1$
+  public static final String PROJECT_PATH = "ru.biatech.edt.junit.launcher.PROJECT_PATH"; //$NON-NLS-1$
 
   public static final String WORK_PATH = "ru.biatech.edt.junit.launcher.WORK_PATH"; //$NON-NLS-1$
 
@@ -95,6 +96,10 @@ public final class LaunchConfigurationAttributes {
 
   public static String getTestModuleName(ILaunchConfiguration configuration) {
     return getAttribute(configuration, TEST_MODULE);
+  }
+
+  public static String getProjectPath(ILaunchConfiguration configuration) {
+    return getAttribute(configuration, PROJECT_PATH);
   }
 
   public static String getTestKind(ILaunchConfiguration configuration) {

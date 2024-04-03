@@ -34,7 +34,8 @@ public final class JUnitMessages extends NLS {
   public static String LaunchConfigurationTab_filter_test_extension;
   public static String LaunchConfigurationTab_filter_test_module;
   public static String LaunchConfigurationTab_failedRestoreSettings;
-
+  public static String LaunchConfigurationTab_ProjectPath;
+  public static String LaunchConfigurationTab_SettingsTab;
   public static String CompareResultDialog_actualLabel;
   public static String CompareResultDialog_expectedLabel;
   public static String CompareResultDialog_labelOK;

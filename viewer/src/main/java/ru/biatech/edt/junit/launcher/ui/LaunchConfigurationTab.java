@@ -47,6 +47,7 @@ public class LaunchConfigurationTab extends AbstractLaunchConfigurationTab {
     control.usedLaunchConfigurationControl.addSelectionChangedListener(this::selectionChanged);
     control.testExtensionControl.addSelectionChangedListener(this::selectionChanged);
     control.testModuleControl.addSelectionChangedListener(this::selectionChanged);
+    control.projectPathControl.addModifyListener(e -> onChanged());
   }
 
   @Override
@@ -82,6 +83,7 @@ public class LaunchConfigurationTab extends AbstractLaunchConfigurationTab {
     configuration.setAttribute(LaunchConfigurationAttributes.USED_LAUNCH_CONFIGURATION, usedConfiguration == null ? null : usedConfiguration.getName());
     configuration.setAttribute(LaunchConfigurationAttributes.TEST_EXTENSION, project == null ? null : project.getDtProject().getName());
     configuration.setAttribute(LaunchConfigurationAttributes.TEST_MODULE, module);
+    configuration.setAttribute(LaunchConfigurationAttributes.PROJECT_PATH, control.projectPathControl.getText());
   }
 
   @Override
@@ -103,22 +105,27 @@ public class LaunchConfigurationTab extends AbstractLaunchConfigurationTab {
     return success;
   }
 
-  protected void updateParametersFromConfig(ILaunchConfiguration configuration) {
+  private void updateParametersFromConfig(ILaunchConfiguration configuration) {
     try {
       var usedConfiguration = LaunchHelper.getTargetConfiguration(configuration);
       var project = LaunchHelper.getTestExtension(configuration);
       var moduleName = LaunchConfigurationAttributes.getTestModuleName(configuration);
+      var projectPath = LaunchConfigurationAttributes.getProjectPath(configuration);
 
       UtilsUI.setSelection(control.usedLaunchConfigurationControl, usedConfiguration);
       UtilsUI.setSelection(control.testExtensionControl, project);
       UtilsUI.setSelection(control.testModuleControl, moduleName);
+      control.projectPathControl.setText(projectPath == null ? "" : projectPath);
     } catch (CoreException e) {
       TestViewerPlugin.log().logError(JUnitMessages.LaunchConfigurationTab_failedRestoreSettings, e);
     }
   }
 
+  private void selectionChanged(SelectionChangedEvent event) {
+    onChanged();
+  }
 
-  public void selectionChanged(SelectionChangedEvent event) {
+  private void onChanged() {
     setDirty(true);
     updateLaunchConfigurationDialog();
   }

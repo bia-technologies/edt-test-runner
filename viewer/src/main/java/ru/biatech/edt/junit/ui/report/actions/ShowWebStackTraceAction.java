@@ -17,11 +17,13 @@
 package ru.biatech.edt.junit.ui.report.actions;
 
 import org.eclipse.jface.action.IAction;
+
+import ru.biatech.edt.junit.ui.JUnitMessages;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
 
 public class ShowWebStackTraceAction extends SettingsChangeAction {
   public ShowWebStackTraceAction(TestRunnerViewPart.ReportSettings settings) {
-    super(settings, "Modern stack viewer", IAction.AS_CHECK_BOX);
+    super(settings, JUnitMessages.ShowWebStackTraceAction_name, IAction.AS_CHECK_BOX);
   }
 
   @Override

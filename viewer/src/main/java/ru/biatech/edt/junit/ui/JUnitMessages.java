@@ -71,10 +71,10 @@ public final class JUnitMessages extends NLS {
   public static String ShowNextFailureAction_tooltip;
   public static String ShowPreviousFailureAction_label;
   public static String ShowPreviousFailureAction_tooltip;
+  public static String ShowWebStackTraceAction_name;
 
   // TestRunnerViewPart
   public static String TestRunnerViewPart_activate_on_failure_only;
-
   public static String TestRunnerViewPart_error_notests_kind;
   public static String TestRunnerViewPart_ImportTestRunSessionAction_error_title;
   public static String TestRunnerViewPart_ImportTestRunSessionAction_name;

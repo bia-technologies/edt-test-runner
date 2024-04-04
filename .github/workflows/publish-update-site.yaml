@@ -37,6 +37,7 @@ jobs:
         if: github.ref == 'refs/heads/master'
         run: |
           export publication_location=../../../public/repository
+          export site_label_suffix=''
 
           export MAVEN_OPTS=
           ./gradlew download-lombok-plugin

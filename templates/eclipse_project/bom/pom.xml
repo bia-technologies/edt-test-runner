@@ -21,7 +21,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>ru.biatech.edt.xtest</groupId>
   <artifactId>bom</artifactId>
-  <version>24.2.0-SNAPSHOT</version>
+  <version>24.3.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>BOM</name>
@@ -86,7 +86,7 @@
               <artifact>
                 <groupId>ru.biatech.edt.xtest</groupId>
                 <artifactId>default</artifactId>
-                <version>24.2.0-SNAPSHOT</version>
+                <version>24.3.0-SNAPSHOT</version>
               </artifact>
             </target>
             <dependency-resolution>

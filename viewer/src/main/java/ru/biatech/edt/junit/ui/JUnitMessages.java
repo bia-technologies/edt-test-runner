@@ -117,9 +117,10 @@ public final class JUnitMessages extends NLS {
   public static String TestSessionLabelProvider_testMethodName_className;
 
   public static String LaunchConfigurationDelegate_Launching;
-
+  public static String LaunchHelper_DefaultLaunchConfigurationNotFound;
   public static String LaunchHelper_LaunchConfigurationNotFound;
   public static String LaunchHelper_LaunchConfigurationNotSpecified;
+
   public static String JUnitModel_LoadReport;
   public static String JUnitModel_ReportFile;
   public static String JUnitModel_ReportFileNotFound;
@@ -136,7 +137,7 @@ public final class JUnitMessages extends NLS {
   public static String JUnitLaunchListener_ProcessError;
   public static String JUnitModel_ReportIsEmpty;
 
-  public static String LaunchTest_dialog_title;
+  public static String LaunchTest_title;
   public static String LaunchTest_error_is_not_test;
 
   public static String OpenTestAction_label;

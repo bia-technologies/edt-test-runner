@@ -35,7 +35,7 @@ public class RunTestOutlineAction extends OnMethodAction {
       TestsManager.runTestMethod(module, methodName, ILaunchManager.RUN_MODE);
     } else {
       MessageDialog.openError(editor.getShell(),
-          JUnitMessages.LaunchTest_dialog_title,
+          JUnitMessages.LaunchTest_title,
           JUnitMessages.LaunchTest_error_is_not_test);
     }
   }

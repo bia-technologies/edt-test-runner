@@ -23,6 +23,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
@@ -39,6 +40,7 @@ public class LaunchControl extends Composite {
   ComboViewer testExtensionControl;
   ComboViewer testModuleControl;
   Text projectPathControl;
+  Button loggingControl;
 
   public LaunchControl(Composite parent, int style) {
     super(parent, style);
@@ -70,7 +72,11 @@ public class LaunchControl extends Composite {
 
     appendLabel(grpSettings, JUnitMessages.LaunchConfigurationTab_ProjectPath);
     projectPathControl = new Text(grpSettings, SWT.BORDER);
-    projectPathControl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+    projectPathControl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+
+    appendLabel(grpSettings, "Выводить лог в консоль");
+    loggingControl = new Button(grpSettings, SWT.CHECK);
+    loggingControl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
   }
 
   @Override

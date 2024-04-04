@@ -42,6 +42,8 @@ public class LaunchSettings {
   boolean closeAfterTests = true;
   @Expose
   Filter filter;
+  @Expose
+  LoggingSettings logging;
   String extensionName;
 
   public static class Filter {
@@ -86,12 +88,26 @@ public class LaunchSettings {
     }
     filter.tests = tests;
 
+    var logging = new LoggingSettings();
+    if (LaunchConfigurationAttributes.getLoggingToConsole(configuration)) {
+      logging.console = true;
+      logging.level = "debug"; //$NON-NLS-1$
+    }
+
     settings.name = configuration.getName();
     settings.workPath = LaunchHelper.getWorkPath(settings.name).toString();
     settings.reportPath = settings.workPath;
     settings.filter = filter;
+    settings.logging = logging;
     settings.projectPath = LaunchConfigurationAttributes.getProjectPath(configuration);
 
     return settings;
+  }
+
+  public static class LoggingSettings {
+    @Expose
+    boolean console;
+    @Expose
+    String level;
   }
 }

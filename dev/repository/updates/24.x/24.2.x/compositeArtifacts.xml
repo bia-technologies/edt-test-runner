@@ -2,12 +2,13 @@
 <?compositeArtifactRepository version='1.0.0'?>
 <repository name='DEV. EDT Test Runner Repository for 24.2.x' type='org.eclipse.equinox.internal.p2.artifact.repository.CompositeArtifactRepository' version='1.0.0'>
   <properties size='2'>
-    <property name='p2.timestamp' value='1711501437807'/>
+    <property name='p2.timestamp' value='1712190708758'/>
     <property name='p2.atomic.composite.loading' value='false'/>
   </properties>
-  <children size='3'>
+  <children size='4'>
     <child location='../../../releases/24.2.0.v20240326-2342'/>
     <child location='../../../releases/24.2.0.v20240326-2351'/>
     <child location='../../../releases/24.2.0.v20240327-0103'/>
+    <child location='../../../releases/24.2.0.v20240404-0030'/>
   </children>
 </repository>

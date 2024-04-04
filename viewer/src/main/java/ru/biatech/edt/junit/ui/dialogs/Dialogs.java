@@ -39,6 +39,7 @@ import ru.biatech.edt.junit.ui.labelProvider.TestItemActionLabelProvider;
 import ru.biatech.edt.junit.ui.testitemaction.ITestItemAction;
 import ru.biatech.edt.junit.ui.viewsupport.ColoringLabelProvider;
 import ru.biatech.edt.junit.utils.StringUtilities;
+import ru.biatech.edt.junit.v8utils.EventData;
 import ru.biatech.edt.junit.v8utils.MethodReference;
 import ru.biatech.edt.junit.v8utils.Present;
 import ru.biatech.edt.junit.yaxunit.Engine;
@@ -110,25 +111,12 @@ public class Dialogs {
     dialog.open();
   }
 
-  public Optional<Method[]> selectMethodsForTesting(List<Method> items, String destination) {
-    var shell = TestViewerPlugin.ui().getActiveWorkbenchShell();
-    var dialog = new CheckedTreeSelectionDialog(shell, new MethodLabelProvider(), new FlatTree());
-    dialog.setTitle(MessageFormat.format(Messages.Dialogs_Select_Methods_ForTestSuite, destination));
-    dialog.setHelpAvailable(false);
+  public void showWarning(String title, String message) {
+    MessageDialog.openWarning(TestViewerPlugin.ui().getShell(), title, message);
+  }
 
-    dialog.setInput(items.toArray());
-
-    if (dialog.open() == Dialog.OK) {
-      var result = dialog.getResult();
-      if (result.length > 0) {
-        var methods = Arrays.stream(dialog.getResult())
-            .map(Method.class::cast)
-            .toArray(Method[]::new);
-
-        return Optional.of(methods);
-      }
-    }
-    return Optional.empty();
+  public Optional<List<Method>> selectMethodsForTesting(List<Method> items, String description) {
+    return selectItems(items, description, Method.class);
   }
 
   private <T> T selectItem(Collection<T> items, String title, String message, ILabelProvider labelProvider) {
@@ -161,7 +149,32 @@ public class Dialogs {
     }
   }
 
-  private static class FlatTree implements ITreeContentProvider {
+  public Optional<List<EventData>> selectEvents(List<EventData> items, String description) {
+    return selectItems(items, description, EventData.class);
+  }
+
+  private <T> Optional<List<T>> selectItems(List<T> items, String description, Class<T> clazz) {
+    var shell = TestViewerPlugin.ui().getActiveWorkbenchShell();
+    var dialog = new CheckedTreeSelectionDialog(shell, new MethodLabelProvider(), new FlatTree());
+    dialog.setTitle(MessageFormat.format(Messages.Dialogs_Select_Methods_ForTestSuite, description));
+    dialog.setHelpAvailable(false);
+
+    dialog.setInput(items.toArray());
+
+    if (dialog.open() == Dialog.OK) {
+      var result = dialog.getResult();
+      if (result.length > 0) {
+        var methods = Arrays.stream(dialog.getResult())
+            .map(clazz::cast)
+            .collect(Collectors.toList());
+
+        return Optional.of(methods);
+      }
+    }
+    return Optional.empty();
+  }
+
+  private class FlatTree implements ITreeContentProvider {
 
     @Override
     public Object[] getElements(Object inputElement) {

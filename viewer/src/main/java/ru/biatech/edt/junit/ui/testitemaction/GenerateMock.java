@@ -17,13 +17,13 @@
 package ru.biatech.edt.junit.ui.testitemaction;
 
 import com._1c.g5.v8.dt.bsl.model.Module;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.graphics.Image;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
 import ru.biatech.edt.junit.ui.viewsupport.LabelStylerFactory;
-import ru.biatech.edt.junit.yaxunit.MockCreator;
+import ru.biatech.edt.junit.yaxunit.mocks.MethodMockDefinition;
+import ru.biatech.edt.junit.yaxunit.mocks.MockCreator;
 
 import java.text.MessageFormat;
 
@@ -53,12 +53,11 @@ public class GenerateMock implements ITestItemAction {
 
   @Override
   public void run() {
-    var creator = new MockCreator(module, methodName);
+    var creator = new MockCreator(module);
 
-    try {
-      creator.createMock();
-    } catch (CoreException e) {
-      TestViewerPlugin.log().logError("Не удалось создать мок", e);
+    creator.createMock(new MethodMockDefinition(module, methodName));
+    if (!creator.getExceptions().isEmpty()) {
+      creator.getExceptions().forEach(e -> TestViewerPlugin.log().logError("Не удалось создать мок", e));
     }
   }
 

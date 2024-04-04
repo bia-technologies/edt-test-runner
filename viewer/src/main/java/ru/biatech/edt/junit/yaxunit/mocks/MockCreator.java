@@ -14,10 +14,8 @@
  * limitations under the License.
  *******************************************************************************/
 
-package ru.biatech.edt.junit.yaxunit;
+package ru.biatech.edt.junit.yaxunit.mocks;
 
-import com._1c.g5.v8.dt.bsl.model.Function;
-import com._1c.g5.v8.dt.bsl.model.Method;
 import com._1c.g5.v8.dt.bsl.model.Module;
 import com._1c.g5.v8.dt.bsl.model.ModuleType;
 import com._1c.g5.v8.dt.bsl.services.BslGrammarAccess;
@@ -27,14 +25,15 @@ import com._1c.g5.v8.dt.bsl.util.BslUtil;
 import com._1c.g5.v8.dt.common.PreferenceUtils;
 import com._1c.g5.v8.dt.core.platform.IConfigurationProject;
 import com._1c.g5.v8.dt.core.platform.IExtensionProject;
-import com._1c.g5.v8.dt.mcore.NamedElement;
 import com._1c.g5.v8.dt.metadata.mdclass.CommonModule;
 import com._1c.g5.v8.dt.metadata.mdclass.MdObject;
+import lombok.Getter;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 import org.eclipse.xtext.resource.IResourceServiceProvider;
+import org.eclipse.xtext.ui.editor.XtextEditor;
 import ru.biatech.edt.junit.templates.TemplatesProvider;
 import ru.biatech.edt.junit.ui.dialogs.Dialogs;
 import ru.biatech.edt.junit.ui.dialogs.Messages;
@@ -46,6 +45,8 @@ import ru.biatech.edt.junit.v8utils.Projects;
 import ru.biatech.edt.junit.v8utils.VendorServices;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -53,20 +54,17 @@ import java.util.stream.Collectors;
  */
 public class MockCreator {
   private final Module module;
-  private final Method method;
-  private final BslGeneratorMultiLangProposals bslGenProp;
-  private final BslGrammarAccess bslGrammar;
-  private final boolean isRussian;
-  private final boolean isFunction;
-  private String lineFormatter;
+  protected final BslGeneratorMultiLangProposals bslGenProp;
+  protected final BslGrammarAccess bslGrammar;
+  protected final boolean isRussian;
+  protected MockDefinition mockDefinition;
+  protected String lineSeparator;
+  @Getter
+  List<Exception> exceptions = new ArrayList<>();
+  private IExtensionProject projectForMocks;
 
-  public MockCreator(Module module, String methodName) {
+  public MockCreator(Module module) {
     this.module = module;
-    method = module.allMethods().stream()
-        .filter(m -> m.getName().equals(methodName))
-        .findFirst()
-        .orElseThrow();
-    isFunction = method instanceof Function;
     isRussian = BslUtil.isRussian(module, VendorServices.getProjectManager());
 
     var resourceProvider = IResourceServiceProvider.Registry.INSTANCE.getResourceServiceProvider(module.eResource().getURI());
@@ -75,38 +73,83 @@ public class MockCreator {
     bslGenProp.setRussianLang(isRussian);
   }
 
-  public void createMock() throws CoreException {
-    var parent = Projects.getParentProject(module);
-    var relatedProjects = Projects.getRelatedExtensions((IConfigurationProject) parent).collect(Collectors.toList());
-    var project = Dialogs.selectProject(relatedProjects, MessageFormat.format(Messages.Dialogs_Select_Project_ForMock, Present.getPresent(module)));
-    if (project.isEmpty()) {
+  public void createMock(MockDefinition mockDefinition) {
+    XtextEditor editor;
+    if (getProject() == null || (editor = getAdoptEditor()) == null) {
       return;
     }
+    var editorContext = new EditionContext(editor);
 
-    var extensionModule = (Module) adopt(module, project.get());
+
+    this.mockDefinition = mockDefinition;
+    mockDefinition.setIsRussian(isRussian);
+    createMock(editor, editorContext);
+    editorContext.apply();
+    editorContext.revealLast();
+  }
+
+  public void createMock(List<MockDefinition> mockDefinitions) {
+    XtextEditor editor;
+    if (mockDefinitions.isEmpty() || getProject() == null || (editor = getAdoptEditor()) == null) {
+      return;
+    }
+    var editorContext = new EditionContext(editor);
+
+    for (MockDefinition definition : mockDefinitions) {
+      this.mockDefinition = definition;
+      mockDefinition.setIsRussian(isRussian);
+      createMock(editor, editorContext);
+    }
+    editorContext.apply();
+    editorContext.revealLast();
+  }
+
+  protected String getPrefix() {
+    return isRussian ? "Мок_" : "Mock_";
+  }
+
+  private IExtensionProject getProject() {
+    if (projectForMocks != null) {
+      return projectForMocks;
+    }
+    var parent = Projects.getParentProject(module);
+    var relatedProjects = Projects.getRelatedExtensions((IConfigurationProject) parent).collect(Collectors.toList());
+    return projectForMocks = Dialogs.selectProject(relatedProjects, MessageFormat.format(Messages.Dialogs_Select_Project_ForMock, Present.getPresent(module))).orElse(null);
+  }
+
+  private XtextEditor getAdoptEditor() {
+    Module extensionModule;
+    try {
+      extensionModule = (Module) adopt(module, projectForMocks);
+    } catch (CoreException e) {
+      exceptions.add(e);
+      return null;
+    }
     var editorPart = UIHelper.openModuleEditor(extensionModule);
-    var editor = EditorHelper.getEditor(editorPart);
+    return EditorHelper.getEditor(editorPart);
 
-    extensionModule = EditorHelper.getParsedModule(editor);
+  }
 
-    var prefix = isRussian ? "Мок_" : "Mock_";
-    var newMethodName = prefix + method.getName();
+  private void createMock(XtextEditor editor, EditionContext editorContext) {
+    lineSeparator = PreferenceUtils.getLineSeparator(projectForMocks.getProject());
+
+    var extensionModule = EditorHelper.getParsedModule(editor);
+
+    var prefix = getPrefix();
+    var newMethodName = prefix + mockDefinition.getName();
 
     var existMethod = extensionModule.allMethods().stream()
         .filter(m -> m.getName().equalsIgnoreCase(newMethodName))
         .findFirst();
 
-    var content = createContent(project.get(), newMethodName, existMethod.isEmpty());
-
-    var editorContext = new EditionContext(editor);
+    var content = createContent(projectForMocks, newMethodName);
     if (existMethod.isPresent()) {
       var node = NodeModelUtils.findActualNodeFor(existMethod.get());
       editorContext.replace(node.getOffset(), node.getLength(), content);
     } else {
+      content = lineSeparator + content + lineSeparator;
       editorContext.append(content);
     }
-    editorContext.apply();
-    editorContext.revealLast();
   }
 
   private EObject adopt(EObject modelObject, IExtensionProject target) throws CoreException {
@@ -119,14 +162,8 @@ public class MockCreator {
     }
   }
 
-  private String createContent(IExtensionProject project, String newMethodName, boolean appendFirstLine) {
-    lineFormatter = PreferenceUtils.getLineSeparator(project.getProject());
-
+  protected String createContent(IExtensionProject project, String newMethodName) {
     StringBuilder builder = new StringBuilder();
-
-    if (appendFirstLine) {
-      builder.append(lineFormatter);
-    }
 
     appendAroundAnnotation(builder);
     appendPragma(builder);
@@ -135,52 +172,48 @@ public class MockCreator {
     appendMockito(builder, project);
 
     appendEndMethod(builder);
-    if (appendFirstLine) {
-      builder.append(lineFormatter);
-    }
+
     return builder.toString();
   }
 
   private void appendAroundAnnotation(StringBuilder builder) {
     builder.append('&').append(isRussian ? "Вместо" : "Around");
-    builder.append(this.bslGenProp.getOpenBracketPropStr()).append(this.bslGenProp.getQuotePropStr()).append(method.getName()).append(this.bslGenProp.getQuotePropStr()).append(this.bslGenProp.getCloseBracketPropStr());
+    builder.append(this.bslGenProp.getOpenBracketPropStr()).append(this.bslGenProp.getQuotePropStr()).append(mockDefinition.getName()).append(this.bslGenProp.getQuotePropStr()).append(this.bslGenProp.getCloseBracketPropStr());
   }
 
   private void appendPragma(StringBuilder builder) {
-    method.getPragmas().forEach(p -> builder.append(lineFormatter).append('&').append(p.getSymbol()));
+    mockDefinition.getPragmas().forEach(p -> builder.append(lineSeparator).append('&').append(p.getSymbol()));
   }
 
   private void appendSignature(StringBuilder builder, String newMethodName) {
-    builder.append(lineFormatter).append(BslProposalProvider.getTypeMethodName(this.bslGrammar, isFunction, isRussian));
-    builder.append(this.bslGenProp.getSpacePropStr());
-    builder.append(newMethodName);
-    builder.append(this.bslGenProp.getOpenBracketPropStr());
+    builder.append(lineSeparator).append(BslProposalProvider.getTypeMethodName(this.bslGrammar, mockDefinition.isFunction(), isRussian))
+        .append(this.bslGenProp.getSpacePropStr())
+        .append(newMethodName)
+        .append(this.bslGenProp.getOpenBracketPropStr())
 
-    builder.append(method.getFormalParams().stream()
-        .map(p -> p.isByValue() ? BslProposalProvider.getByValueLiteralName(this.bslGrammar, isRussian) + this.bslGenProp.getSpacePropStr() + p.getName() : p.getName())
-        .collect(Collectors.joining(bslGenProp.getCommaPropStr())));
-    builder.append(this.bslGenProp.getCloseBracketPropStr());
-    if (method.isExport()) {
+        .append(mockDefinition.getParamsDefinition(bslGenProp, bslGrammar))
+        .append(this.bslGenProp.getCloseBracketPropStr());
+    if (mockDefinition.isExport()) {
       builder.append(this.bslGenProp.getSpacePropStr()).append(BslProposalProvider.getExportLiteralName(this.bslGrammar, isRussian));
     }
   }
 
   private void appendEndMethod(StringBuilder builder) {
-    builder.append(lineFormatter).append(BslProposalProvider.getTypeEndMethodName(this.bslGrammar, isFunction, isRussian));
+    builder.append(lineSeparator).append(BslProposalProvider.getTypeEndMethodName(this.bslGrammar, mockDefinition.isFunction(), isRussian));
   }
 
   private void appendMockito(StringBuilder builder, IExtensionProject project) {
-    var template = isFunction ? TemplatesProvider.getMockFunctionTemplateString(project) : TemplatesProvider.getMockProcedureTemplateString(project);
+    var template = mockDefinition.isFunction() ? TemplatesProvider.getMockFunctionTemplateString(project) : TemplatesProvider.getMockProcedureTemplateString(project);
     if (template.isEmpty()) {
       return;
     }
     var modulePresent = getModulePresent();
-    var methodPresent = method.getName();
-    var paramsPresent = method.getFormalParams().stream()
-        .map(NamedElement::getName)
+    var methodPresent = mockDefinition.getName();
+    var paramsPresent = mockDefinition.getParams().stream()
         .collect(Collectors.joining(bslGenProp.getCommaPropStr()));
+
     var content = MessageFormat.format(template.get(), modulePresent, methodPresent, paramsPresent);
-    builder.append(lineFormatter);
+    builder.append(lineSeparator);
     builder.append(content);
   }
 
@@ -194,4 +227,5 @@ public class MockCreator {
       return isRussian ? "ЭтотОбъект" : "ThisObject";
     }
   }
+
 }

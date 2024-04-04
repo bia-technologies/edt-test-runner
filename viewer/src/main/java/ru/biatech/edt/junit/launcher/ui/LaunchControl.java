@@ -62,9 +62,6 @@ public class LaunchControl extends Composite {
     appendLabel(grpFilter, JUnitMessages.LaunchConfigurationTab_filter_test_module);
     testModuleControl = appendAutoCompleteComboViewer(grpFilter);
 
-    appendLabel(grpFilter, JUnitMessages.LaunchConfigurationTab_filter_test_module);
-    testModuleControl = appendAutoCompleteComboViewer(grpFilter);
-
     Group grpSettings = new Group(this, SWT.NONE);
     grpSettings.setText(JUnitMessages.LaunchConfigurationTab_SettingsTab);
     grpSettings.setLayout(new GridLayout(3, false));

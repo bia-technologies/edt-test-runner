@@ -23,7 +23,7 @@
   <parent>
     <groupId>ru.biatech.edt.xtest</groupId>
     <artifactId>repositories</artifactId>
-    <version>24.2.0-SNAPSHOT</version>
+    <version>24.3.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>repository</artifactId>

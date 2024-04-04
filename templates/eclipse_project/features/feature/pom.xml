@@ -22,7 +22,7 @@
   <parent>
     <groupId>ru.biatech.edt.xtest</groupId>
     <artifactId>features</artifactId>
-    <version>24.2.0-SNAPSHOT</version>
+    <version>24.3.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>ru.biatech.edt.xtest.feature</artifactId>

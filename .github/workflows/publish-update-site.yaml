@@ -54,6 +54,13 @@ jobs:
           export MAVEN_OPTS=-javaagent:target/lombok.jar=ECJ
           ./gradlew publishPlugin
 
+      - name: upload-artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: repository
+          path: build/buildPlugin/repositories/repository/target/repository.zip
+          if-no-files-found: error
+          retention-days: 1
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3.9.3
         with:

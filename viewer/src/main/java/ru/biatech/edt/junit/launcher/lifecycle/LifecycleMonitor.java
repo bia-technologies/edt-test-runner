@@ -62,10 +62,11 @@ public class LifecycleMonitor {
     DebugPlugin.getDefault().removeDebugEventListener(monitor);
   }
 
-  public void removeTerminated() {
+  public void removeTerminated(LifecycleItem reserved) {
     var removed = new HashSet<ILaunch>();
     var manager = DebugPlugin.getDefault().getLaunchManager();
     var elements = manager.getLaunches();
+
     for (var launch : elements) {
       if (launch.isTerminated() && LaunchHelper.isRunTestConfiguration(launch.getLaunchConfiguration())) {
         removed.add(launch);
@@ -75,6 +76,8 @@ public class LifecycleMonitor {
     for (var item : monitor.monitoringItems.values()) {
       if (!item.isActive()) {
         removed.add(item.getMainLaunch());
+        removed.add(item.getTestLaunch());
+      } else if (item != reserved && item.getMainLaunch() == null) {
         removed.add(item.getTestLaunch());
       }
     }
@@ -87,8 +90,8 @@ public class LifecycleMonitor {
     }
   }
 
-  private void debug(String message) {
-    TestViewerPlugin.log().debug(message);
+  private void debug(String template, Object... objects) {
+    TestViewerPlugin.log().debug(template, objects);
   }
 
   private void riseEvent(int eventType, LifecycleItem item) {
@@ -106,7 +109,7 @@ public class LifecycleMonitor {
   private void onItemStart(LifecycleItem item) {
     item.onStart();
     riseEvent(LifecycleEvent.START, item);
-    removeTerminated();
+    removeTerminated(item);
   }
 
   private void onItemStop(LifecycleItem item, int eventType) {
@@ -121,19 +124,23 @@ public class LifecycleMonitor {
     @Override
     public void handleDebugEvents(DebugEvent[] events) {
       for (var event : events) {
-        debug("handleDebugEvents " + event.toString());
-        if (event.getKind() != DebugEvent.TERMINATE || !(event.getSource() instanceof IProcess)) {
+        if (event.getSource() == null) {
+          TestViewerPlugin.log().warning("Event source is empty {0}", event);
+          continue;
+        } else if (event.getKind() != DebugEvent.TERMINATE || !(event.getSource() instanceof IProcess)) {
           continue;
         }
         var process = (IProcess) event.getSource();
         var launch = process.getLaunch();
+        debug("handleDebugEvents {0}", event);
+
         lock.lock();
         try {
           if (monitoringItems.containsKey(launch)) {
             var item = monitoringItems.get(launch);
             handleProcesses(item);
             if (item.isActive()) {
-              debug("Finish " + item.getName());
+              debug("Finish {0}", item.getName());
               onTerminate(item, process);
             }
           }
@@ -152,7 +159,7 @@ public class LifecycleMonitor {
           var item = monitoringItems.get(launch);
           handleProcesses(item);
           if (item.isActive()) {
-            debug("canceled " + item.getName());
+            debug("canceled {0}", item.getName());
             onItemStop(item, LifecycleEvent.CANCELED);
           }
         }
@@ -173,7 +180,8 @@ public class LifecycleMonitor {
       } else if (LaunchHelper.isOnecConfiguration(configuration) && !Strings.isNullOrEmpty(LaunchConfigurationAttributes.getTestKind(configuration))) {
         var name = configuration.getName();
         for (var item : monitoringItems.values()) {
-          if (name.contains(item.getName())) {
+          if (name.contains(item.getName()) && item.getMainLaunch() == null) {
+            debug("Attach 1C launch for {0}", item.getTestLaunch());
             item.setMainLaunch(launch);
             handleProcesses(item);
             monitoringItems.put(launch, item);
@@ -196,13 +204,12 @@ public class LifecycleMonitor {
       if (item.getMainLaunch() == null) {
         return;
       }
-      if (item.getTestLaunch().getProcesses().length < item.getMainLaunch().getProcesses().length) {
-        var processes = new HashSet<>(List.of(item.getTestLaunch().getProcesses()));
+
+      var processes = new HashSet<>(List.of(item.getTestLaunch().getProcesses()));
         for (var process : item.getMainLaunch().getProcesses()) {
           if (!processes.contains(process)) {
             item.getTestLaunch().addProcess(process);
           }
-        }
       }
     }
 

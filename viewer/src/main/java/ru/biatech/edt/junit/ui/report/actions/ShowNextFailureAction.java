@@ -17,7 +17,6 @@
 package ru.biatech.edt.junit.ui.report.actions;
 
 import org.eclipse.jface.action.Action;
-import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.ui.JUnitMessages;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
 
@@ -30,10 +29,9 @@ public class ShowNextFailureAction extends Action {
 
   public ShowNextFailureAction(TestRunnerViewPart part) {
     super(JUnitMessages.ShowNextFailureAction_label);
-    setDisabledImageDescriptor(TestViewerPlugin.ui().getImageDescriptor("dlcl16/select_next.png")); //$NON-NLS-1$
-    setHoverImageDescriptor(TestViewerPlugin.ui().getImageDescriptor("elcl16/select_next.png")); //$NON-NLS-1$
-    setImageDescriptor(TestViewerPlugin.ui().getImageDescriptor("elcl16/select_next.png")); //$NON-NLS-1$
     setToolTipText(JUnitMessages.ShowNextFailureAction_tooltip);
+
+    ActionsSupport.setLocalImageDescriptors(this, "select_next.png"); //$NON-NLS-1$
     fPart = part;
   }
 

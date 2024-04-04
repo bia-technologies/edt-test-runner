@@ -30,7 +30,6 @@ import ru.biatech.edt.junit.kinds.IUnitLauncher;
 import ru.biatech.edt.junit.kinds.TestKindRegistry;
 import ru.biatech.edt.junit.launcher.v8.LaunchConfigurationAttributes;
 import ru.biatech.edt.junit.launcher.v8.LaunchHelper;
-import ru.biatech.edt.junit.ui.JUnitMessages;
 
 import java.io.Writer;
 import java.nio.file.Files;
@@ -38,19 +37,15 @@ import java.nio.file.Path;
 
 public class Launcher implements IUnitLauncher {
 
-  private static final String RUN_PARAMETERS = "RunUnitTests=";
-  private static final String PARAMETERS_FILE_NAME = "xUnitParams.json";
-  public static final String REPORT_FORMAT = "jUnit";
-
   @Override
   public void launch(ILaunchConfiguration configuration, String launchMode, ILaunch launch, IProgressMonitor monitor) throws CoreException {
-    TestViewerPlugin.log().debug(JUnitMessages.Launcher_Launch, configuration);
+    TestViewerPlugin.log().debug(Messages.Launcher_Launch, configuration);
 
     var settings = LaunchSettings.fromConfiguration(configuration);
 
     var oneCConfiguration = LaunchHelper.getTargetConfiguration(configuration);
     if (oneCConfiguration == null) {
-      TestViewerPlugin.log().logError("Не указана конфигурация запуска 1С:Предприятие");
+      TestViewerPlugin.log().logError(Messages.Launcher_LaunchConfigurationNotSpecified);
       launch.terminate();
       return;
     }
@@ -70,7 +65,7 @@ public class Launcher implements IUnitLauncher {
   }
 
   public void configure(ILaunchConfigurationWorkingCopy oneCConfiguration, LaunchSettings settings) {
-    var startupParameters = RUN_PARAMETERS + createConfig(settings);
+    var startupParameters = Constants.RUN_PARAMETERS + createConfig(settings);
 
     oneCConfiguration.setAttribute(ILaunchConfigurationAttributes.STARTUP_OPTION, startupParameters);
     oneCConfiguration.setAttribute(LaunchConfigurationAttributes.WORK_PATH, settings.getWorkPath());
@@ -79,7 +74,7 @@ public class Launcher implements IUnitLauncher {
   }
 
   protected String createConfig(LaunchSettings settings) {
-    var path = Path.of(settings.getWorkPath(), PARAMETERS_FILE_NAME);
+    var path = Path.of(settings.getWorkPath(), Constants.PARAMETERS_FILE_NAME);
 
     try (Writer writer = Files.newBufferedWriter(path)) {
       new GsonBuilder()
@@ -89,7 +84,7 @@ public class Launcher implements IUnitLauncher {
     } catch (Exception e) {
       TestViewerPlugin.log().logError(e);
     }
-    TestViewerPlugin.log().debug(JUnitMessages.Launcher_ConfigurationLocation, path);
+    TestViewerPlugin.log().debug(Messages.Launcher_ConfigurationLocation, path);
     return path.toString();
   }
 

@@ -31,6 +31,7 @@ import ru.biatech.edt.junit.model.TestResult;
 import ru.biatech.edt.junit.model.TestRunSession;
 import ru.biatech.edt.junit.ui.JUnitMessages;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
+import ru.biatech.edt.junit.ui.report.actions.ActionsSupport;
 import ru.biatech.edt.junit.ui.report.actions.ImportTestRunSessionAction;
 
 import java.text.DateFormat;
@@ -57,7 +58,7 @@ public class RunnerViewHistory extends ViewHistory<TestRunSession> {
   @Override
   public void configureHistoryDropDownAction(IAction action) {
     action.setToolTipText(JUnitMessages.TestRunnerViewPart_test_run_history);
-    TestViewerPlugin.ui().setLocalImageDescriptors(action, "history_list.png"); //$NON-NLS-1$
+    ActionsSupport.setLocalImageDescriptors(action, "history_list.png"); //$NON-NLS-1$
   }
 
   @Override

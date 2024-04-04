@@ -33,6 +33,7 @@ import ru.biatech.edt.junit.kinds.TestKindRegistry;
 import ru.biatech.edt.junit.launcher.LaunchConfigurationTypes;
 import ru.biatech.edt.junit.services.TestsManager;
 import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.dialogs.Dialogs;
 import ru.biatech.edt.junit.v8utils.Projects;
 
 import java.io.IOException;
@@ -156,15 +157,33 @@ public class LaunchHelper {
     var methodFullName = moduleName + "." + methodName; //$NON-NLS-1$
 
     var configuration = getTestLaunchConfigurations().findFirst();
-    if (configuration.isEmpty()) return;
+    String errorMessage = null;
+
+    if (configuration.isEmpty()) {
+      errorMessage = JUnitMessages.LaunchHelper_DefaultLaunchConfigurationNotFound;
+    } else {
+      try {
+        checkConfiguration(configuration.get());
+      } catch (CoreException e) {
+        TestViewerPlugin.log().logError(e);
+        errorMessage = e.getMessage();
+      }
+    }
+
+    if (errorMessage != null) {
+      Dialogs.showError(JUnitMessages.LaunchTest_title, errorMessage);
+      return;
+    }
 
     ILaunchConfigurationWorkingCopy copy;
     try {
       copy = configuration.get().copy(PREFIX_LAUNCH_TEST + methodFullName); //$NON-NLS-1$
     } catch (CoreException e) {
       TestViewerPlugin.log().logError(e);
+      Dialogs.showError(JUnitMessages.LaunchTest_title, e.getMessage());
       return;
     }
+
     LaunchConfigurationAttributes.clearFilter(copy);
     LaunchConfigurationAttributes.setTestMethods(copy, List.of(methodFullName));
     DebugUITools.launch(copy, launchMode);

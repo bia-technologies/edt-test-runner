@@ -104,11 +104,6 @@ public class ProgressBar extends Canvas {
       gc.setBackground(fOKColor);
   }
 
-  public void stopped() {
-    fStopped = true;
-    redraw();
-  }
-
   private int scale(int value) {
     if (fMaxTickCount > 0) {
       Rectangle r = getClientArea();
@@ -151,25 +146,4 @@ public class ProgressBar extends Canvas {
     if (hHint != SWT.DEFAULT) size.y = hHint;
     return size;
   }
-
-  public void step(int failures) {
-    fCurrentTickCount++;
-    int x = fColorBarWidth;
-
-    fColorBarWidth = scale(fCurrentTickCount);
-
-    if (!fError && failures > 0) {
-      fError = true;
-      x = 1;
-    }
-    if (fCurrentTickCount == fMaxTickCount)
-      fColorBarWidth = getClientArea().width - 1;
-    paintStep(x, fColorBarWidth);
-  }
-
-  public void refresh(boolean hasErrors) {
-    fError = hasErrors;
-    redraw();
-  }
-
 }

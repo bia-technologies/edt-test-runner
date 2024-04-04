@@ -19,8 +19,8 @@ package ru.biatech.edt.junit.ui.report.actions;
 import com._1c.g5.v8.dt.core.platform.IV8Project;
 import org.eclipse.jface.action.Action;
 import ru.biatech.edt.junit.TestViewerPlugin;
-import ru.biatech.edt.junit.ui.ImageProvider;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
+import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
 import ru.biatech.edt.junit.v8utils.BslSourceDisplay;
 import ru.biatech.edt.junit.v8utils.MethodReference;
 

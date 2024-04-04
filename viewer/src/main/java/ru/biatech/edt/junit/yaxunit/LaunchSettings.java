@@ -33,13 +33,17 @@ public class LaunchSettings {
   String name;
   String workPath;
   @Expose
+  String projectPath;
+  @Expose
   String reportPath;
   @Expose
-  String reportFormat = Launcher.REPORT_FORMAT;
+  String reportFormat = Constants.REPORT_FORMAT;
   @Expose
   boolean closeAfterTests = true;
   @Expose
   Filter filter;
+  @Expose
+  LoggingSettings logging;
   String extensionName;
 
   public static class Filter {
@@ -77,18 +81,33 @@ public class LaunchSettings {
     var tests = LaunchConfigurationAttributes.getTestMethods(configuration);
     if (tests != null && tests.size() == 1) {
       var chunks = tests.get(0).split("\\."); //$NON-NLS-1$
-      if (chunks.length == 2 && chunks[1].equalsIgnoreCase(TestFinder.REGISTRATION_METHOD_NAME)) {
+      if (chunks.length == 2 && chunks[1].equalsIgnoreCase(Constants.REGISTRATION_METHOD_NAME)) {
         filter.modules.add(chunks[0]);
         tests = Collections.emptyList();
       }
     }
     filter.tests = tests;
 
+    var logging = new LoggingSettings();
+    if (LaunchConfigurationAttributes.getLoggingToConsole(configuration)) {
+      logging.console = true;
+      logging.level = "debug"; //$NON-NLS-1$
+    }
+
     settings.name = configuration.getName();
     settings.workPath = LaunchHelper.getWorkPath(settings.name).toString();
     settings.reportPath = settings.workPath;
     settings.filter = filter;
+    settings.logging = logging;
+    settings.projectPath = LaunchConfigurationAttributes.getProjectPath(configuration);
 
     return settings;
+  }
+
+  public static class LoggingSettings {
+    @Expose
+    boolean console;
+    @Expose
+    String level;
   }
 }

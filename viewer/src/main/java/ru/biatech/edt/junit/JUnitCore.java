@@ -18,8 +18,6 @@
 
 package ru.biatech.edt.junit;
 
-import java.io.File;
-
 import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.eclipse.core.runtime.CoreException;
@@ -29,8 +27,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Platform;
-
 import ru.biatech.edt.junit.model.JUnitModel;
+
+import java.io.File;
 
 public class JUnitCore {
   public static final String CORE_PLUGIN_ID = "ru.biatech.edt.juni.core"; //$NON-NLS-1$

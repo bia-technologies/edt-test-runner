@@ -25,9 +25,9 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.ui.IJUnitHelpContextIds;
-import ru.biatech.edt.junit.ui.ImageProvider;
 import ru.biatech.edt.junit.ui.JUnitMessages;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
+import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
 import ru.biatech.edt.junit.utils.ClipboardHelper;
 import ru.biatech.edt.junit.utils.StringUtilities;
 

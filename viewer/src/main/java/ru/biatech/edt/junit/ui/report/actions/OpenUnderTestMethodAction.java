@@ -19,10 +19,10 @@ package ru.biatech.edt.junit.ui.report.actions;
 import ru.biatech.edt.junit.kinds.TestKindRegistry;
 import ru.biatech.edt.junit.model.TestCaseElement;
 import ru.biatech.edt.junit.services.TestsManager;
-import ru.biatech.edt.junit.ui.ImageProvider;
 import ru.biatech.edt.junit.ui.JUnitMessages;
 import ru.biatech.edt.junit.ui.editor.ReferencedMethodHelper;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
+import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
 
 /**
  * Действие для перехода к проверяемому методу
@@ -30,7 +30,7 @@ import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
 public class OpenUnderTestMethodAction extends OpenEditorAction {
 
   public OpenUnderTestMethodAction(TestRunnerViewPart testRunnerPart, TestCaseElement testCase) {
-    super(JUnitMessages.OpenUnderTestMethodAction_label, ImageProvider.UNDER_TEST, testRunnerPart, testCase.getClassName());
+    super(JUnitMessages.OpenUnderTestMethodAction_label, ImageProvider.ACTION_GOTO_METHOD, testRunnerPart, testCase.getClassName());
   }
 
   @Override

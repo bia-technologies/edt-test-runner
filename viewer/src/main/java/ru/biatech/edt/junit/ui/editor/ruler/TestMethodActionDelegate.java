@@ -38,8 +38,8 @@ import org.eclipse.ui.texteditor.MarkerUtilities;
 import org.eclipse.xtext.ui.editor.XtextEditor;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.services.TestsManager;
-import ru.biatech.edt.junit.ui.ImageProvider;
 import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
 
 public class TestMethodActionDelegate extends AbstractRulerActionDelegate implements IActionDelegate2 {
 
@@ -73,8 +73,7 @@ public class TestMethodActionDelegate extends AbstractRulerActionDelegate implem
 
   @Override
   protected IAction createAction(ITextEditor editor, IVerticalRulerInfo rulerInfo) {
-    action = new OpenTestMenuAction();
-    return action;
+    return action = new OpenTestMenuAction();
   }
 
   @Override
@@ -122,12 +121,15 @@ public class TestMethodActionDelegate extends AbstractRulerActionDelegate implem
     }
     var marker = (IMarker) event.data;
     var method = marker.getAttribute(RulerAttributes.ATTRIBUTE_METHOD, null);
+    var rulerInfo = getRulerInfo();
+    if (marker == null || method == null || rulerInfo == null) {
+      return;
+    }
     var menu = getMenu();
     for (var item : menu.getItems()) {
       item.setData(RulerAttributes.ATTRIBUTE_METHOD, method);
     }
-
-    var point = getRulerInfo().getControl().toDisplay(event.x, event.y);
+    var point = rulerInfo.getControl().toDisplay(event.x, event.y);
     menu.setLocation(point.x - 5, point.y - 5);
     menu.setVisible(true);
   }
@@ -155,14 +157,14 @@ public class TestMethodActionDelegate extends AbstractRulerActionDelegate implem
     };
 
     var menuItem = new MenuItem(menu, SWT.NONE);
-    menuItem.setText(JUnitMessages.TestMethodActionDelegate_Run);
+    menuItem.setText(JUnitMessages.Run_Test_Label);
     menuItem.setData(MODE_ATTRIBUTE, ILaunchManager.RUN_MODE);
 
     menuItem.setImage(imageProvider.getRunTestIcon());
     menuItem.addSelectionListener(listener);
 
     menuItem = new MenuItem(menu, SWT.NONE);
-    menuItem.setText(JUnitMessages.TestMethodActionDelegate_Debug);
+    menuItem.setText(JUnitMessages.Debug_Test_Label);
     menuItem.setData(MODE_ATTRIBUTE, ILaunchManager.DEBUG_MODE);
     menuItem.setImage(imageProvider.getDebugTestIcon());
     menuItem.addSelectionListener(listener);

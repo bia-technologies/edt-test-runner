@@ -48,7 +48,6 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.part.PageBook;
-import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.model.ITestElement;
 import ru.biatech.edt.junit.model.TestCaseElement;
 import ru.biatech.edt.junit.model.TestElement;
@@ -58,16 +57,17 @@ import ru.biatech.edt.junit.model.TestRunSession;
 import ru.biatech.edt.junit.model.TestStatus;
 import ru.biatech.edt.junit.model.TestSuiteElement;
 import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.labelProvider.TestSessionLabelProvider;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart.SortingCriterion;
 import ru.biatech.edt.junit.ui.report.actions.CopyFailureListAction;
-import ru.biatech.edt.junit.ui.report.actions.OpenUnderTestMethodAction;
 import ru.biatech.edt.junit.ui.report.actions.OpenTestAction;
+import ru.biatech.edt.junit.ui.report.actions.OpenUnderTestMethodAction;
 import ru.biatech.edt.junit.ui.report.actions.RerunAction;
-import ru.biatech.edt.junit.ui.report.contentProviders.TestSessionLabelProvider;
 import ru.biatech.edt.junit.ui.report.contentProviders.TestSessionTableContentProvider;
 import ru.biatech.edt.junit.ui.report.contentProviders.TestSessionTreeContentProvider;
 import ru.biatech.edt.junit.ui.stacktrace.actions.CopyTraceAction;
 import ru.biatech.edt.junit.ui.viewsupport.ColoringLabelProvider;
+import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
 import ru.biatech.edt.junit.ui.viewsupport.SelectionProviderMediator;
 
 import java.util.AbstractList;
@@ -110,6 +110,7 @@ public class TestViewer {
 
   private LinkedList<TestSuiteElement> fAutoClose;
   private HashSet<TestSuiteElement> fAutoExpand;
+  private final ImageProvider imageProvider = new ImageProvider();
 
   public TestViewer(Composite parent, TestRunnerViewPart runner) {
     fTestRunnerPart = runner;
@@ -428,11 +429,12 @@ public class TestViewer {
         }
       } else {
         TestCaseElement testCaseElement = (TestCaseElement) testElement;
-        manager.add(getOpenTestAction(testCaseElement));
 
-        manager.add(new OpenUnderTestMethodAction(fTestRunnerPart, testCaseElement));
-        manager.add(new Separator());
         addRerunActions(manager, testCaseElement);
+        manager.add(new Separator());
+        manager.add(getOpenTestAction(testCaseElement));
+        manager.add(new OpenUnderTestMethodAction(fTestRunnerPart, testCaseElement));
+
       }
       if (fLayoutMode == TestRunnerViewPart.LAYOUT_HIERARCHICAL) {
         manager.add(new Separator());
@@ -457,8 +459,8 @@ public class TestViewer {
     if (fTestRunnerPart.lastLaunchIsKeptAlive()) {
       manager.add(new RerunAction(JUnitMessages.RerunAction_label_rerun, fTestRunnerPart, className, ILaunchManager.RUN_MODE));
     } else {
-      manager.add(new RerunAction(JUnitMessages.RerunAction_label_run, fTestRunnerPart, className, ILaunchManager.RUN_MODE));
-      manager.add(new RerunAction(JUnitMessages.RerunAction_label_debug, fTestRunnerPart, className, ILaunchManager.DEBUG_MODE));
+      manager.add(new RerunAction(JUnitMessages.Run_Test_Label, fTestRunnerPart, className, ILaunchManager.RUN_MODE));
+      manager.add(new RerunAction(JUnitMessages.Debug_Test_Label, fTestRunnerPart, className, ILaunchManager.DEBUG_MODE));
     }
   }
 
@@ -769,6 +771,9 @@ public class TestViewer {
     fAutoExpand.clear();
   }
 
+  public void dispose() {
+    imageProvider.dispose();
+  }
 
   private final class TestSelectionListener implements ISelectionChangedListener {
     @Override
@@ -852,7 +857,7 @@ public class TestViewer {
     public ExpandAllAction() {
       setText(JUnitMessages.ExpandAllAction_text);
       setToolTipText(JUnitMessages.ExpandAllAction_tooltip);
-      setImageDescriptor(TestViewerPlugin.ui().getImageDescriptor("elcl16/expandall.png")); //$NON-NLS-1$
+      setImageDescriptor(ImageProvider.getImageDescriptor(ImageProvider.ICONS_EXPAND_ALL));
     }
 
     @Override
@@ -865,7 +870,7 @@ public class TestViewer {
     public CollapseAllAction() {
       setText(JUnitMessages.CollapseAllAction_text);
       setToolTipText(JUnitMessages.CollapseAllAction_tooltip);
-      setImageDescriptor(TestViewerPlugin.ui().getImageDescriptor("elcl16/collapseall.png")); //$NON-NLS-1$
+      setImageDescriptor(ImageProvider.getImageDescriptor(ImageProvider.ICONS_COLLAPSE_ALL));
     }
 
     @Override

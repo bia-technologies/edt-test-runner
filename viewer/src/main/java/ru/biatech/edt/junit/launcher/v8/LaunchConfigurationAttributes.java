@@ -30,6 +30,8 @@ public final class LaunchConfigurationAttributes {
   public static final String TEST_EXTENSION = "ru.biatech.edt.junit.launcher.TEST_EXTENSION"; //$NON-NLS-1$
 
   public static final String TEST_MODULE = "ru.biatech.edt.junit.launcher.TEST_MODULE"; //$NON-NLS-1$
+  public static final String PROJECT_PATH = "ru.biatech.edt.junit.launcher.PROJECT_PATH"; //$NON-NLS-1$
+  public static final String LOGGING_CONSOLE = "ru.biatech.edt.junit.launcher.LOGGING_TO_CONSOLE"; //$NON-NLS-1$
 
   public static final String WORK_PATH = "ru.biatech.edt.junit.launcher.WORK_PATH"; //$NON-NLS-1$
 
@@ -97,6 +99,14 @@ public final class LaunchConfigurationAttributes {
     return getAttribute(configuration, TEST_MODULE);
   }
 
+  public static String getProjectPath(ILaunchConfiguration configuration) {
+    return getAttribute(configuration, PROJECT_PATH);
+  }
+
+  public static boolean getLoggingToConsole(ILaunchConfiguration configuration) {
+    return getBooleanAttribute(configuration, LOGGING_CONSOLE);
+  }
+
   public static String getTestKind(ILaunchConfiguration configuration) {
     return getAttribute(configuration, ATTR_TEST_RUNNER_KIND);
   }
@@ -104,6 +114,14 @@ public final class LaunchConfigurationAttributes {
   public static String getAttribute(ILaunchConfiguration configuration, String attributeName) {
     try {
       return configuration.getAttribute(attributeName, (String) null);
+    } catch (CoreException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public static boolean getBooleanAttribute(ILaunchConfiguration configuration, String attributeName) {
+    try {
+      return configuration.getAttribute(attributeName, false);
     } catch (CoreException e) {
       throw new RuntimeException(e);
     }

@@ -29,11 +29,11 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.IWorkbenchPage;
 import ru.biatech.edt.junit.model.TestElement;
 import ru.biatech.edt.junit.model.TestErrorInfo;
-import ru.biatech.edt.junit.ui.ImageProvider;
 import ru.biatech.edt.junit.ui.JUnitMessages;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
 import ru.biatech.edt.junit.ui.stacktrace.actions.CompareResultsAction;
 import ru.biatech.edt.junit.ui.stacktrace.actions.CopyTraceAction;
+import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
 import ru.biatech.edt.junit.v8utils.BslSourceDisplay;
 
 /**
@@ -174,18 +174,17 @@ public class FailureViewer {
   class OpenAction extends Action {
 
     private OpenAction() {
-      super("Goto line", ImageProvider.getImageDescriptor(ImageProvider.GOTO_ICON));
+      super("Goto line", ImageProvider.getImageDescriptor(ImageProvider.ACTION_GOTO_ERROR));
       setEnabled(false);
     }
 
     @Override
     public void run() {
       Object element = activeViewer.getSelected();
-      if (!(element instanceof IStacktraceFrame)) {
-        return;
+      if ((element instanceof IStacktraceFrame)) {
+        IWorkbenchPage page = viewPart.getSite().getPage();
+        BslSourceDisplay.INSTANCE.displayBslSource((IStacktraceFrame)element, page, false);
       }
-      IWorkbenchPage page = viewPart.getSite().getPage();
-      BslSourceDisplay.INSTANCE.displayBslSource(element, page, false);
     }
   }
 }

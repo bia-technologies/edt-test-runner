@@ -19,10 +19,10 @@ package ru.biatech.edt.junit.ui.report.actions;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jface.action.Action;
 import org.eclipse.ui.PlatformUI;
-import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.launcher.v8.RerunHelper;
 import ru.biatech.edt.junit.ui.IJUnitHelpContextIds;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
+import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
 
 /**
  * Requests to rerun a test.
@@ -47,9 +47,9 @@ public class RerunAction extends Action {
     fClassName = className;
     fLaunchMode = launchMode;
     if (ILaunchManager.RUN_MODE.equals(launchMode)) {
-      setImageDescriptor(TestViewerPlugin.ui().getImageDescriptor("etool16/run_exc.png")); //$NON-NLS-1$
+      setImageDescriptor(ImageProvider.getImageDescriptor(ImageProvider.ACTION_RUN_TEST)); //$NON-NLS-1$
     } else if (ILaunchManager.DEBUG_MODE.equals(launchMode)) {
-      setImageDescriptor(TestViewerPlugin.ui().getImageDescriptor("etool16/debug_exc.png")); //$NON-NLS-1$
+      setImageDescriptor(ImageProvider.getImageDescriptor(ImageProvider.ACTION_DEBUG_TEST)); //$NON-NLS-1$
     }
   }
 

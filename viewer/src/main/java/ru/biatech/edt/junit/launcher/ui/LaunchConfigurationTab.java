@@ -21,9 +21,10 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
-import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.PlatformUI;
 import ru.biatech.edt.junit.TestViewerPlugin;
@@ -37,16 +38,19 @@ public class LaunchConfigurationTab extends AbstractLaunchConfigurationTab {
 
   @Override
   public void createControl(Composite parent) {
-    Composite composite = new Composite(parent, SWT.None);
+    Composite composite = new Composite(parent, SWT.NONE);
     this.setControl(composite);
     PlatformUI.getWorkbench().getHelpSystem().setHelp(this.getControl(), this.getHelpContextId());
-    GridLayoutFactory.swtDefaults().applyTo(composite);
+    composite.setLayout(new GridLayout());
+
     composite.setFont(parent.getFont());
-    control = new LaunchControl(composite, 0);
+    control = new LaunchControl(composite, SWT.NONE);
 
     control.usedLaunchConfigurationControl.addSelectionChangedListener(this::selectionChanged);
     control.testExtensionControl.addSelectionChangedListener(this::selectionChanged);
     control.testModuleControl.addSelectionChangedListener(this::selectionChanged);
+    control.projectPathControl.addModifyListener(e -> onChanged());
+    control.loggingControl.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> onChanged()));
   }
 
   @Override
@@ -82,6 +86,8 @@ public class LaunchConfigurationTab extends AbstractLaunchConfigurationTab {
     configuration.setAttribute(LaunchConfigurationAttributes.USED_LAUNCH_CONFIGURATION, usedConfiguration == null ? null : usedConfiguration.getName());
     configuration.setAttribute(LaunchConfigurationAttributes.TEST_EXTENSION, project == null ? null : project.getDtProject().getName());
     configuration.setAttribute(LaunchConfigurationAttributes.TEST_MODULE, module);
+    configuration.setAttribute(LaunchConfigurationAttributes.PROJECT_PATH, control.projectPathControl.getText());
+    configuration.setAttribute(LaunchConfigurationAttributes.LOGGING_CONSOLE, control.loggingControl.getSelection());
   }
 
   @Override
@@ -103,22 +109,29 @@ public class LaunchConfigurationTab extends AbstractLaunchConfigurationTab {
     return success;
   }
 
-  protected void updateParametersFromConfig(ILaunchConfiguration configuration) {
+  private void updateParametersFromConfig(ILaunchConfiguration configuration) {
     try {
       var usedConfiguration = LaunchHelper.getTargetConfiguration(configuration);
       var project = LaunchHelper.getTestExtension(configuration);
       var moduleName = LaunchConfigurationAttributes.getTestModuleName(configuration);
+      var projectPath = LaunchConfigurationAttributes.getProjectPath(configuration);
+      var logging = LaunchConfigurationAttributes.getLoggingToConsole(configuration);
 
       UtilsUI.setSelection(control.usedLaunchConfigurationControl, usedConfiguration);
       UtilsUI.setSelection(control.testExtensionControl, project);
       UtilsUI.setSelection(control.testModuleControl, moduleName);
+      control.projectPathControl.setText(projectPath == null ? "" : projectPath);
+      control.loggingControl.setSelection(logging);
     } catch (CoreException e) {
       TestViewerPlugin.log().logError(JUnitMessages.LaunchConfigurationTab_failedRestoreSettings, e);
     }
   }
 
+  private void selectionChanged(SelectionChangedEvent event) {
+    onChanged();
+  }
 
-  public void selectionChanged(SelectionChangedEvent event) {
+  private void onChanged() {
     setDirty(true);
     updateLaunchConfigurationDialog();
   }

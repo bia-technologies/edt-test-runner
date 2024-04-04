@@ -21,7 +21,7 @@
   <parent>
     <groupId>ru.biatech.edt.xtest</groupId>
     <artifactId>parent</artifactId>
-    <version>23.4.1-SNAPSHOT</version>
+    <version>24.3.0-SNAPSHOT</version>
   </parent>
   
   <artifactId>bundles</artifactId>

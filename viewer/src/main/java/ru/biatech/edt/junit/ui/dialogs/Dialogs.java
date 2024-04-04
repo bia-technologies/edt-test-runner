@@ -119,8 +119,9 @@ public class Dialogs {
     MessageDialog.openError(TestViewerPlugin.ui().getShell(), title, message);
   }
 
-  public Optional<List<Method>> selectMethodsForTesting(List<Method> items, String description) {
-    return selectItems(items, description, Method.class);
+  public Optional<List<Method>> selectMethodsForTesting(List<Method> items, String destination) {
+    var title = MessageFormat.format(Messages.Dialogs_Select_Methods_ForTestSuite, destination);
+    return selectItems(items, title, Method.class);
   }
 
   private <T> T selectItem(Collection<T> items, String title, String message, ILabelProvider labelProvider) {
@@ -160,7 +161,7 @@ public class Dialogs {
   private <T> Optional<List<T>> selectItems(List<T> items, String description, Class<T> clazz) {
     var shell = TestViewerPlugin.ui().getActiveWorkbenchShell();
     var dialog = new CheckedTreeSelectionDialog(shell, new MethodLabelProvider(), new FlatTree());
-    dialog.setTitle(MessageFormat.format(Messages.Dialogs_Select_Methods_ForTestSuite, description));
+    dialog.setTitle(description);
     dialog.setHelpAvailable(false);
 
     dialog.setInput(items.toArray());

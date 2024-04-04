@@ -43,7 +43,7 @@ public class GenerateMockForEvents implements ITestItemAction {
 
   @Override
   public Image getIcon(ImageProvider provider) {
-    return provider.getActionNewMock();
+    return provider.getActionNewEventMock();
   }
 
   @Override

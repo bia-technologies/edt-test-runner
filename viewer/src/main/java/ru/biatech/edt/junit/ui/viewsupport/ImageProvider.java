@@ -54,6 +54,7 @@ public class ImageProvider {
   public static final String FAILURES_ICON = "obj16/failures.png"; //$NON-NLS-1$
   public static final String STACK_ICON = "obj16/stkfrm_obj.png"; //$NON-NLS-1$
   public static final String ERROR_ICON = "obj16/error.png"; //$NON-NLS-1$
+  public static final String EVENT_ICON = "obj16/event.png"; //$NON-NLS-1$
 
   // ACTIONS
   public static final String ACTION_NEW_TESTCASE = "actions16/item-add.png"; //$NON-NLS-1$
@@ -67,6 +68,7 @@ public class ImageProvider {
   public static final String ACTION_COMPARE = "actions16/compare.png"; //$NON-NLS-1$
   public static final String ACTION_COMPARE_DISABLED = "actions16/compare-disable.png"; //$NON-NLS-1$
   public static final String ACTION_NEW_MOCK = "actions16/mock.png"; //$NON-NLS-1$
+  public static final String ACTION_NEW_EVENT_MOCK = "actions16/event_mock.png"; //$NON-NLS-1$
 
   public static final String ICONS_COLLAPSE_ALL = "elcl16/collapseall.png"; //$NON-NLS-1$
   public static final String ICONS_EXPAND_ALL = "elcl16/expandall.png"; //$NON-NLS-1$
@@ -123,6 +125,8 @@ public class ImageProvider {
   private final Image stackIcon = createManagedImage(STACK_ICON);
   @Getter(lazy = true)
   private final Image messageIcon = createManagedImage(getSharedImage(ISharedImages.IMG_OBJS_INFO_TSK));
+  @Getter(lazy = true)
+  private final Image eventIcon = createManagedImage(EVENT_ICON);
 
   // ACTIONS
   @Getter(lazy = true)
@@ -141,6 +145,8 @@ public class ImageProvider {
   private final Image actionNewTestCase = createManagedImage(ACTION_NEW_TESTCASE);
   @Getter(lazy = true)
   private final Image actionNewMock = createManagedImage(ACTION_NEW_MOCK);
+  @Getter(lazy = true)
+  private final Image actionNewEventMock = createManagedImage(ACTION_NEW_EVENT_MOCK);
 
   public static ImageDescriptor getImageDescriptor(String relativePath) {
     return TestViewerPlugin.getDefault().createImageDescriptor(relativePath, true);

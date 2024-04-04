@@ -16,12 +16,15 @@
 
 package ru.biatech.edt.junit.ui.labelProvider;
 
+import com._1c.g5.v8.dt.mcore.Event;
 import com._1c.g5.v8.dt.md.ui.shared.MdUiSharedImages;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
+import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
 import ru.biatech.edt.junit.v8utils.Present;
 
 public class MethodLabelProvider extends LabelProvider {
+  private final ImageProvider imageProvider = new ImageProvider();
   @Override
   public String getText(Object element) {
     return Present.getPresent(element);
@@ -29,6 +32,17 @@ public class MethodLabelProvider extends LabelProvider {
 
   @Override
   public Image getImage(Object element) {
-    return MdUiSharedImages.getImage(MdUiSharedImages.OBJS_METHOD);
+    if (element instanceof Event) {
+      return imageProvider.getEventIcon();
+
+    } else {
+      return MdUiSharedImages.getImage(MdUiSharedImages.OBJS_METHOD);
+    }
+  }
+
+  @Override
+  public void dispose() {
+    super.dispose();
+    imageProvider.dispose();
   }
 }

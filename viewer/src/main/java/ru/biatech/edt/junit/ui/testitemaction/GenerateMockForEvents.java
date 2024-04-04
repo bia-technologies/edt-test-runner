@@ -19,10 +19,10 @@ package ru.biatech.edt.junit.ui.testitemaction;
 import com._1c.g5.v8.dt.bsl.model.Module;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.graphics.Image;
+import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.ui.dialogs.Dialogs;
 import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
 import ru.biatech.edt.junit.v8utils.BslContext;
-import ru.biatech.edt.junit.v8utils.EventData;
 import ru.biatech.edt.junit.yaxunit.mocks.EventMockDefinition;
 import ru.biatech.edt.junit.yaxunit.mocks.MockCreator;
 import ru.biatech.edt.junit.yaxunit.mocks.MockDefinition;
@@ -38,7 +38,7 @@ public class GenerateMockForEvents implements ITestItemAction {
 
   @Override
   public String getPresent() {
-    return INDENT + "Создать мок для событий объекта";
+    return INDENT + Messages.GenerateMockForEvents_present;
   }
 
   @Override
@@ -54,22 +54,28 @@ public class GenerateMockForEvents implements ITestItemAction {
   @Override
   public void run() {
     var events = BslContext.getEvents(module);
+    var title = getPresent();
+
     if (events.isEmpty()) {
-      Dialogs.showWarning("Создание мока для события объекта", "Объект не содержит событий");
+      Dialogs.showWarning(Messages.GenerateMockForEvents_present, Messages.GenerateMockForEvents_events_not_found);
       return;
     }
 
-    var eventsForMocking = Dialogs.selectEvents(events, "Выберите события для мокирования");
+    var eventsForMocking = Dialogs.selectEvents(events, Messages.GenerateMockForEvents_select_event);
     if (eventsForMocking.isEmpty()) {
       return;
     }
     var creator = new MockCreator(module);
     var mocks = eventsForMocking.get().stream()
-        .map(EventData::getEvent)
         .map(EventMockDefinition::new)
         .map(MockDefinition.class::cast)
         .collect(Collectors.toList());
 
     creator.createMock(mocks);
+
+    if (!creator.getExceptions().isEmpty()) {
+      creator.getExceptions().forEach(e -> TestViewerPlugin.log().logError(Messages.GenerateMock_failed_error_prefix, e));
+      Dialogs.showError(title, Messages.GenerateMock_failed_message);
+    }
   }
 }

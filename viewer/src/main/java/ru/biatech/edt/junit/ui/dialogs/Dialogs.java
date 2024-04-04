@@ -20,6 +20,7 @@ import com._1c.g5.v8.dt.bsl.model.Method;
 import com._1c.g5.v8.dt.bsl.model.Module;
 import com._1c.g5.v8.dt.core.platform.IExtensionProject;
 import com._1c.g5.v8.dt.core.platform.IV8Project;
+import com._1c.g5.v8.dt.mcore.Event;
 import lombok.experimental.UtilityClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.jface.dialogs.Dialog;
@@ -39,7 +40,6 @@ import ru.biatech.edt.junit.ui.labelProvider.TestItemActionLabelProvider;
 import ru.biatech.edt.junit.ui.testitemaction.ITestItemAction;
 import ru.biatech.edt.junit.ui.viewsupport.ColoringLabelProvider;
 import ru.biatech.edt.junit.utils.StringUtilities;
-import ru.biatech.edt.junit.v8utils.EventData;
 import ru.biatech.edt.junit.v8utils.MethodReference;
 import ru.biatech.edt.junit.v8utils.Present;
 import ru.biatech.edt.junit.yaxunit.Engine;
@@ -115,6 +115,10 @@ public class Dialogs {
     MessageDialog.openWarning(TestViewerPlugin.ui().getShell(), title, message);
   }
 
+  public static void showError(String title, String message) {
+    MessageDialog.openError(TestViewerPlugin.ui().getShell(), title, message);
+  }
+
   public Optional<List<Method>> selectMethodsForTesting(List<Method> items, String description) {
     return selectItems(items, description, Method.class);
   }
@@ -149,8 +153,8 @@ public class Dialogs {
     }
   }
 
-  public Optional<List<EventData>> selectEvents(List<EventData> items, String description) {
-    return selectItems(items, description, EventData.class);
+  public Optional<List<Event>> selectEvents(List<Event> items, String description) {
+    return selectItems(items, description, Event.class);
   }
 
   private <T> Optional<List<T>> selectItems(List<T> items, String description, Class<T> clazz) {

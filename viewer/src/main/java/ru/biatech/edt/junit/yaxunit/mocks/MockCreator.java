@@ -105,7 +105,7 @@ public class MockCreator {
   }
 
   protected String getPrefix() {
-    return isRussian ? "Мок_" : "Mock_";
+    return isRussian ? "Мок_" : "Mock_"; //$NON-NLS-1$ //$NON-NLS-2$
   }
 
   private IExtensionProject getProject() {
@@ -177,7 +177,7 @@ public class MockCreator {
   }
 
   private void appendAroundAnnotation(StringBuilder builder) {
-    builder.append('&').append(isRussian ? "Вместо" : "Around");
+    builder.append('&').append(isRussian ? "Вместо" : "Around"); //$NON-NLS-1$ //$NON-NLS-2$
     builder.append(this.bslGenProp.getOpenBracketPropStr()).append(this.bslGenProp.getQuotePropStr()).append(mockDefinition.getName()).append(this.bslGenProp.getQuotePropStr()).append(this.bslGenProp.getCloseBracketPropStr());
   }
 
@@ -224,7 +224,7 @@ public class MockCreator {
     } else if (moduleType == ModuleType.MANAGER_MODULE) {
       return Present.getPresent((MdObject) module.getOwner());
     } else {
-      return isRussian ? "ЭтотОбъект" : "ThisObject";
+      return isRussian ? "ЭтотОбъект" : "ThisObject"; //$NON-NLS-1$ //$NON-NLS-2$
     }
   }
 

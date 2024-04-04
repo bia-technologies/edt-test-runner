@@ -18,6 +18,7 @@ package ru.biatech.edt.junit.v8utils;
 
 import com._1c.g5.v8.dt.bsl.model.Method;
 import com._1c.g5.v8.dt.bsl.model.Module;
+import com._1c.g5.v8.dt.mcore.Event;
 import com._1c.g5.v8.dt.metadata.mdclass.CommonModule;
 import com._1c.g5.v8.dt.metadata.mdclass.MdObject;
 import com._1c.g5.v8.dt.ui.util.Labeler;
@@ -31,11 +32,12 @@ public class Present {
       return "<NULL>"; //$NON-NLS-1$
     } else if (item instanceof Method) {
       return getPresent((Method) item);
-
     } else if (item instanceof Module) {
       return getPresent((Module) item);
     } else if (item instanceof MdObject) {
       return getPresent((CommonModule) item);
+    } else if (item instanceof Event) {
+      return getPresent((Event) item);
     }
     return item.toString();
   }
@@ -57,6 +59,11 @@ public class Present {
         .stopBefore(IProject.class)
         .label();
   }
+
+  public String getPresent(Event item) {
+    return item.getNameRu();
+  }
+
   public String getShortPresent(CommonModule item) {
     return item.getName();
   }

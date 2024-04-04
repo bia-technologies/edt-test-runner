@@ -20,6 +20,7 @@ import com._1c.g5.v8.dt.bsl.model.Module;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.graphics.Image;
 import ru.biatech.edt.junit.TestViewerPlugin;
+import ru.biatech.edt.junit.ui.dialogs.Dialogs;
 import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
 import ru.biatech.edt.junit.ui.viewsupport.LabelStylerFactory;
 import ru.biatech.edt.junit.yaxunit.mocks.MethodMockDefinition;
@@ -57,7 +58,8 @@ public class GenerateMock implements ITestItemAction {
 
     creator.createMock(new MethodMockDefinition(module, methodName));
     if (!creator.getExceptions().isEmpty()) {
-      creator.getExceptions().forEach(e -> TestViewerPlugin.log().logError("Не удалось создать мок", e));
+      creator.getExceptions().forEach(e -> TestViewerPlugin.log().logError(Messages.GenerateMock_failed_error_prefix, e));
+      Dialogs.showError(getPresent(), Messages.GenerateMock_failed_message);
     }
   }
 

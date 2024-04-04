@@ -27,13 +27,13 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.DebugUITools;
-import org.eclipse.jface.dialogs.MessageDialog;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.kinds.ITestKind;
 import ru.biatech.edt.junit.kinds.TestKindRegistry;
 import ru.biatech.edt.junit.launcher.LaunchConfigurationTypes;
 import ru.biatech.edt.junit.services.TestsManager;
 import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.dialogs.Dialogs;
 import ru.biatech.edt.junit.v8utils.Projects;
 
 import java.io.IOException;
@@ -171,7 +171,7 @@ public class LaunchHelper {
     }
 
     if (errorMessage != null) {
-      MessageDialog.openError(TestViewerPlugin.ui().getShell(), JUnitMessages.LaunchTest_title, errorMessage);
+      Dialogs.showError(JUnitMessages.LaunchTest_title, errorMessage);
       return;
     }
 
@@ -180,7 +180,7 @@ public class LaunchHelper {
       copy = configuration.get().copy(PREFIX_LAUNCH_TEST + methodFullName); //$NON-NLS-1$
     } catch (CoreException e) {
       TestViewerPlugin.log().logError(e);
-      MessageDialog.openError(TestViewerPlugin.ui().getShell(), JUnitMessages.LaunchTest_title, e.getMessage());
+      Dialogs.showError(JUnitMessages.LaunchTest_title, e.getMessage());
       return;
     }
 

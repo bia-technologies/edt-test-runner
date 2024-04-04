@@ -18,52 +18,29 @@ package ru.biatech.edt.junit.v8utils;
 
 import com._1c.g5.v8.dt.bsl.model.Module;
 import com._1c.g5.v8.dt.bsl.ui.contentassist.BslProposalProvider;
-import com._1c.g5.v8.dt.bsl.util.BslUtil;
 import com._1c.g5.v8.dt.mcore.Event;
 import lombok.experimental.UtilityClass;
 import org.eclipse.xtext.resource.IResourceServiceProvider;
+import org.eclipse.xtext.util.Pair;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @UtilityClass
 public class BslContext {
   private BslProposalProvider proposalProvider;
-  private boolean isRussian;
 
-  public List<EventData> getEvents(Module module) {
-    var events = getProposalProvider(module).getAllCorrectEvent(module);
-    var result = new ArrayList<EventData>();
-    for (var item : events) {
-      var event = createEvent(item.getFirst());
-      event.handler = item.getSecond();
-      result.add(event);
-    }
-    return result;
+  public List<Event> getEvents(Module module) {
+    return getProposalProvider(module).getAllCorrectEvent(module)
+        .stream().map(Pair::getFirst)
+        .collect(Collectors.toList());
   }
 
   private synchronized BslProposalProvider getProposalProvider(Module module) {
     if (proposalProvider == null) {
       IResourceServiceProvider resourceProvider = IResourceServiceProvider.Registry.INSTANCE.getResourceServiceProvider(module.eResource().getURI());
       proposalProvider = resourceProvider.get(BslProposalProvider.class);
-      isRussian = BslUtil.isRussian(module, VendorServices.getProjectManager());
     }
     return proposalProvider;
-  }
-
-  EventData createEvent(Event rawEvent) {
-    var event = new EventData();
-    event.event = rawEvent;
-    event.name = !isRussian ? rawEvent.getName() : rawEvent.getNameRu();
-
-    for (var paramSet : rawEvent.getParamSet()) {
-      if (paramSet.getParams() != null && !paramSet.getParams().isEmpty()) {
-        for (var param : paramSet.getParams()) {
-          String nameParam = !isRussian ? param.getName() : param.getNameRu();
-          event.parameters.add(nameParam);
-        }
-      }
-    }
-    return event;
   }
 }

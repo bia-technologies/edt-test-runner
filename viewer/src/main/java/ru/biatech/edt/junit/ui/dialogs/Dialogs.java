@@ -20,6 +20,7 @@ import com._1c.g5.v8.dt.bsl.model.Method;
 import com._1c.g5.v8.dt.bsl.model.Module;
 import com._1c.g5.v8.dt.core.platform.IExtensionProject;
 import com._1c.g5.v8.dt.core.platform.IV8Project;
+import com._1c.g5.v8.dt.mcore.Event;
 import lombok.experimental.UtilityClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.jface.dialogs.Dialog;
@@ -110,25 +111,17 @@ public class Dialogs {
     dialog.open();
   }
 
-  public Optional<Method[]> selectMethodsForTesting(List<Method> items, String destination) {
-    var shell = TestViewerPlugin.ui().getActiveWorkbenchShell();
-    var dialog = new CheckedTreeSelectionDialog(shell, new MethodLabelProvider(), new FlatTree());
-    dialog.setTitle(MessageFormat.format(Messages.Dialogs_Select_Methods_ForTestSuite, destination));
-    dialog.setHelpAvailable(false);
+  public void showWarning(String title, String message) {
+    MessageDialog.openWarning(TestViewerPlugin.ui().getShell(), title, message);
+  }
 
-    dialog.setInput(items.toArray());
+  public static void showError(String title, String message) {
+    MessageDialog.openError(TestViewerPlugin.ui().getShell(), title, message);
+  }
 
-    if (dialog.open() == Dialog.OK) {
-      var result = dialog.getResult();
-      if (result.length > 0) {
-        var methods = Arrays.stream(dialog.getResult())
-            .map(Method.class::cast)
-            .toArray(Method[]::new);
-
-        return Optional.of(methods);
-      }
-    }
-    return Optional.empty();
+  public Optional<List<Method>> selectMethodsForTesting(List<Method> items, String destination) {
+    var title = MessageFormat.format(Messages.Dialogs_Select_Methods_ForTestSuite, destination);
+    return selectItems(items, title, Method.class);
   }
 
   private <T> T selectItem(Collection<T> items, String title, String message, ILabelProvider labelProvider) {
@@ -161,7 +154,32 @@ public class Dialogs {
     }
   }
 
-  private static class FlatTree implements ITreeContentProvider {
+  public Optional<List<Event>> selectEvents(List<Event> items, String description) {
+    return selectItems(items, description, Event.class);
+  }
+
+  private <T> Optional<List<T>> selectItems(List<T> items, String description, Class<T> clazz) {
+    var shell = TestViewerPlugin.ui().getActiveWorkbenchShell();
+    var dialog = new CheckedTreeSelectionDialog(shell, new MethodLabelProvider(), new FlatTree());
+    dialog.setTitle(description);
+    dialog.setHelpAvailable(false);
+
+    dialog.setInput(items.toArray());
+
+    if (dialog.open() == Dialog.OK) {
+      var result = dialog.getResult();
+      if (result.length > 0) {
+        var methods = Arrays.stream(dialog.getResult())
+            .map(clazz::cast)
+            .collect(Collectors.toList());
+
+        return Optional.of(methods);
+      }
+    }
+    return Optional.empty();
+  }
+
+  private class FlatTree implements ITreeContentProvider {
 
     @Override
     public Object[] getElements(Object inputElement) {

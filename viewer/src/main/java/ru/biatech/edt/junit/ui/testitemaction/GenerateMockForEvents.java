@@ -16,33 +16,34 @@
 
 package ru.biatech.edt.junit.ui.testitemaction;
 
-import com._1c.g5.v8.dt.bsl.model.Method;
 import com._1c.g5.v8.dt.bsl.model.Module;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.graphics.Image;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.ui.dialogs.Dialogs;
 import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
-import ru.biatech.edt.junit.yaxunit.TestCreator;
+import ru.biatech.edt.junit.v8utils.BslContext;
+import ru.biatech.edt.junit.yaxunit.mocks.EventMockDefinition;
+import ru.biatech.edt.junit.yaxunit.mocks.MockCreator;
+import ru.biatech.edt.junit.yaxunit.mocks.MockDefinition;
 
 import java.util.stream.Collectors;
 
-public class NewTestSuiteAction implements ITestItemAction {
-  private final Module baseModule;
+public class GenerateMockForEvents implements ITestItemAction {
+  private final Module module;
 
-  public NewTestSuiteAction(Module baseModule) {
-    this.baseModule = baseModule;
+  public GenerateMockForEvents(Module module) {
+    this.module = module;
   }
-
 
   @Override
   public String getPresent() {
-    return INDENT + Messages.NewTestSuiteAction_Present;
+    return INDENT + Messages.GenerateMockForEvents_present;
   }
 
   @Override
   public Image getIcon(ImageProvider provider) {
-    return provider.getNewTestSuite();
+    return provider.getActionNewEventMock();
   }
 
   @Override
@@ -52,23 +53,29 @@ public class NewTestSuiteAction implements ITestItemAction {
 
   @Override
   public void run() {
-    var methods = baseModule.allMethods()
-        .stream()
-        .filter(Method::isExport);
-    var owner = baseModule.getOwner();
-    var selected = Dialogs.selectMethodsForTesting(methods.collect(Collectors.toList()), owner.toString());
+    var events = BslContext.getEvents(module);
+    var title = getPresent();
 
-    if (selected.isEmpty()) {
+    if (events.isEmpty()) {
+      Dialogs.showWarning(Messages.GenerateMockForEvents_present, Messages.GenerateMockForEvents_events_not_found);
       return;
     }
-    var methodNames = selected.get().stream()
-        .map(Method::getName)
-        .toArray(String[]::new);
 
-    try {
-      TestCreator.createTestSuite(baseModule, methodNames);
-    } catch (InterruptedException e) {
-      TestViewerPlugin.log().logError(Messages.NewTestSuiteAction_Failed, e);
+    var eventsForMocking = Dialogs.selectEvents(events, Messages.GenerateMockForEvents_select_event);
+    if (eventsForMocking.isEmpty()) {
+      return;
+    }
+    var creator = new MockCreator(module);
+    var mocks = eventsForMocking.get().stream()
+        .map(EventMockDefinition::new)
+        .map(MockDefinition.class::cast)
+        .collect(Collectors.toList());
+
+    creator.createMock(mocks);
+
+    if (!creator.getExceptions().isEmpty()) {
+      creator.getExceptions().forEach(e -> TestViewerPlugin.log().logError(Messages.GenerateMock_failed_error_prefix, e));
+      Dialogs.showError(title, Messages.GenerateMock_failed_message);
     }
   }
 }

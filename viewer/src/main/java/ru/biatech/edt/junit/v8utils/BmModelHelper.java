@@ -26,10 +26,10 @@ import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class BmModelHelper {
-  public <T extends MdObject> T appendItem(IV8Project project, T item, String description) {
+  public <T extends MdObject> void appendItem(IV8Project project, T item, String description) {
 
     var modelMng = VendorServices.getBmModelManager();
-    return modelMng.getGlobalEditingContext()
+    modelMng.getGlobalEditingContext()
         .execute(description, null, null, transaction -> {
           addItem(transaction.toTransactionObject(((IConfigurationAware) project).getConfiguration()), item);
           var fqn = VendorServices.getTopObjectFqnGenerator().generateStandaloneObjectFqn(item.eClass(), item.getName());

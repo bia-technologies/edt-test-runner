@@ -17,10 +17,10 @@
 package ru.biatech.edt.junit.ui.commands;
 
 import org.eclipse.debug.core.ILaunchManager;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.xtext.ui.editor.XtextEditor;
 import ru.biatech.edt.junit.services.TestsManager;
 import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.dialogs.Dialogs;
 import ru.biatech.edt.junit.ui.editor.EditorHelper;
 
 /**
@@ -34,9 +34,7 @@ public class DebugTestOutlineAction extends OnMethodAction {
     if (TestsManager.isTestMethod(module, methodName)) {
       TestsManager.runTestMethod(module, methodName, ILaunchManager.DEBUG_MODE);
     } else {
-      MessageDialog.openError(editor.getShell(),
-          JUnitMessages.LaunchTest_title,
-          JUnitMessages.LaunchTest_error_is_not_test);
+      Dialogs.showError(JUnitMessages.LaunchTest_title, JUnitMessages.LaunchTest_error_is_not_test);
     }
   }
 }

@@ -55,9 +55,6 @@ public class TestItemActionLabelProvider extends LabelProvider implements Delega
   @Override
   public void dispose() {
     super.dispose();
-    if (imageProvider != null) {
       imageProvider.dispose();
-      imageProvider = null;
     }
-  }
 }

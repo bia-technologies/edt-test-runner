@@ -31,7 +31,6 @@ import ru.biatech.edt.junit.v8utils.Present;
 import ru.biatech.edt.junit.yaxunit.TestCreator;
 
 import java.text.MessageFormat;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.stream.Collectors;
 
@@ -94,7 +93,7 @@ public class UpdateTestSuiteAction implements ITestItemAction {
     if (selected.isEmpty()) {
       return;
     }
-    var methodNames = Arrays.stream(selected.get())
+    var methodNames = selected.get().stream()
         .map(Method::getName)
         .toArray(String[]::new);
     TestCreator.updateTestSuite(testSuite, methodNames);

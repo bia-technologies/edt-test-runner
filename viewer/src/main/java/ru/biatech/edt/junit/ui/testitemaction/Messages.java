@@ -34,6 +34,12 @@ public class Messages extends NLS {
   public static String UpdateTestSuiteAction_Present;
   public static String GenerateMock_Present;
 
+  public static String GenerateMockForEvents_events_not_found;
+  public static String GenerateMock_failed_error_prefix;
+  public static String GenerateMock_failed_message;
+  public static String GenerateMockForEvents_present;
+  public static String GenerateMockForEvents_select_event;
+
   static {
     // initialize resource bundle
     NLS.initializeMessages(BUNDLE_NAME, Messages.class);

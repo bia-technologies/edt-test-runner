@@ -20,7 +20,7 @@ import ru.biatech.edt.junit.model.ITestCaseElement;
 import ru.biatech.edt.junit.model.ITestRunSession;
 
 /**
- * A test run listener that can be registered at {@link JUnitCore#addTestRunListener(TestRunListener)}
+ * A test run listener that can be registered at {@link Core#addTestRunListener(TestRunListener)}
  * or as a contribution to the <code>org.eclipse.jdt.junit.testRunListeners</code> extension point.
  * The latter approach has the advantage that the contributing plug-in is automatically loaded when a test run starts.
  * <p>

@@ -113,7 +113,6 @@ public final class JUnitMessages extends NLS {
   public static String TestRunnerViewPart_layout_menu;
 
   public static String TestSessionLabelProvider_testName_elapsedTimeInSeconds;
-  public static String TestSessionLabelProvider_testName_JUnitVersion;
   public static String TestSessionLabelProvider_testMethodName_className;
 
   public static String LaunchConfigurationDelegate_Launching;

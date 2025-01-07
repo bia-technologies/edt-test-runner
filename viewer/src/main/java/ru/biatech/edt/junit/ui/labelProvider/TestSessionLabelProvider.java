@@ -29,7 +29,6 @@ import org.eclipse.swt.graphics.Image;
 import ru.biatech.edt.junit.BasicElementLabels;
 import ru.biatech.edt.junit.model.ITestCaseElement;
 import ru.biatech.edt.junit.model.ITestElement;
-import ru.biatech.edt.junit.model.ITestRunSession;
 import ru.biatech.edt.junit.model.ITestSuiteElement;
 import ru.biatech.edt.junit.model.TestCaseElement;
 import ru.biatech.edt.junit.model.TestElement;
@@ -79,13 +78,6 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
     if (fLayoutMode == TestRunnerViewPart.LAYOUT_HIERARCHICAL) {
       if (element instanceof ITestSuiteElement) {
         text = addContext(text, ((ITestSuiteElement) testElement).getContext());
-      }
-      if (testElement.getParentContainer() instanceof ITestRunSession) {
-        String testKindDisplayName = fTestRunnerPart.getTestKindDisplayName();
-        if (testKindDisplayName != null) {
-          String decorated = MessageFormat.format(JUnitMessages.TestSessionLabelProvider_testName_JUnitVersion, text, testKindDisplayName);
-          text = StyledCellLabelProvider.styleDecoratedString(decorated, StyledString.QUALIFIER_STYLER, text);
-        }
       }
     } else {
       if (element instanceof ITestCaseElement) {
@@ -172,17 +164,8 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
       return element.toString();
     }
     ITestElement testElement = (ITestElement) element;
-    if (fLayoutMode == TestRunnerViewPart.LAYOUT_HIERARCHICAL) {
-      if (testElement.getParentContainer() instanceof ITestRunSession) {
-        String testKindDisplayName = fTestRunnerPart.getTestKindDisplayName();
-        if (testKindDisplayName != null) {
-          label = MessageFormat.format(JUnitMessages.TestSessionLabelProvider_testName_JUnitVersion, label, testKindDisplayName);
-        }
-      }
-    } else {
-      if (element instanceof TestCaseElement) {
+    if (fLayoutMode != TestRunnerViewPart.LAYOUT_HIERARCHICAL && element instanceof TestCaseElement) {
         label = getTextForFlatLayout((TestCaseElement) testElement, label);
-      }
     }
     return addElapsedTime(label, testElement.getElapsedTimeInSeconds());
   }

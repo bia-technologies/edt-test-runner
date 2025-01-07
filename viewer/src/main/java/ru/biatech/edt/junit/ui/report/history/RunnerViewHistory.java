@@ -27,8 +27,7 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 import ru.biatech.edt.junit.BasicElementLabels;
 import ru.biatech.edt.junit.PreferencesConstants;
 import ru.biatech.edt.junit.TestViewerPlugin;
-import ru.biatech.edt.junit.model.TestResult;
-import ru.biatech.edt.junit.model.TestRunSession;
+import ru.biatech.edt.junit.model.Session;
 import ru.biatech.edt.junit.ui.JUnitMessages;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
 import ru.biatech.edt.junit.ui.report.actions.ActionsSupport;
@@ -42,7 +41,7 @@ import java.util.List;
 /**
  * Класс-помощник для работы с историей запусков тестирования
  */
-public class RunnerViewHistory extends ViewHistory<TestRunSession> {
+public class RunnerViewHistory extends ViewHistory<Session> {
 
   private final TestRunnerViewPart testRunnerViewPart;
 
@@ -82,40 +81,40 @@ public class RunnerViewHistory extends ViewHistory<TestRunSession> {
   }
 
   @Override
-  public List<TestRunSession> getHistoryEntries() {
-    return TestViewerPlugin.core().getModel().getTestRunSessions();
+  public List<Session> getHistoryEntries() {
+    return TestViewerPlugin.core().getSessionsManager().getSessions();
   }
 
   @Override
-  public TestRunSession getCurrentEntry() {
+  public Session getCurrentEntry() {
     return testRunnerViewPart.getTestRunSession();
   }
 
   @Override
-  public void setActiveEntry(TestRunSession entry) {
-    TestRunSession deactivatedSession = testRunnerViewPart.setActiveTestRunSession(entry);
+  public void setActiveEntry(Session entry) {
+    var deactivatedSession = testRunnerViewPart.setActiveTestRunSession(entry);
     if (deactivatedSession != null) {
       deactivatedSession.swapOut();
     }
   }
 
   @Override
-  public void setHistoryEntries(List<TestRunSession> remainingEntries, TestRunSession activeEntry) {
+  public void setHistoryEntries(List<Session> remainingEntries, Session activeEntry) {
     testRunnerViewPart.setActiveTestRunSession(activeEntry);
 
-    List<TestRunSession> testRunSessions = TestViewerPlugin.core().getModel().getTestRunSessions();
-    testRunSessions.removeAll(remainingEntries);
-    for (TestRunSession testRunSession : testRunSessions) {
-      TestViewerPlugin.core().getModel().removeTestRunSession(testRunSession);
+    var sessions = TestViewerPlugin.core().getSessionsManager().getSessions();
+    sessions.removeAll(remainingEntries);
+    for (var session : sessions) {
+      TestViewerPlugin.core().getSessionsManager().removeSession(session);
     }
-    for (TestRunSession remaining : remainingEntries) {
+    for (var remaining : remainingEntries) {
       remaining.swapOut();
     }
   }
 
   @Override
   public ImageDescriptor getImageDescriptor(Object element) {
-    TestRunSession session = (TestRunSession) element;
+    var session = (Session) element;
     var imageProvider = testRunnerViewPart.getImageProvider();
 
     if (session.isStopped()) {
@@ -126,7 +125,7 @@ public class RunnerViewHistory extends ViewHistory<TestRunSession> {
       return imageProvider.getSuiteRunningIconDescriptor();
     }
 
-    TestResult result = session.getTestResult(true);
+    var result = session.getTestResult(true);
 
     switch (result) {
       case OK:
@@ -141,12 +140,12 @@ public class RunnerViewHistory extends ViewHistory<TestRunSession> {
   }
 
   @Override
-  public String getText(TestRunSession session) {
-    String testRunLabel = BasicElementLabels.getJavaElementName(session.getTestRunName());
+  public String getText(Session session) {
+    var testRunLabel = BasicElementLabels.getJavaElementName(session.getTestRunName());
     if (session.getStartTime() <= 0) {
       return testRunLabel;
     } else {
-      String startTime = DateFormat.getDateTimeInstance().format(new Date(session.getStartTime()));
+      var startTime = DateFormat.getDateTimeInstance().format(new Date(session.getStartTime()));
       return MessageFormat.format(JUnitMessages.TestRunnerViewPart_testName_startTime, testRunLabel, startTime);
     }
   }

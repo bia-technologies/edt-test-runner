@@ -49,11 +49,11 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.part.PageBook;
 import ru.biatech.edt.junit.model.ITestElement;
+import ru.biatech.edt.junit.model.Session;
 import ru.biatech.edt.junit.model.TestCaseElement;
 import ru.biatech.edt.junit.model.TestElement;
 import ru.biatech.edt.junit.model.TestResult;
 import ru.biatech.edt.junit.model.TestRoot;
-import ru.biatech.edt.junit.model.TestRunSession;
 import ru.biatech.edt.junit.model.TestStatus;
 import ru.biatech.edt.junit.model.TestSuiteElement;
 import ru.biatech.edt.junit.ui.JUnitMessages;
@@ -93,7 +93,6 @@ public class TestViewer {
   private TestSessionTreeContentProvider fTreeContentProvider;
   private TestSessionLabelProvider fTreeLabelProvider;
   private TableViewer fTableViewer;
-  private TestSessionTableContentProvider fTableContentProvider;
   private TestSessionLabelProvider fTableLabelProvider;
   private SelectionProviderMediator fSelectionProvider;
 
@@ -101,7 +100,7 @@ public class TestViewer {
   private boolean fTreeHasFilter;
   private boolean fTableHasFilter;
 
-  private TestRunSession fTestRunSession;
+  private Session session;
 
   private boolean fTreeNeedsRefresh;
   private boolean fTableNeedsRefresh;
@@ -128,8 +127,8 @@ public class TestViewer {
     return fViewerBook;
   }
 
-  public synchronized void registerActiveSession(TestRunSession testRunSession) {
-    fTestRunSession = testRunSession;
+  public synchronized void registerActiveSession(Session session) {
+    this.session = session;
     registerAutoScrollTarget(null);
     registerViewersRefresh();
   }
@@ -267,7 +266,7 @@ public class TestViewer {
    */
   void processChangesInUI() {
     TestRoot testRoot;
-    if (fTestRunSession == null) {
+    if (session == null) {
       registerViewersRefresh();
       fTreeNeedsRefresh = false;
       fTableNeedsRefresh = false;
@@ -276,7 +275,7 @@ public class TestViewer {
       return;
     }
 
-    testRoot = fTestRunSession.getTestRoot();
+    testRoot = session.getTestRoot();
 
     StructuredViewer viewer = getActiveViewer();
     if (getActiveViewerNeedsRefresh()) {
@@ -321,7 +320,7 @@ public class TestViewer {
   }
 
   void selectFirstFailure() {
-    TestElement firstFailure = getNextChildFailure(fTestRunSession.getTestRoot(), true);
+    TestElement firstFailure = getNextChildFailure(session.getTestRoot(), true);
     if (firstFailure != null) {
       getActiveViewer().setSelection(new StructuredSelection(firstFailure), true);
     }
@@ -333,7 +332,7 @@ public class TestViewer {
     TestElement next;
 
     if (selected == null) {
-      next = getNextChildFailure(fTestRunSession.getTestRoot(), showNext);
+      next = getNextChildFailure(session.getTestRoot(), showNext);
     } else {
       next = getNextFailure(selected, showNext);
     }
@@ -389,7 +388,7 @@ public class TestViewer {
 
     fTableViewer = new TableViewer(fViewerBook, SWT.V_SCROLL | SWT.H_SCROLL | SWT.SINGLE);
     fTableViewer.setUseHashlookup(true);
-    fTableContentProvider = new TestSessionTableContentProvider();
+    TestSessionTableContentProvider fTableContentProvider = new TestSessionTableContentProvider();
     fTableViewer.setContentProvider(fTableContentProvider);
     fTableLabelProvider = new TestSessionLabelProvider(fTestRunnerPart, TestRunnerViewPart.LAYOUT_FLAT);
     fTableViewer.setLabelProvider(new ColoringLabelProvider(fTableLabelProvider));
@@ -447,7 +446,7 @@ public class TestViewer {
       manager.add(action);
     }
 
-    if (fTestRunSession != null && fTestRunSession.getFailureCount() + fTestRunSession.getErrorCount() > 0) {
+    if (session != null && session.getFailureCount() + session.getErrorCount() > 0) {
       manager.add(new CopyFailureListAction(fTestRunnerPart));
     }
     manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
@@ -679,7 +678,7 @@ public class TestViewer {
         }
       }
 
-      while (parent != null && !fTestRunSession.getTestRoot().equals(parent) && !fTreeViewer.getExpandedState(parent)) {
+      while (parent != null && !session.getTestRoot().equals(parent) && !fTreeViewer.getExpandedState(parent)) {
         fAutoClose.add(parent); // add to auto-opened elements -> close later if STATUS_OK
         parent = (TestSuiteElement) fTreeContentProvider.getParent(parent);
       }
@@ -797,7 +796,7 @@ public class TestViewer {
 
     public boolean select(TestElement testElement) {
       TestStatus status = testElement.getStatus();
-      return status.isErrorOrFailure() || (!fTestRunSession.isRunning() && status == TestStatus.RUNNING);  // rerunning
+      return status.isErrorOrFailure() || (!session.isRunning() && status == TestStatus.RUNNING);  // rerunning
     }
   }
 
@@ -808,7 +807,7 @@ public class TestViewer {
     }
 
     public boolean select(TestElement testElement) {
-      return hasIgnoredInTestResult(testElement) || (!fTestRunSession.isRunning() && testElement.getStatus() == TestStatus.RUNNING); // rerunning
+      return hasIgnoredInTestResult(testElement) || (!session.isRunning() && testElement.getStatus() == TestStatus.RUNNING); // rerunning
     }
 
     /**

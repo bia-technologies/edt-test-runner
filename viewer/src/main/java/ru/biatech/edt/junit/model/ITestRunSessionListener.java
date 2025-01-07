@@ -21,10 +21,10 @@ package ru.biatech.edt.junit.model;
 public interface ITestRunSessionListener {
 
   /**
-   * @param testRunSession the new session, or <code>null</code>
+   * @param session the new session, or <code>null</code>
    */
-  void sessionAdded(TestRunSession testRunSession);
+  void sessionAdded(Session session);
 
-  void sessionRemoved(TestRunSession testRunSession);
+  void sessionRemoved(Session session);
 
 }

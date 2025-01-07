@@ -18,12 +18,16 @@
 
 package ru.biatech.edt.junit.model;
 
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 
 
 public class TestCaseElement extends TestElement implements ITestCaseElement {
 
-  private boolean fIgnored;
+  @Getter
+  @Setter
+  private boolean ignored;
   private final boolean fIsDynamicTest;
 
   public TestCaseElement(@NonNull TestSuiteElement parent, @NonNull String testName, String displayName, boolean isDynamicTest, String[] parameterTypes, String uniqueId, String context) {
@@ -59,19 +63,11 @@ public class TestCaseElement extends TestElement implements ITestCaseElement {
    */
   @Override
   public TestResult getTestResult(boolean includeChildren) {
-    if (fIgnored) {
+    if (ignored) {
       return TestResult.IGNORED;
     } else {
       return super.getTestResult(includeChildren);
     }
-  }
-
-  public void setIgnored(boolean ignored) {
-    fIgnored = ignored;
-  }
-
-  public boolean isIgnored() {
-    return fIgnored;
   }
 
   @Override

@@ -21,7 +21,7 @@ import lombok.SneakyThrows;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.ui.DebugUITools;
 import ru.biatech.edt.junit.TestViewerPlugin;
-import ru.biatech.edt.junit.model.TestRunSession;
+import ru.biatech.edt.junit.model.Session;
 
 import java.util.List;
 
@@ -35,7 +35,7 @@ public class RerunHelper {
   }
 
   @SneakyThrows
-  public static void rerunTest(TestRunSession session, String testClassName, String launchMode) {
+  public static void rerunTest(Session session, String testClassName, String launchMode) {
     if (isBadSession(session)) {
       return;
     }
@@ -45,7 +45,7 @@ public class RerunHelper {
   }
 
   @SneakyThrows
-  public static void rerun(TestRunSession session) {
+  public static void rerun(Session session) {
     if (isBadSession(session)) {
       return;
     }
@@ -60,7 +60,7 @@ public class RerunHelper {
   }
 
   @SneakyThrows
-  public static void rerunFailures(TestRunSession session) {
+  public static void rerunFailures(Session session) {
     if (isBadSession(session)) {
       return;
     }
@@ -77,7 +77,7 @@ public class RerunHelper {
   }
 
   @SneakyThrows
-  private static boolean isBadSession(TestRunSession session) {
+  private static boolean isBadSession(Session session) {
     if (session == null || session.getLaunch() == null) {
       return true;
     }
@@ -91,7 +91,7 @@ public class RerunHelper {
   }
 
   @SneakyThrows
-  private static void rerunTests(TestRunSession session, List<String> tests, String configName, String launchMode) {
+  private static void rerunTests(Session session, List<String> tests, String configName, String launchMode) {
     if (tests == null || tests.isEmpty()) {
       return;
     }

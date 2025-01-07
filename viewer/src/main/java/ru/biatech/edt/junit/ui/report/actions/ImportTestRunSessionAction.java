@@ -22,7 +22,7 @@ import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.FileDialog;
 import ru.biatech.edt.junit.TestViewerPlugin;
-import ru.biatech.edt.junit.model.JUnitModel;
+import ru.biatech.edt.junit.model.SessionsManager;
 import ru.biatech.edt.junit.ui.JUnitMessages;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
 
@@ -57,7 +57,7 @@ import java.io.File;
     File file = new File(path);
 
     try {
-      JUnitModel.importTestRunSession(file, null);
+      SessionsManager.importSession(file, null);
     } catch (CoreException e) {
       TestViewerPlugin.log().logError(e);
       ErrorDialog.openError(shell, JUnitMessages.TestRunnerViewPart_ImportTestRunSessionAction_error_title, e.getStatus().getMessage(), e.getStatus());

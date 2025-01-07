@@ -25,9 +25,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.ILaunch;
-import org.eclipse.debug.core.ILaunchManager;
-import ru.biatech.edt.junit.JUnitCore;
+import ru.biatech.edt.junit.Constants;
+import ru.biatech.edt.junit.Core;
 import ru.biatech.edt.junit.PreferencesConstants;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.launcher.lifecycle.LifecycleEvent;
@@ -44,20 +43,19 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
 /**
  * Central registry for JUnit test runs.
  */
-public final class JUnitModel {
+public final class SessionsManager {
 
-  private final ListenerList<ITestRunSessionListener> fTestRunSessionListeners = new ListenerList<>();
+  private final ListenerList<ITestRunSessionListener> sessionListeners = new ListenerList<>();
   /**
    * Active test run sessions, youngest first.
    */
-  private final LinkedList<TestRunSession> fTestRunSessions = new LinkedList<>();
+  private final LinkedList<Session> sessions = new LinkedList<>();
   private LifecycleListener lifecycleListener;
 
   /**
@@ -67,7 +65,7 @@ public final class JUnitModel {
    * @return the imported test run session
    * @throws CoreException if the import failed
    */
-  public static TestRunSession importTestRunSession(File file, String defaultProjectName) throws CoreException {
+  public static Session importSession(File file, String defaultProjectName) throws CoreException {
     return Serializer.importTestRunSession(file, defaultProjectName);
   }
 
@@ -80,116 +78,8 @@ public final class JUnitModel {
    * @throws InterruptedException      if the import was cancelled
    * @since 3.6
    */
-  public static void importTestRunSession(String url, String defaultProjectName, IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+  public static void importSession(String url, String defaultProjectName, IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
     Serializer.importTestRunSession(url, defaultProjectName, monitor);
-  }
-
-  /**
-   * Starts the model (called by the {@link JUnitCore} on startup).
-   */
-  public void start() {
-    LifecycleMonitor.addListener(lifecycleListener = (eventType, item) -> {
-      if (LifecycleEvent.isFinished(eventType)) {
-        JUnitModel.loadTestReport(item);
-      }
-    });
-    addTestRunSessionListener(new TestRunSessionListener());
-  }
-
-  /**
-   * Stops the model (called by the {@link JUnitCore} on shutdown).
-   */
-  public void stop() {
-    LifecycleMonitor.removeListener(lifecycleListener);
-    File historyDirectory = TestViewerPlugin.core().getHistoryDirectory();
-    File[] swapFiles = historyDirectory.listFiles();
-    if (swapFiles != null) {
-      for (File swapFile : swapFiles) {
-        swapFile.delete();
-      }
-    }
-  }
-
-  public void addTestRunSessionListener(ITestRunSessionListener listener) {
-    fTestRunSessionListeners.add(listener);
-  }
-
-  public void removeTestRunSessionListener(ITestRunSessionListener listener) {
-    fTestRunSessionListeners.remove(listener);
-  }
-
-  /**
-   * @return a list of active {@link TestRunSession}s. The list is a copy of
-   * the internal data structure and modifications do not affect the
-   * global list of active sessions. The list is sorted by age, youngest first.
-   */
-  public synchronized List<TestRunSession> getTestRunSessions() {
-    return new ArrayList<>(fTestRunSessions);
-  }
-
-  /**
-   * Adds the given {@link TestRunSession} and notifies all registered
-   * {@link ITestRunSessionListener}s.
-   *
-   * @param testRunSession the session to add
-   */
-  public void addTestRunSession(@NonNull TestRunSession testRunSession) {
-    ArrayList<TestRunSession> toRemove = new ArrayList<>();
-
-    synchronized (this) {
-      Assert.isLegal(!fTestRunSessions.contains(testRunSession));
-      fTestRunSessions.addFirst(testRunSession);
-
-      int maxCount = Platform.getPreferencesService().getInt(TestViewerPlugin.PLUGIN_ID, PreferencesConstants.MAX_TEST_RUNS, 10, null);
-      int size = fTestRunSessions.size();
-      if (size > maxCount) {
-        List<TestRunSession> excess = fTestRunSessions.subList(maxCount, size);
-        for (Iterator<TestRunSession> iter = excess.iterator(); iter.hasNext(); ) {
-          TestRunSession oldSession = iter.next();
-          if (!oldSession.isStarting() && !oldSession.isRunning() && !oldSession.isKeptAlive()) {
-            toRemove.add(oldSession);
-            iter.remove();
-          }
-        }
-      }
-    }
-
-    for (TestRunSession oldSession : toRemove) {
-      notifyTestRunSessionRemoved(oldSession);
-    }
-    notifyTestRunSessionAdded(testRunSession);
-  }
-
-  /**
-   * Removes the given {@link TestRunSession} and notifies all registered
-   * {@link ITestRunSessionListener}s.
-   *
-   * @param testRunSession the session to remove
-   */
-  public void removeTestRunSession(TestRunSession testRunSession) {
-    boolean existed;
-    synchronized (this) {
-      existed = fTestRunSessions.remove(testRunSession);
-    }
-    if (existed) {
-      notifyTestRunSessionRemoved(testRunSession);
-    }
-    testRunSession.removeSwapFile();
-  }
-
-  private void notifyTestRunSessionRemoved(TestRunSession testRunSession) {
-    testRunSession.stopTestRun();
-    ILaunch launch = testRunSession.getLaunch();
-    if (launch != null) {
-      ILaunchManager launchManager = DebugPlugin.getDefault().getLaunchManager();
-      launchManager.removeLaunch(launch);
-    }
-
-    fTestRunSessionListeners.forEach(it -> it.sessionRemoved(testRunSession));
-  }
-
-  private void notifyTestRunSessionAdded(TestRunSession testRunSession) {
-    fTestRunSessionListeners.forEach(it -> it.sessionAdded(testRunSession));
   }
 
   public static void loadTestReport(LifecycleItem item) {
@@ -209,7 +99,7 @@ public final class JUnitModel {
         return;
       }
 
-      var session = JUnitModel.importTestRunSession(reportPath.toFile(), project);
+      var session = SessionsManager.importSession(reportPath.toFile(), project);
       assert session != null;
       session.setLaunch(item.getTestLaunch());
 
@@ -222,47 +112,151 @@ public final class JUnitModel {
   }
 
   /**
-   * @deprecated to prevent deprecation warnings
+   * Starts the model (called by the {@link Core} on startup).
    */
-  @Deprecated
+  public void start() {
+    LifecycleMonitor.addListener(lifecycleListener = (eventType, item) -> {
+      if (LifecycleEvent.isFinished(eventType)) {
+        SessionsManager.loadTestReport(item);
+      }
+    });
+    addTestRunSessionListener(new TestRunSessionListener());
+  }
+
+  /**
+   * Stops the model (called by the {@link Core} on shutdown).
+   */
+  public void stop() {
+    LifecycleMonitor.removeListener(lifecycleListener);
+    var historyDirectory = TestViewerPlugin.core().getHistoryDirectory();
+    var swapFiles = historyDirectory.listFiles();
+    if (swapFiles != null) {
+      for (var swapFile : swapFiles) {
+        swapFile.delete();
+      }
+    }
+  }
+
+  public void addTestRunSessionListener(ITestRunSessionListener listener) {
+    sessionListeners.add(listener);
+  }
+
+  public void removeTestRunSessionListener(ITestRunSessionListener listener) {
+    sessionListeners.remove(listener);
+  }
+
+  /**
+   * @return a list of active {@link Session}s. The list is a copy of
+   * the internal data structure and modifications do not affect the
+   * global list of active sessions. The list is sorted by age, youngest first.
+   */
+  public synchronized List<Session> getSessions() {
+    return new ArrayList<>(sessions);
+  }
+
+  /**
+   * Adds the given {@link Session} and notifies all registered
+   * {@link ITestRunSessionListener}s.
+   *
+   * @param session the session to add
+   */
+  public void addSession(@NonNull Session session) {
+    var toRemove = new ArrayList<Session>();
+
+    synchronized (this) {
+      Assert.isLegal(!sessions.contains(session));
+      sessions.addFirst(session);
+
+      var maxCount = Platform.getPreferencesService().getInt(Constants.PLUGIN_ID, PreferencesConstants.MAX_TEST_RUNS, 10, null);
+      var size = sessions.size();
+      if (size > maxCount) {
+        var excess = sessions.subList(maxCount, size);
+        for (var iter = excess.iterator(); iter.hasNext(); ) {
+          var oldSession = iter.next();
+          if (!oldSession.isStarting() && !oldSession.isRunning() && !oldSession.isKeptAlive()) {
+            toRemove.add(oldSession);
+            iter.remove();
+          }
+        }
+      }
+    }
+
+    for (var oldSession : toRemove) {
+      notifySessionRemoved(oldSession);
+    }
+    notifySessionAdded(session);
+  }
+
+  /**
+   * Removes the given {@link Session} and notifies all registered
+   * {@link ITestRunSessionListener}s.
+   *
+   * @param session the session to remove
+   */
+  public void removeSession(Session session) {
+    boolean existed;
+    synchronized (this) {
+      existed = sessions.remove(session);
+    }
+    if (existed) {
+      notifySessionRemoved(session);
+    }
+    session.removeSwapFile();
+  }
+
+  private void notifySessionRemoved(Session session) {
+    session.stopTestRun();
+    var launch = session.getLaunch();
+    if (launch != null) {
+      var launchManager = DebugPlugin.getDefault().getLaunchManager();
+      launchManager.removeLaunch(launch);
+    }
+
+    sessionListeners.forEach(it -> it.sessionRemoved(session));
+  }
+
+  private void notifySessionAdded(Session session) {
+    sessionListeners.forEach(it -> it.sessionAdded(session));
+  }
+
   private static final class TestRunSessionListener implements ITestRunSessionListener {
-    private TestRunSession fActiveTestRunSession;
-    private ITestSessionListener fTestSessionListener;
+    private Session activeSession;
+    private ITestSessionListener sessionListener;
 
     @Override
-    public void sessionAdded(TestRunSession testRunSession) {
+    public void sessionAdded(Session session) {
       // Only serve one legacy ITestRunListener at a time, since they cannot distinguish between different concurrent test sessions:
-      if (fActiveTestRunSession != null)
+      if (activeSession != null)
         return;
 
-      fActiveTestRunSession = testRunSession;
+      activeSession = session;
 
-      fTestSessionListener = new ITestSessionListener() {
+      sessionListener = new ITestSessionListener() {
         @Override
         public void testAdded(TestElement testElement) {
         }
 
         @Override
         public void sessionStarted() {
-          TestViewerPlugin.core().getNewTestRunListeners().forEach(it -> it.sessionStarted(fActiveTestRunSession));
+          TestViewerPlugin.core().getNewTestRunListeners().forEach(it -> it.sessionStarted(activeSession));
         }
 
         @Override
         public void sessionTerminated() {
-          TestViewerPlugin.core().getNewTestRunListeners().forEach(it -> it.sessionTerminated(fActiveTestRunSession));
-          sessionRemoved(fActiveTestRunSession);
+          TestViewerPlugin.core().getNewTestRunListeners().forEach(it -> it.sessionTerminated(activeSession));
+          sessionRemoved(activeSession);
         }
 
         @Override
         public void sessionStopped(long elapsedTime) {
-          TestViewerPlugin.core().getNewTestRunListeners().forEach(it -> it.sessionFinished(fActiveTestRunSession));
-          sessionRemoved(fActiveTestRunSession);
+          TestViewerPlugin.core().getNewTestRunListeners().forEach(it -> it.sessionFinished(activeSession));
+          sessionRemoved(activeSession);
         }
 
         @Override
         public void sessionEnded(long elapsedTime) {
-          TestViewerPlugin.core().getNewTestRunListeners().forEach(it -> it.sessionFinished(fActiveTestRunSession));
-          sessionRemoved(fActiveTestRunSession);
+          TestViewerPlugin.core().getNewTestRunListeners().forEach(it -> it.sessionFinished(activeSession));
+          sessionRemoved(activeSession);
         }
 
         @Override
@@ -299,15 +293,15 @@ public final class JUnitModel {
           return true;
         }
       };
-      fActiveTestRunSession.addTestSessionListener(fTestSessionListener);
+      activeSession.addTestSessionListener(sessionListener);
     }
 
     @Override
-    public void sessionRemoved(TestRunSession testRunSession) {
-      if (fActiveTestRunSession == testRunSession) {
-        fActiveTestRunSession.removeTestSessionListener(fTestSessionListener);
-        fTestSessionListener = null;
-        fActiveTestRunSession = null;
+    public void sessionRemoved(Session session) {
+      if (activeSession == session) {
+        activeSession.removeTestSessionListener(sessionListener);
+        sessionListener = null;
+        activeSession = null;
       }
     }
   }

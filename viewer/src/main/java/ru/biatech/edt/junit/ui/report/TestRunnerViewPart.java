@@ -90,10 +90,10 @@ import ru.biatech.edt.junit.kinds.ITestKind;
 import ru.biatech.edt.junit.model.ITestCaseElement;
 import ru.biatech.edt.junit.model.ITestRunSessionListener;
 import ru.biatech.edt.junit.model.ITestSessionListener;
-import ru.biatech.edt.junit.model.JUnitModel;
+import ru.biatech.edt.junit.model.Session;
+import ru.biatech.edt.junit.model.SessionsManager;
 import ru.biatech.edt.junit.model.TestCaseElement;
 import ru.biatech.edt.junit.model.TestElement;
-import ru.biatech.edt.junit.model.TestRunSession;
 import ru.biatech.edt.junit.model.TestStatus;
 import ru.biatech.edt.junit.ui.IJUnitHelpContextIds;
 import ru.biatech.edt.junit.ui.JUnitMessages;
@@ -174,8 +174,8 @@ public class TestRunnerViewPart extends ViewPart {
   private ActivateOnErrorAction fActivateOnErrorAction;
   private ToggleSortingAction[] fToggleSortingActions;
   private IMenuListener fViewMenuListener;
-  private TestRunSession fTestRunSession;
-  private TestSessionListener fTestSessionListener;
+  private Session session;
+  private TestSessionListener sessionListener;
   private RunnerViewHistory fViewHistory;
   private TestRunSessionListener fTestRunSessionListener;
   private IMemento fMemento;
@@ -217,7 +217,7 @@ public class TestRunnerViewPart extends ViewPart {
 
   private static void importTestRunSession(final String url) {
     try {
-      PlatformUI.getWorkbench().getProgressService().busyCursorWhile(monitor -> JUnitModel.importTestRunSession(url, null, monitor));
+      PlatformUI.getWorkbench().getProgressService().busyCursorWhile(monitor -> SessionsManager.importSession(url, null, monitor));
     } catch (InterruptedException e) {
       // cancelled
     } catch (InvocationTargetException e) {
@@ -257,7 +257,7 @@ public class TestRunnerViewPart extends ViewPart {
    * @return the display name of the current test run sessions kind, or <code>null</code>
    */
   public String getTestKindDisplayName() {
-    ITestKind kind = fTestRunSession.getTestRunnerKind();
+    ITestKind kind = session.getTestRunnerKind();
     if (!kind.isNull()) {
       return kind.getDisplayName();
     }
@@ -272,7 +272,7 @@ public class TestRunnerViewPart extends ViewPart {
   public synchronized void dispose() {
     fIsDisposed = true;
     if (fTestRunSessionListener != null) {
-      TestViewerPlugin.core().getModel().removeTestRunSessionListener(fTestRunSessionListener);
+      TestViewerPlugin.core().getSessionsManager().removeTestRunSessionListener(fTestRunSessionListener);
     }
 
     setActiveTestRunSession(null);
@@ -290,26 +290,26 @@ public class TestRunnerViewPart extends ViewPart {
   }
 
   public IV8Project getLaunchedProject() {
-    return fTestRunSession == null ? null : fTestRunSession.getLaunchedProject();
+    return session == null ? null : session.getLaunchedProject();
   }
 
   public boolean lastLaunchIsKeptAlive() {
-    return fTestRunSession != null && fTestRunSession.isKeptAlive();
+    return session != null && session.isKeptAlive();
   }
 
   public Shell getShell() {
     return fParent.getShell();
   }
 
-  public TestRunSession getTestRunSession() {
-    return fTestRunSession;
+  public Session getTestRunSession() {
+    return session;
   }
 
   /**
-   * @param testRunSession new active test run session
+   * @param session new active test run session
    * @return deactivated session, or <code>null</code> iff no session got deactivated
    */
-  public TestRunSession setActiveTestRunSession(TestRunSession testRunSession) {
+  public Session setActiveTestRunSession(Session session) {
 /*
 - State:
 fTestRunSession
@@ -327,23 +327,23 @@ fFailureTrace
 
 action enablement
  */
-    if (fTestRunSession == testRunSession) {
+    if (this.session == session) {
       return null;
     }
 
     deregisterTestSessionListener(true);
 
-    TestRunSession deactivatedSession = fTestRunSession;
+    Session deactivatedSession = this.session;
 
-    fTestRunSession = testRunSession;
-    fTestViewer.registerActiveSession(testRunSession);
+    this.session = session;
+    fTestViewer.registerActiveSession(session);
 
     if (fSashForm.isDisposed()) {
       stopUpdateJobs();
       return deactivatedSession;
     }
 
-    if (testRunSession == null) {
+    if (session == null) {
       setTitleToolTip(null);
       resetViewIcon();
       clearStatus();
@@ -353,7 +353,7 @@ action enablement
       stopUpdateJobs();
 
     } else {
-      if (!fTestRunSession.isStarting() && !settings.isShowOnErrorOnly()) {
+      if (!this.session.isStarting() && !settings.isShowOnErrorOnly()) {
         showTestResultsView();
       }
 
@@ -361,7 +361,7 @@ action enablement
 
       clearStatus();
       failureViewer.clear();
-      registerInfoMessage(BasicElementLabels.getJavaElementName(fTestRunSession.getTestRunPresent()));
+      registerInfoMessage(BasicElementLabels.getJavaElementName(this.session.getTestRunPresent()));
 
       stopUpdateJobs();
 
@@ -372,7 +372,7 @@ action enablement
   }
 
   public ITestCaseElement[] getAllFailures() {
-    return fTestRunSession.getAllFailedTestElements();
+    return session.getAllFailedTestElements();
   }
 
   void handleTestSelected(TestElement test) {
@@ -443,10 +443,10 @@ action enablement
   }
 
   private int getErrorsPlusFailures() {
-    if (fTestRunSession == null) {
+    if (session == null) {
       return 0;
     } else {
-      return fTestRunSession.getErrorCount() + fTestRunSession.getFailureCount();
+      return session.getErrorCount() + session.getFailureCount();
     }
   }
 
@@ -466,8 +466,8 @@ action enablement
   }
 
   private void logMessageIfNoTests() {
-    if (fTestRunSession != null && fTestRunSession.getTotalCount() == 0) {
-      String msg = MessageFormat.format(JUnitMessages.TestRunnerViewPart_error_notests_kind, fTestRunSession.getTestRunnerKind().getDisplayName());
+    if (session != null && session.getTotalCount() == 0) {
+      String msg = MessageFormat.format(JUnitMessages.TestRunnerViewPart_error_notests_kind, session.getTestRunnerKind().getDisplayName());
       Platform.getLog(getClass()).error(msg);
     }
   }
@@ -478,7 +478,7 @@ action enablement
   }
 
   private void updateViewIcon() {
-    if (fTestRunSession == null || fTestRunSession.getStartedCount() == 0) {
+    if (session == null || session.getStartedCount() == 0) {
       fViewImage = fOriginalViewImage;
     } else if (hasErrorsOrFailures()) {
       fViewImage = imageProvider.getTestRunFailIcon();
@@ -489,7 +489,7 @@ action enablement
   }
 
   private void updateViewTitleProgress() {
-    if (fTestRunSession != null) {
+    if (session != null) {
       updateViewIcon();
     } else {
       resetViewIcon();
@@ -497,16 +497,16 @@ action enablement
   }
 
   private void deregisterTestSessionListener(boolean force) {
-    if (fTestRunSession != null && fTestSessionListener != null && (force || !fTestRunSession.isKeptAlive())) {
-      fTestRunSession.removeTestSessionListener(fTestSessionListener);
-      fTestSessionListener = null;
+    if (session != null && sessionListener != null && (force || !session.isKeptAlive())) {
+      session.removeTestSessionListener(sessionListener);
+      sessionListener = null;
     }
   }
 
   private void setTitleToolTip() {
     String testKindDisplayStr = getTestKindDisplayName();
 
-    String testRunLabel = BasicElementLabels.getJavaElementName(fTestRunSession.getTestRunName());
+    String testRunLabel = BasicElementLabels.getJavaElementName(session.getTestRunName());
     if (testKindDisplayStr != null) {
       setTitleToolTip(MessageFormat.format(JUnitMessages.TestRunnerViewPart_titleToolTip, testRunLabel, testKindDisplayStr));
     } else {
@@ -534,15 +534,15 @@ action enablement
     boolean hasErrorsOrFailures;
     boolean stopped;
 
-    if (fTestRunSession != null) {
-      startedCount = fTestRunSession.getStartedCount();
-      ignoredCount = fTestRunSession.getIgnoredCount();
-      totalCount = fTestRunSession.getTotalCount();
-      errorCount = fTestRunSession.getErrorCount();
-      failureCount = fTestRunSession.getFailureCount();
-      assumptionFailureCount = fTestRunSession.getAssumptionFailureCount();
+    if (session != null) {
+      startedCount = session.getStartedCount();
+      ignoredCount = session.getIgnoredCount();
+      totalCount = session.getTotalCount();
+      errorCount = session.getErrorCount();
+      failureCount = session.getFailureCount();
+      assumptionFailureCount = session.getAssumptionFailureCount();
       hasErrorsOrFailures = errorCount + failureCount > 0;
-      stopped = fTestRunSession.isStopped();
+      stopped = session.isStopped();
     } else {
       startedCount = 0;
       ignoredCount = 0;
@@ -686,12 +686,12 @@ action enablement
     fMemento = null;
 
     fTestRunSessionListener = new TestRunSessionListener();
-    TestViewerPlugin.core().getModel().addTestRunSessionListener(fTestRunSessionListener);
+    TestViewerPlugin.core().getSessionsManager().addTestRunSessionListener(fTestRunSessionListener);
 
     // always show youngest test run in view. simulate "sessionAdded" event to do that
-    List<TestRunSession> testRunSessions = TestViewerPlugin.core().getModel().getTestRunSessions();
-    if (!testRunSessions.isEmpty()) {
-      fTestRunSessionListener.sessionAdded(testRunSessions.get(0));
+    List<Session> sessions = TestViewerPlugin.core().getSessionsManager().getSessions();
+    if (!sessions.isEmpty()) {
+      fTestRunSessionListener.sessionAdded(sessions.get(0));
     }
   }
 
@@ -757,7 +757,7 @@ action enablement
 
       @Override
       public String getName(Object page) {
-        return fViewHistory.getText((TestRunSession) page);
+        return fViewHistory.getText((Session) page);
       }
 
       @Override
@@ -767,7 +767,7 @@ action enablement
 
       @Override
       public void activatePage(Object page) {
-        fViewHistory.setActiveEntry((TestRunSession) page);
+        fViewHistory.setActiveEntry((Session) page);
       }
 
       @Override
@@ -958,13 +958,13 @@ action enablement
 
   private class TestRunSessionListener implements ITestRunSessionListener {
     @Override
-    public void sessionAdded(final TestRunSession testRunSession) {
+    public void sessionAdded(final Session session) {
       getDisplay().asyncExec(() -> {
         if (UIPreferencesConstants.getShowInAllViews() || getSite().getWorkbenchWindow() == TestViewerPlugin.ui().getActiveWorkbenchWindow()) {
           if (fInfoMessage == null) {
-            String testRunLabel = BasicElementLabels.getJavaElementName(testRunSession.getTestRunName());
+            String testRunLabel = BasicElementLabels.getJavaElementName(session.getTestRunName());
             String msg;
-            if (testRunSession.getLaunch() != null) {
+            if (session.getLaunch() != null) {
               msg = MessageFormat.format(JUnitMessages.TestRunnerViewPart_Launching, testRunLabel);
             } else {
               msg = testRunLabel;
@@ -972,7 +972,7 @@ action enablement
             registerInfoMessage(msg);
           }
 
-          TestRunSession deactivatedSession = setActiveTestRunSession(testRunSession);
+          Session deactivatedSession = setActiveTestRunSession(session);
           if (deactivatedSession != null) {
             deactivatedSession.swapOut();
           }
@@ -981,13 +981,13 @@ action enablement
     }
 
     @Override
-    public void sessionRemoved(final TestRunSession testRunSession) {
+    public void sessionRemoved(final Session session) {
       getDisplay().asyncExec(() -> {
-        if (testRunSession.equals(fTestRunSession)) {
-          List<TestRunSession> testRunSessions = TestViewerPlugin.core().getModel().getTestRunSessions();
-          TestRunSession deactivatedSession;
-          if (!testRunSessions.isEmpty()) {
-            deactivatedSession = setActiveTestRunSession(testRunSessions.get(0));
+        if (session.equals(TestRunnerViewPart.this.session)) {
+          var sessions = TestViewerPlugin.core().getSessionsManager().getSessions();
+          Session deactivatedSession;
+          if (!sessions.isEmpty()) {
+            deactivatedSession = setActiveTestRunSession(sessions.get(0));
           } else {
             deactivatedSession = setActiveTestRunSession(null);
           }
@@ -1265,7 +1265,7 @@ action enablement
 
     public void setSortingCriterion(SortingCriterion sortingCriterion) {
       this.sortingCriterion = sortingCriterion;
-      if (fTestRunSession != null) {
+      if (session != null) {
         fTestViewer.setSortingCriterion(this.sortingCriterion);
       }
     }

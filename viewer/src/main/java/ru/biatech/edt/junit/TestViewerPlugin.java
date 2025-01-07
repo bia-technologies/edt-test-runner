@@ -44,10 +44,9 @@ import java.net.URL;
 import java.text.MessageFormat;
 
 public class TestViewerPlugin extends AbstractUIPlugin {
-  public static final String PLUGIN_ID = "ru.biatech.edt.junit"; //$NON-NLS-1$
   private static final IPath ICONS_PATH = new Path("$nl$/icons/full"); //$NON-NLS-1$
   private static TestViewerPlugin plugin;
-  JUnitCore core;
+  Core core;
   JUnitUI ui;
   private BundleContext bundleContext;
   private Injector injector;
@@ -55,7 +54,7 @@ public class TestViewerPlugin extends AbstractUIPlugin {
 
   public TestViewerPlugin() {
     plugin = this;
-    core = new JUnitCore();
+    core = new Core();
     ui = new JUnitUI();
   }
 
@@ -78,7 +77,7 @@ public class TestViewerPlugin extends AbstractUIPlugin {
     return (T) bundleContext.getService(serviceReference);
   }
 
-  public static JUnitCore core() {
+  public static Core core() {
     return getDefault().core;
   }
 
@@ -87,7 +86,7 @@ public class TestViewerPlugin extends AbstractUIPlugin {
   }
 
   public static String getPluginId() {
-    return PLUGIN_ID;
+    return Constants.PLUGIN_ID;
   }
 
   public static boolean isStopped() {
@@ -130,14 +129,14 @@ public class TestViewerPlugin extends AbstractUIPlugin {
 
     new InjectorAwareServiceRegistrator(bundleContext, this::getInjector);
     this.bundleContext = bundleContext;
-    core().getModel().start();
+    core().getSessionsManager().start();
     LifecycleMonitor.start();
   }
 
   @Override
   public void stop(BundleContext bundleContext) throws Exception {
     LifecycleMonitor.stop();
-    core().getModel().stop();
+    core().getSessionsManager().stop();
     plugin = null;
     super.stop(bundleContext);
   }

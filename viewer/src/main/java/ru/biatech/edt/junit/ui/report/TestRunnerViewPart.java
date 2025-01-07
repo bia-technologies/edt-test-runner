@@ -30,9 +30,6 @@ package ru.biatech.edt.junit.ui.report;
 import com._1c.g5.v8.dt.core.platform.IV8Project;
 import lombok.Getter;
 import lombok.Setter;
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.IHandler;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -80,8 +77,6 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
-import org.eclipse.ui.handlers.IHandlerActivation;
-import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.PageSwitcher;
 import org.eclipse.ui.part.ViewPart;
@@ -106,8 +101,6 @@ import ru.biatech.edt.junit.ui.JUnitUIPreferencesConstants;
 import ru.biatech.edt.junit.ui.report.actions.ActivateOnErrorAction;
 import ru.biatech.edt.junit.ui.report.actions.FailuresOnlyFilterAction;
 import ru.biatech.edt.junit.ui.report.actions.IgnoredOnlyFilterAction;
-import ru.biatech.edt.junit.ui.report.actions.RerunLastAction;
-import ru.biatech.edt.junit.ui.report.actions.RerunLastFailedFirstAction;
 import ru.biatech.edt.junit.ui.report.actions.ScrollLockAction;
 import ru.biatech.edt.junit.ui.report.actions.ShowNextFailureAction;
 import ru.biatech.edt.junit.ui.report.actions.ShowPreviousFailureAction;
@@ -140,8 +133,6 @@ public class TestRunnerViewPart extends ViewPart {
   public static final int VIEW_ORIENTATION_VERTICAL = 0;
   public static final int VIEW_ORIENTATION_HORIZONTAL = 1;
   public static final int VIEW_ORIENTATION_AUTOMATIC = 2;
-  public static final String RERUN_LAST_COMMAND = "ru.biatech.edt.junit.junitShortcut.rerunLast"; //$NON-NLS-1$
-  public static final String RERUN_FAILED_FIRST_COMMAND = "ru.biatech.edt.junit.junitShortcut.rerunFailedFirst"; //$NON-NLS-1$
 
   /**
    * @since 3.5
@@ -173,10 +164,6 @@ public class TestRunnerViewPart extends ViewPart {
   private Action fNextAction;
   private Action fPreviousAction;
   private CopyTraceAction fCopyAction;
-  private Action fRerunLastTestAction;
-  private IHandlerActivation fRerunLastActivation;
-  private Action fRerunFailedFirstAction;
-  private IHandlerActivation fRerunFailedFirstActivation;
   private FailuresOnlyFilterAction fFailuresOnlyFilterAction;
   private IgnoredOnlyFilterAction fIgnoredOnlyFilterAction;
   private ScrollLockAction fScrollLockAction;
@@ -288,9 +275,6 @@ public class TestRunnerViewPart extends ViewPart {
       TestViewerPlugin.core().getModel().removeTestRunSessionListener(fTestRunSessionListener);
     }
 
-    IHandlerService handlerService = getSite().getWorkbenchWindow().getService(IHandlerService.class);
-    handlerService.deactivateHandler(fRerunLastActivation);
-    handlerService.deactivateHandler(fRerunFailedFirstActivation);
     setActiveTestRunSession(null);
 
     getViewSite().getPage().removePartListener(fPartListener);
@@ -368,9 +352,6 @@ action enablement
       registerInfoMessage(" "); //$NON-NLS-1$
       stopUpdateJobs();
 
-      fRerunFailedFirstAction.setEnabled(false);
-      fRerunLastTestAction.setEnabled(false);
-
     } else {
       if (!fTestRunSession.isStarting() && !settings.isShowOnErrorOnly()) {
         showTestResultsView();
@@ -381,9 +362,6 @@ action enablement
       clearStatus();
       failureViewer.clear();
       registerInfoMessage(BasicElementLabels.getJavaElementName(fTestRunSession.getTestRunPresent()));
-
-      updateRerunFailedFirstAction();
-      fRerunLastTestAction.setEnabled(fTestRunSession.getLaunch() != null);
 
       stopUpdateJobs();
 
@@ -482,7 +460,6 @@ action enablement
         return;
       }
       resetViewIcon();
-      updateRerunFailedFirstAction();
     });
     stopUpdateJobs();
     logMessageIfNoTests();
@@ -524,11 +501,6 @@ action enablement
       fTestRunSession.removeTestSessionListener(fTestSessionListener);
       fTestSessionListener = null;
     }
-  }
-
-  private void updateRerunFailedFirstAction() {
-    boolean state = hasErrorsOrFailures() && fTestRunSession.getLaunch() != null;
-    fRerunFailedFirstAction.setEnabled(state);
   }
 
   private void setTitleToolTip() {
@@ -847,45 +819,12 @@ action enablement
     fPreviousAction.setEnabled(false);
     actionBars.setGlobalActionHandler(ActionFactory.PREVIOUS.getId(), fPreviousAction);
 
-    fRerunLastTestAction = new RerunLastAction(this);
-    IHandlerService handlerService = getSite().getWorkbenchWindow().getService(IHandlerService.class);
-    IHandler handler = new AbstractHandler() {
-      @Override
-      public Object execute(ExecutionEvent event) {
-        fRerunLastTestAction.run();
-        return null;
-      }
-
-      @Override
-      public boolean isEnabled() {
-        return fRerunLastTestAction.isEnabled();
-      }
-    };
-    fRerunLastActivation = handlerService.activateHandler(RERUN_LAST_COMMAND, handler);
-
-    fRerunFailedFirstAction = new RerunLastFailedFirstAction(this);
-    handler = new AbstractHandler() {
-      @Override
-      public Object execute(ExecutionEvent event) {
-        fRerunFailedFirstAction.run();
-        return null;
-      }
-
-      @Override
-      public boolean isEnabled() {
-        return fRerunFailedFirstAction.isEnabled();
-      }
-    };
-    fRerunFailedFirstActivation = handlerService.activateHandler(RERUN_FAILED_FIRST_COMMAND, handler);
-
     toolBar.add(fNextAction);
     toolBar.add(fPreviousAction);
     toolBar.add(fFailuresOnlyFilterAction = new FailuresOnlyFilterAction(settings));
     toolBar.add(fIgnoredOnlyFilterAction = new IgnoredOnlyFilterAction(settings));
     toolBar.add(fScrollLockAction = new ScrollLockAction(settings));
     toolBar.add(new Separator());
-    toolBar.add(fRerunLastTestAction);
-    toolBar.add(fRerunFailedFirstAction);
     toolBar.add(fViewHistory.createHistoryDropDownAction());
 
 
@@ -1069,8 +1008,6 @@ action enablement
 
       startUpdateJobs();
 
-      fRerunLastTestAction.setEnabled(true);
-
       // While tests are running, always use the execution order
       getDisplay().asyncExec(() -> fTestViewer.setSortingCriterion(SortingCriterion.SORT_BY_EXECUTION_ORDER));
     }
@@ -1088,7 +1025,6 @@ action enablement
         if (isDisposed()) {
           return;
         }
-        updateRerunFailedFirstAction();
         processChangesInUI();
         if (hasErrorsOrFailures()) {
           selectFirstFailure();

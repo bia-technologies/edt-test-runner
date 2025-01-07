@@ -27,7 +27,7 @@ import ru.biatech.edt.junit.TestViewerPlugin;
  *
  * @since 3.7
  */
-public class JUnitUIPreferencesConstants {
+public class UIPreferencesConstants {
   /**
    * Boolean preference controlling whether newly launched JUnit tests should be shown in all
    * JUnit views (in all windows).
@@ -36,7 +36,7 @@ public class JUnitUIPreferencesConstants {
 
   public static final boolean SHOW_IN_ALL_VIEWS_DEFAULT = false; // would need a PreferenceInitializer if this was changed to true!
 
-  private JUnitUIPreferencesConstants() {
+  private UIPreferencesConstants() {
     // no instance
   }
 

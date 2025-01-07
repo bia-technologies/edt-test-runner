@@ -84,7 +84,7 @@ import org.eclipse.ui.progress.IWorkbenchSiteProgressService;
 import org.eclipse.ui.progress.UIJob;
 import org.eclipse.ui.statushandlers.StatusManager;
 import ru.biatech.edt.junit.BasicElementLabels;
-import ru.biatech.edt.junit.JUnitPreferencesConstants;
+import ru.biatech.edt.junit.PreferencesConstants;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.kinds.ITestKind;
 import ru.biatech.edt.junit.model.ITestCaseElement;
@@ -97,7 +97,7 @@ import ru.biatech.edt.junit.model.TestRunSession;
 import ru.biatech.edt.junit.model.TestStatus;
 import ru.biatech.edt.junit.ui.IJUnitHelpContextIds;
 import ru.biatech.edt.junit.ui.JUnitMessages;
-import ru.biatech.edt.junit.ui.JUnitUIPreferencesConstants;
+import ru.biatech.edt.junit.ui.UIPreferencesConstants;
 import ru.biatech.edt.junit.ui.report.actions.ActivateOnErrorAction;
 import ru.biatech.edt.junit.ui.report.actions.FailuresOnlyFilterAction;
 import ru.biatech.edt.junit.ui.report.actions.IgnoredOnlyFilterAction;
@@ -212,7 +212,7 @@ public class TestRunnerViewPart extends ViewPart {
   final ReportSettings settings;
 
   private static boolean getShowOnErrorOnly() {
-    return Platform.getPreferencesService().getBoolean(TestViewerPlugin.getPluginId(), JUnitPreferencesConstants.SHOW_ON_ERROR_ONLY, false, null);
+    return Platform.getPreferencesService().getBoolean(TestViewerPlugin.getPluginId(), PreferencesConstants.SHOW_ON_ERROR_ONLY, false, null);
   }
 
   private static void importTestRunSession(final String url) {
@@ -960,7 +960,7 @@ action enablement
     @Override
     public void sessionAdded(final TestRunSession testRunSession) {
       getDisplay().asyncExec(() -> {
-        if (JUnitUIPreferencesConstants.getShowInAllViews() || getSite().getWorkbenchWindow() == TestViewerPlugin.ui().getActiveWorkbenchWindow()) {
+        if (UIPreferencesConstants.getShowInAllViews() || getSite().getWorkbenchWindow() == TestViewerPlugin.ui().getActiveWorkbenchWindow()) {
           if (fInfoMessage == null) {
             String testRunLabel = BasicElementLabels.getJavaElementName(testRunSession.getTestRunName());
             String msg;

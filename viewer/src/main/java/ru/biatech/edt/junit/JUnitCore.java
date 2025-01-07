@@ -18,8 +18,6 @@
 
 package ru.biatech.edt.junit;
 
-import org.apache.commons.lang3.concurrent.ConcurrentException;
-import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionPoint;
@@ -49,32 +47,7 @@ public class JUnitCore {
   private static JUnitCore fgPlugin = null;
   private final JUnitModel fJUnitModel = new JUnitModel();
 
-  private final LazyInitializer<ListenerList<TestRunListener>> newListeners = new LazyInitializer<>() {
-    @Override
-    protected ListenerList<TestRunListener> initialize() {
-      ListenerList<TestRunListener> listeners = new ListenerList<>();
-      IExtensionPoint extensionPoint = Platform.getExtensionRegistry().getExtensionPoint(ID_EXTENSION_POINT_TESTRUN_LISTENERS);
-      if (extensionPoint == null) {
-        return listeners;
-      }
-      IConfigurationElement[] configs = extensionPoint.getConfigurationElements();
-      MultiStatus status = new MultiStatus(CORE_PLUGIN_ID, IStatus.OK, "Could not load some testRunner extension points", null); //$NON-NLS-1$
-      for (IConfigurationElement config : configs) {
-        try {
-          Object testRunListener = config.createExecutableExtension("class"); //$NON-NLS-1$
-          if (testRunListener instanceof TestRunListener) {
-            listeners.add((TestRunListener) testRunListener);
-          }
-        } catch (CoreException e) {
-          status.add(e.getStatus());
-        }
-      }
-      if (!status.isOK()) {
-        TestViewerPlugin.log().log(status);
-      }
-      return listeners;
-    }
-  };
+  private ListenerList<TestRunListener> newListeners = null;
 
 
   public JUnitCore() {
@@ -113,12 +86,34 @@ public class JUnitCore {
    * @return a <code>ListenerList</code> of all <code>TestRunListener</code>s
    */
   public ListenerList<TestRunListener> getNewTestRunListeners() {
-    try {
-      return newListeners.get();
-    } catch (ConcurrentException e) {
-      TestViewerPlugin.log().logError(e);
-      return null;
+    if (newListeners == null) {
+      newListeners = calculateNewListeners();
     }
+    return newListeners;
+  }
+
+  private ListenerList<TestRunListener> calculateNewListeners() {
+    ListenerList<TestRunListener> listeners = new ListenerList<>();
+    IExtensionPoint extensionPoint = Platform.getExtensionRegistry().getExtensionPoint(ID_EXTENSION_POINT_TESTRUN_LISTENERS);
+    if (extensionPoint == null) {
+      return listeners;
+    }
+    IConfigurationElement[] configs = extensionPoint.getConfigurationElements();
+    MultiStatus status = new MultiStatus(CORE_PLUGIN_ID, IStatus.OK, "Could not load some testRunner extension points", null); //$NON-NLS-1$
+    for (IConfigurationElement config : configs) {
+      try {
+        Object testRunListener = config.createExecutableExtension("class"); //$NON-NLS-1$
+        if (testRunListener instanceof TestRunListener) {
+          listeners.add((TestRunListener) testRunListener);
+        }
+      } catch (CoreException e) {
+        status.add(e.getStatus());
+      }
+    }
+    if (!status.isOK()) {
+      TestViewerPlugin.log().log(status);
+    }
+    return listeners;
   }
 
   public File getHistoryDirectory() throws IllegalStateException {

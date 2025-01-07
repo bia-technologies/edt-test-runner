@@ -28,7 +28,7 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchManager;
 import ru.biatech.edt.junit.JUnitCore;
-import ru.biatech.edt.junit.JUnitPreferencesConstants;
+import ru.biatech.edt.junit.PreferencesConstants;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.launcher.lifecycle.LifecycleEvent;
 import ru.biatech.edt.junit.launcher.lifecycle.LifecycleItem;
@@ -140,7 +140,7 @@ public final class JUnitModel {
       Assert.isLegal(!fTestRunSessions.contains(testRunSession));
       fTestRunSessions.addFirst(testRunSession);
 
-      int maxCount = Platform.getPreferencesService().getInt(TestViewerPlugin.PLUGIN_ID, JUnitPreferencesConstants.MAX_TEST_RUNS, 10, null);
+      int maxCount = Platform.getPreferencesService().getInt(TestViewerPlugin.PLUGIN_ID, PreferencesConstants.MAX_TEST_RUNS, 10, null);
       int size = fTestRunSessions.size();
       if (size > maxCount) {
         List<TestRunSession> excess = fTestRunSessions.subList(maxCount, size);

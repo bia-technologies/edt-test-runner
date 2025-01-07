@@ -25,7 +25,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import ru.biatech.edt.junit.BasicElementLabels;
-import ru.biatech.edt.junit.JUnitPreferencesConstants;
+import ru.biatech.edt.junit.PreferencesConstants;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.model.TestResult;
 import ru.biatech.edt.junit.model.TestRunSession;
@@ -163,11 +163,11 @@ public class RunnerViewHistory extends ViewHistory<TestRunSession> {
 
   @Override
   public int getMaxEntries() {
-    return Platform.getPreferencesService().getInt(TestViewerPlugin.getPluginId(), JUnitPreferencesConstants.MAX_TEST_RUNS, 10, null);
+    return Platform.getPreferencesService().getInt(TestViewerPlugin.getPluginId(), PreferencesConstants.MAX_TEST_RUNS, 10, null);
   }
 
   @Override
   public void setMaxEntries(int maxEntries) {
-    InstanceScope.INSTANCE.getNode(TestViewerPlugin.getPluginId()).putInt(JUnitPreferencesConstants.MAX_TEST_RUNS, maxEntries);
+    InstanceScope.INSTANCE.getNode(TestViewerPlugin.getPluginId()).putInt(PreferencesConstants.MAX_TEST_RUNS, maxEntries);
   }
 }

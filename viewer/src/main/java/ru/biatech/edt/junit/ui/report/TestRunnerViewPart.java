@@ -84,7 +84,7 @@ import org.eclipse.ui.progress.IWorkbenchSiteProgressService;
 import org.eclipse.ui.progress.UIJob;
 import org.eclipse.ui.statushandlers.StatusManager;
 import ru.biatech.edt.junit.BasicElementLabels;
-import ru.biatech.edt.junit.PreferencesConstants;
+import ru.biatech.edt.junit.Preferences;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.kinds.ITestKind;
 import ru.biatech.edt.junit.model.ITestCaseElement;
@@ -210,10 +210,6 @@ public class TestRunnerViewPart extends ViewPart {
 
   @Getter
   final ReportSettings settings;
-
-  private static boolean getShowOnErrorOnly() {
-    return Platform.getPreferencesService().getBoolean(TestViewerPlugin.getPluginId(), PreferencesConstants.SHOW_ON_ERROR_ONLY, false, null);
-  }
 
   private static void importTestRunSession(final String url) {
     try {
@@ -1004,7 +1000,7 @@ action enablement
     @Override
     public void sessionStarted() {
       fTestViewer.registerViewersRefresh();
-      settings.setShowOnErrorOnly(getShowOnErrorOnly());
+      settings.setShowOnErrorOnly(Preferences.getShowOnErrorOnly());
 
       startUpdateJobs();
 

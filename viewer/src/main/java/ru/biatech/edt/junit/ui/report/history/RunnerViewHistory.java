@@ -16,8 +16,6 @@
 
 package ru.biatech.edt.junit.ui.report.history;
 
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.MenuManager;
@@ -25,7 +23,6 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import ru.biatech.edt.junit.BasicElementLabels;
-import ru.biatech.edt.junit.PreferencesConstants;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.model.Session;
 import ru.biatech.edt.junit.ui.JUnitMessages;
@@ -153,20 +150,5 @@ public class RunnerViewHistory extends ViewHistory<Session> {
   @Override
   public void addMenuEntries(MenuManager manager) {
     manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, new ImportTestRunSessionAction());
-  }
-
-  @Override
-  public String getMaxEntriesMessage() {
-    return JUnitMessages.TestRunnerViewPart_max_remembered;
-  }
-
-  @Override
-  public int getMaxEntries() {
-    return Platform.getPreferencesService().getInt(TestViewerPlugin.getPluginId(), PreferencesConstants.MAX_TEST_RUNS, 10, null);
-  }
-
-  @Override
-  public void setMaxEntries(int maxEntries) {
-    InstanceScope.INSTANCE.getNode(TestViewerPlugin.getPluginId()).putInt(PreferencesConstants.MAX_TEST_RUNS, maxEntries);
   }
 }

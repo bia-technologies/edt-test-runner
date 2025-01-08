@@ -16,10 +16,8 @@
 
 package ru.biatech.edt.junit.ui.report.actions;
 
-import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.action.IAction;
-import ru.biatech.edt.junit.PreferencesConstants;
-import ru.biatech.edt.junit.TestViewerPlugin;
+import ru.biatech.edt.junit.Preferences;
 import ru.biatech.edt.junit.ui.JUnitMessages;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
 
@@ -35,7 +33,6 @@ public class ActivateOnErrorAction extends SettingsChangeAction {
   @Override
   public void run() {
     settings.setShowOnErrorOnly(isChecked());
-    InstanceScope.INSTANCE.getNode(TestViewerPlugin.getPluginId())
-        .putBoolean(PreferencesConstants.SHOW_ON_ERROR_ONLY, settings.isShowOnErrorOnly());
+    Preferences.putShowOnErrorOnly(settings.isShowOnErrorOnly());
   }
 }

@@ -23,11 +23,9 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ListenerList;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.DebugPlugin;
-import ru.biatech.edt.junit.Constants;
 import ru.biatech.edt.junit.Core;
-import ru.biatech.edt.junit.PreferencesConstants;
+import ru.biatech.edt.junit.Preferences;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.launcher.lifecycle.LifecycleEvent;
 import ru.biatech.edt.junit.launcher.lifecycle.LifecycleItem;
@@ -167,7 +165,7 @@ public final class SessionsManager {
       Assert.isLegal(!sessions.contains(session));
       sessions.addFirst(session);
 
-      var maxCount = Platform.getPreferencesService().getInt(Constants.PLUGIN_ID, PreferencesConstants.MAX_TEST_RUNS, 10, null);
+      var maxCount = Preferences.getMaxTestRuns();
       var size = sessions.size();
       if (size > maxCount) {
         var excess = sessions.subList(maxCount, size);

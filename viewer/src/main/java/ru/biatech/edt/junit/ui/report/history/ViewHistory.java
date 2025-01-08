@@ -103,11 +103,4 @@ public abstract class ViewHistory<E> {
   }
 
   public abstract void addMenuEntries(MenuManager manager);
-
-  public abstract String getMaxEntriesMessage();
-
-  public abstract int getMaxEntries();
-
-  public abstract void setMaxEntries(int maxEntries);
-
 }

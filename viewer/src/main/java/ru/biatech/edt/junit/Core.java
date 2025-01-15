@@ -91,8 +91,8 @@ public class Core {
 
   public File getHistoryDirectory() throws IllegalStateException {
     File historyDir = TestViewerPlugin.getDefault().getStateLocation().append(Constants.HISTORY_DIR_NAME).toFile();
-    if (!historyDir.isDirectory()) {
-      historyDir.mkdir();
+    if (!historyDir.isDirectory() && !historyDir.mkdir()) {
+      throw new IllegalStateException("Не удалось создать директорию истории: " + historyDir);
     }
     return historyDir;
   }

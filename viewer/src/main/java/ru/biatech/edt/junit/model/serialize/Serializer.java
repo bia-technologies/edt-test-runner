@@ -25,7 +25,7 @@ import org.xml.sax.SAXException;
 import ru.biatech.edt.junit.BasicElementLabels;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.model.Session;
-import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.UIMessages;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
@@ -59,7 +59,7 @@ public class Serializer {
         TestViewerPlugin.core().getSessionsManager().addSession(session);
       }
       else{
-        TestViewerPlugin.log().logError(JUnitMessages.JUnitModel_ReportIsEmpty);
+        TestViewerPlugin.log().logError(UIMessages.JUnitModel_ReportIsEmpty);
       }
       return session;
     } catch (ParserConfigurationException | SAXException e) {
@@ -84,7 +84,7 @@ public class Serializer {
    * @since 3.6
    */
   public Session importTestRunSession(String url, String defaultProjectName, IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-    monitor.beginTask(JUnitMessages.JUnitModel_importing_from_url, IProgressMonitor.UNKNOWN);
+    monitor.beginTask(UIMessages.JUnitModel_importing_from_url, IProgressMonitor.UNKNOWN);
     final var trimmedUrl = url.trim().replaceAll("\r\n?|\n", ""); //$NON-NLS-1$ //$NON-NLS-2$
     final var handler = new TestRunHandler(monitor);
     handler.fDefaultProjectName = defaultProjectName;
@@ -115,7 +115,7 @@ public class Serializer {
 
       private void storeImportError(Exception e) {
         exception[0] = new CoreException(new org.eclipse.core.runtime.Status(IStatus.ERROR,
-            TestViewerPlugin.getPluginId(), JUnitMessages.JUnitModel_could_not_import, e));
+            TestViewerPlugin.getPluginId(), UIMessages.JUnitModel_could_not_import, e));
       }
     };
     importThread.start();
@@ -160,7 +160,7 @@ public class Serializer {
   }
 
   private void throwImportError(File file, Exception e) throws CoreException {
-    var message = MessageFormat.format(JUnitMessages.JUnitModel_could_not_read, BasicElementLabels.getPathLabel(file));
+    var message = MessageFormat.format(UIMessages.JUnitModel_could_not_read, BasicElementLabels.getPathLabel(file));
     throw new CoreException(TestViewerPlugin.log().createErrorStatus(message, e));
   }
 }

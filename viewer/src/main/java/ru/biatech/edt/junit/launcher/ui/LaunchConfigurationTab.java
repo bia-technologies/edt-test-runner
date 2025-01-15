@@ -30,7 +30,7 @@ import org.eclipse.ui.PlatformUI;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.launcher.v8.LaunchConfigurationAttributes;
 import ru.biatech.edt.junit.launcher.v8.LaunchHelper;
-import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.UIMessages;
 
 public class LaunchConfigurationTab extends AbstractLaunchConfigurationTab {
 
@@ -92,7 +92,7 @@ public class LaunchConfigurationTab extends AbstractLaunchConfigurationTab {
 
   @Override
   public String getName() {
-    return JUnitMessages.LaunchConfigurationTab_tab_label;
+    return UIMessages.LaunchConfigurationTab_tab_label;
   }
 
   @Override
@@ -123,7 +123,7 @@ public class LaunchConfigurationTab extends AbstractLaunchConfigurationTab {
       control.projectPathControl.setText(projectPath == null ? "" : projectPath);
       control.loggingControl.setSelection(logging);
     } catch (CoreException e) {
-      TestViewerPlugin.log().logError(JUnitMessages.LaunchConfigurationTab_failedRestoreSettings, e);
+      TestViewerPlugin.log().logError(UIMessages.LaunchConfigurationTab_failedRestoreSettings, e);
     }
   }
 

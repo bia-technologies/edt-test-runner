@@ -23,7 +23,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.FileDialog;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.model.SessionsManager;
-import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
 
 import java.io.File;
@@ -33,7 +33,7 @@ import java.io.File;
  */
  public class ImportTestRunSessionAction extends Action {
   public ImportTestRunSessionAction() {
-    super(JUnitMessages.TestRunnerViewPart_ImportTestRunSessionAction_name);
+    super(UIMessages.TestRunnerViewPart_ImportTestRunSessionAction_name);
    }
 
   @Override
@@ -41,7 +41,7 @@ import java.io.File;
     var shell = TestViewerPlugin.ui().getShell();
 
     var importDialog = new FileDialog(shell, SWT.OPEN | SWT.SHEET);
-    importDialog.setText(JUnitMessages.TestRunnerViewPart_ImportTestRunSessionAction_title);
+    importDialog.setText(UIMessages.TestRunnerViewPart_ImportTestRunSessionAction_title);
     var dialogSettings = TestViewerPlugin.getDefault().getDialogSettings();
     var lastPath = dialogSettings.get(TestRunnerViewPart.PREF_LAST_PATH);
     if (lastPath != null) {
@@ -60,7 +60,7 @@ import java.io.File;
       SessionsManager.importSession(file, null);
     } catch (CoreException e) {
       TestViewerPlugin.log().logError(e);
-      ErrorDialog.openError(shell, JUnitMessages.TestRunnerViewPart_ImportTestRunSessionAction_error_title, e.getStatus().getMessage(), e.getStatus());
+      ErrorDialog.openError(shell, UIMessages.TestRunnerViewPart_ImportTestRunSessionAction_error_title, e.getStatus().getMessage(), e.getStatus());
     }
   }
 }

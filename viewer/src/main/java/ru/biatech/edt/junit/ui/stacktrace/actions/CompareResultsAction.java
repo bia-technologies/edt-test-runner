@@ -20,7 +20,7 @@ package ru.biatech.edt.junit.ui.stacktrace.actions;
 import org.eclipse.jface.action.Action;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.model.TestErrorInfo;
-import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.ui.dialogs.CompareResultDialog;
 import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
 
@@ -33,10 +33,10 @@ public class CompareResultsAction extends Action {
   private TestErrorInfo testElement;
 
   public CompareResultsAction() {
-    super(JUnitMessages.CompareResultsAction_label);
+    super(UIMessages.CompareResultsAction_label);
     setEnabled(false);
-    setDescription(JUnitMessages.CompareResultsAction_description);
-    setToolTipText(JUnitMessages.CompareResultsAction_tooltip);
+    setDescription(UIMessages.CompareResultsAction_description);
+    setToolTipText(UIMessages.CompareResultsAction_tooltip);
 
     setImageDescriptor(ImageProvider.getImageDescriptor(ImageProvider.ACTION_COMPARE));
     setDisabledImageDescriptor(ImageProvider.getImageDescriptor(ImageProvider.ACTION_COMPARE_DISABLED));

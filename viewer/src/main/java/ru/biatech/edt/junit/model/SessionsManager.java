@@ -34,7 +34,7 @@ import ru.biatech.edt.junit.launcher.lifecycle.LifecycleMonitor;
 import ru.biatech.edt.junit.launcher.v8.LaunchConfigurationAttributes;
 import ru.biatech.edt.junit.launcher.v8.LaunchHelper;
 import ru.biatech.edt.junit.model.serialize.Serializer;
-import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.UIMessages;
 
 import java.io.File;
 import java.io.IOException;
@@ -49,12 +49,44 @@ import java.util.List;
  */
 public final class SessionsManager {
 
-  private final ListenerList<ITestRunSessionListener> sessionListeners = new ListenerList<>();
+  private final ListenerList<ISessionListener> sessionListeners = new ListenerList<>();
   /**
    * Active test run sessions, youngest first.
    */
   private final LinkedList<Session> sessions = new LinkedList<>();
   private LifecycleListener lifecycleListener;
+
+  public static void loadTestReport(LifecycleItem item) {
+    TestViewerPlugin.log().debug(UIMessages.JUnitModel_LoadReport);
+
+    try {
+      var launch = item.getMainLaunch();
+
+      var configuration = launch.getLaunchConfiguration();
+      var project = LaunchConfigurationAttributes.getProject(configuration);
+
+      var reportPath = LaunchHelper.getReportPath(configuration);
+      TestViewerPlugin.log().debug(UIMessages.JUnitModel_ReportFile, reportPath.toAbsolutePath());
+
+      if (!Files.exists(reportPath)) {
+        TestViewerPlugin.log().logError(UIMessages.JUnitModel_ReportFileNotFound);
+        return;
+      }
+
+      var session = SessionsManager.importSession(reportPath.toFile(), project);
+      if (session == null) {
+        TestViewerPlugin.log().logError("Session is null after import.");
+        return;
+      }
+      session.setLaunch(item.getTestLaunch());
+
+      TestViewerPlugin.ui().asyncShowTestRunnerViewPart();
+
+      Files.deleteIfExists(reportPath);
+    } catch (CoreException | IOException e) {
+      TestViewerPlugin.log().logError(UIMessages.JUnitModel_UnknownErrorOnReportLoad, e);
+    }
+  }
 
   /**
    * Imports a test run session from the given file.
@@ -80,33 +112,9 @@ public final class SessionsManager {
     Serializer.importTestRunSession(url, defaultProjectName, monitor);
   }
 
-  public static void loadTestReport(LifecycleItem item) {
-    TestViewerPlugin.log().debug(JUnitMessages.JUnitModel_LoadReport);
-
-    try {
-      var launch = item.getMainLaunch();
-
-      var configuration = launch.getLaunchConfiguration();
-      var project = LaunchConfigurationAttributes.getProject(configuration);
-
-      var reportPath = LaunchHelper.getReportPath(configuration);
-      TestViewerPlugin.log().debug(JUnitMessages.JUnitModel_ReportFile, reportPath.toAbsolutePath());
-
-      if (!Files.exists(reportPath)) {
-        TestViewerPlugin.log().logError(JUnitMessages.JUnitModel_ReportFileNotFound);
-        return;
-      }
-
-      var session = SessionsManager.importSession(reportPath.toFile(), project);
-      assert session != null;
-      session.setLaunch(item.getTestLaunch());
-
-      TestViewerPlugin.ui().asyncShowTestRunnerViewPart();
-
-      Files.deleteIfExists(reportPath);
-    } catch (CoreException | IOException e) {
-      TestViewerPlugin.log().logError(JUnitMessages.JUnitModel_UnknownErrorOnReportLoad, e);
-    }
+  public void startSession(LifecycleItem item) {
+    var session = new Session(item.getName(), LaunchHelper.getProject(item.getTestLaunch().getLaunchConfiguration()));
+    session.setLaunch(item.getTestLaunch());
   }
 
   /**
@@ -114,11 +122,13 @@ public final class SessionsManager {
    */
   public void start() {
     LifecycleMonitor.addListener(lifecycleListener = (eventType, item) -> {
-      if (LifecycleEvent.isFinished(eventType)) {
+      if (LifecycleEvent.START == eventType) {
+        startSession(item);
+      } else if (LifecycleEvent.isFinished(eventType)) {
         SessionsManager.loadTestReport(item);
       }
     });
-    addTestRunSessionListener(new TestRunSessionListener());
+    addTestRunSessionListener(new SessionListener());
   }
 
   /**
@@ -135,11 +145,11 @@ public final class SessionsManager {
     }
   }
 
-  public void addTestRunSessionListener(ITestRunSessionListener listener) {
+  public void addTestRunSessionListener(ISessionListener listener) {
     sessionListeners.add(listener);
   }
 
-  public void removeTestRunSessionListener(ITestRunSessionListener listener) {
+  public void removeTestRunSessionListener(ISessionListener listener) {
     sessionListeners.remove(listener);
   }
 
@@ -154,7 +164,7 @@ public final class SessionsManager {
 
   /**
    * Adds the given {@link Session} and notifies all registered
-   * {@link ITestRunSessionListener}s.
+   * {@link ISessionListener}s.
    *
    * @param session the session to add
    */
@@ -187,7 +197,7 @@ public final class SessionsManager {
 
   /**
    * Removes the given {@link Session} and notifies all registered
-   * {@link ITestRunSessionListener}s.
+   * {@link ISessionListener}s.
    *
    * @param session the session to remove
    */
@@ -217,7 +227,7 @@ public final class SessionsManager {
     sessionListeners.forEach(it -> it.sessionAdded(session));
   }
 
-  private static final class TestRunSessionListener implements ITestRunSessionListener {
+  private static final class SessionListener implements ISessionListener {
     private Session activeSession;
     private ITestSessionListener sessionListener;
 
@@ -303,5 +313,6 @@ public final class SessionsManager {
       }
     }
   }
+
 
 }

@@ -17,12 +17,12 @@
 package ru.biatech.edt.junit.ui.report.actions;
 
 import org.eclipse.jface.action.IAction;
-import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
 
 public class ShowTimeAction extends SettingsChangeAction {
   public ShowTimeAction(TestRunnerViewPart.ReportSettings settings) {
-    super(settings, JUnitMessages.TestRunnerViewPart_show_execution_time, IAction.AS_CHECK_BOX);
+    super(settings, UIMessages.TestRunnerViewPart_show_execution_time, IAction.AS_CHECK_BOX);
   }
 
   @Override

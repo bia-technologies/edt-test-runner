@@ -17,7 +17,7 @@
 package ru.biatech.edt.junit.ui.report.actions;
 
 import org.eclipse.jface.action.IAction;
-import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
 
 public class ToggleSortingAction extends SettingsChangeAction {
@@ -27,13 +27,13 @@ public class ToggleSortingAction extends SettingsChangeAction {
     super(settings, "", IAction.AS_RADIO_BUTTON); //$NON-NLS-1$
     switch (sortingCriterion) {
       case SORT_BY_NAME:
-        setText(JUnitMessages.TestRunnerViewPart_toggle_name_label);
+        setText(UIMessages.TestRunnerViewPart_toggle_name_label);
         break;
       case SORT_BY_EXECUTION_ORDER:
-        setText(JUnitMessages.TestRunnerViewPart_toggle_execution_order_label);
+        setText(UIMessages.TestRunnerViewPart_toggle_execution_order_label);
         break;
       case SORT_BY_EXECUTION_TIME:
-        setText(JUnitMessages.TestRunnerViewPart_toggle_execution_time_label);
+        setText(UIMessages.TestRunnerViewPart_toggle_execution_time_label);
         break;
       default:
         break;

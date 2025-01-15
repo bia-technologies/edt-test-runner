@@ -88,15 +88,14 @@ import ru.biatech.edt.junit.Preferences;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.kinds.ITestKind;
 import ru.biatech.edt.junit.model.ITestCaseElement;
-import ru.biatech.edt.junit.model.ITestRunSessionListener;
+import ru.biatech.edt.junit.model.ISessionListener;
 import ru.biatech.edt.junit.model.ITestSessionListener;
 import ru.biatech.edt.junit.model.Session;
 import ru.biatech.edt.junit.model.SessionsManager;
 import ru.biatech.edt.junit.model.TestCaseElement;
 import ru.biatech.edt.junit.model.TestElement;
 import ru.biatech.edt.junit.model.TestStatus;
-import ru.biatech.edt.junit.ui.IJUnitHelpContextIds;
-import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.ui.UIPreferencesConstants;
 import ru.biatech.edt.junit.ui.report.actions.ActivateOnErrorAction;
 import ru.biatech.edt.junit.ui.report.actions.FailuresOnlyFilterAction;
@@ -177,7 +176,7 @@ public class TestRunnerViewPart extends ViewPart {
   private Session session;
   private TestSessionListener sessionListener;
   private RunnerViewHistory fViewHistory;
-  private TestRunSessionListener fTestRunSessionListener;
+  private SessionListener fTestRunSessionListener;
   private IMemento fMemento;
   private SashForm fSashForm;
   private Composite fCounterComposite;
@@ -190,8 +189,8 @@ public class TestRunnerViewPart extends ViewPart {
    * A Job that runs as long as a test run is running.
    * It is used to show busyness for running jobs in the view (title in italics).
    */
-  private JUnitIsRunningJob fJUnitIsRunningJob;
-  private ILock fJUnitIsRunningLock;
+  private IsRunningJob isRunningJob;
+  private ILock isRunningLock;
   private final IPartListener2 fPartListener = new IPartListener2() {
     @Override
     public void partVisible(IWorkbenchPartReference ref) {
@@ -271,7 +270,7 @@ public class TestRunnerViewPart extends ViewPart {
       TestViewerPlugin.core().getSessionsManager().removeTestRunSessionListener(fTestRunSessionListener);
     }
 
-    setActiveTestRunSession(null);
+    setActiveSession(null);
 
     getViewSite().getPage().removePartListener(fPartListener);
 
@@ -297,7 +296,7 @@ public class TestRunnerViewPart extends ViewPart {
     return fParent.getShell();
   }
 
-  public Session getTestRunSession() {
+  public Session getSession() {
     return session;
   }
 
@@ -305,7 +304,7 @@ public class TestRunnerViewPart extends ViewPart {
    * @param session new active test run session
    * @return deactivated session, or <code>null</code> iff no session got deactivated
    */
-  public Session setActiveTestRunSession(Session session) {
+  public Session setActiveSession(Session session) {
 /*
 - State:
 fTestRunSession
@@ -357,7 +356,7 @@ action enablement
 
       clearStatus();
       failureViewer.clear();
-      registerInfoMessage(BasicElementLabels.getJavaElementName(this.session.getTestRunPresent()));
+      registerInfoMessage(BasicElementLabels.getElementName(this.session.getTestRunPresent()));
 
       stopUpdateJobs();
 
@@ -382,15 +381,15 @@ action enablement
     if (fUpdateJob != null) {
       return;
     }
-    fJUnitIsRunningJob = new JUnitIsRunningJob(JUnitMessages.TestRunnerViewPart_wrapperJobName);
-    fJUnitIsRunningLock = Job.getJobManager().newLock();
+    isRunningJob = new IsRunningJob(UIMessages.TestRunnerViewPart_wrapperJobName);
+    isRunningLock = Job.getJobManager().newLock();
     // acquire lock while a test run is running
     // the lock is released when the test run terminates
     // the wrapper job will wait on this lock.
-    fJUnitIsRunningLock.acquire();
-    getProgressService().schedule(fJUnitIsRunningJob);
+    isRunningLock.acquire();
+    getProgressService().schedule(isRunningJob);
 
-    fUpdateJob = new UpdateUIJob(JUnitMessages.TestRunnerViewPart_jobName);
+    fUpdateJob = new UpdateUIJob(UIMessages.TestRunnerViewPart_jobName);
     fUpdateJob.schedule(REFRESH_INTERVAL);
   }
 
@@ -399,9 +398,9 @@ action enablement
       fUpdateJob.stop();
       fUpdateJob = null;
     }
-    if (fJUnitIsRunningJob != null && fJUnitIsRunningLock != null) {
-      fJUnitIsRunningLock.release();
-      fJUnitIsRunningJob = null;
+    if (isRunningJob != null && isRunningLock != null) {
+      isRunningLock.release();
+      isRunningJob = null;
     }
     postSyncProcessChanges();
   }
@@ -463,7 +462,7 @@ action enablement
 
   private void logMessageIfNoTests() {
     if (session != null && session.getTotalCount() == 0) {
-      String msg = MessageFormat.format(JUnitMessages.TestRunnerViewPart_error_notests_kind, session.getTestRunnerKind().getDisplayName());
+      String msg = MessageFormat.format(UIMessages.TestRunnerViewPart_error_notests_kind, session.getTestRunnerKind().getDisplayName());
       Platform.getLog(getClass()).error(msg);
     }
   }
@@ -500,13 +499,13 @@ action enablement
   }
 
   private void setTitleToolTip() {
-    String testKindDisplayStr = getTestKindDisplayName();
+    var testKindDisplayStr = getTestKindDisplayName();
+    var label = BasicElementLabels.getElementName(session.getName());
 
-    String testRunLabel = BasicElementLabels.getJavaElementName(session.getTestRunName());
     if (testKindDisplayStr != null) {
-      setTitleToolTip(MessageFormat.format(JUnitMessages.TestRunnerViewPart_titleToolTip, testRunLabel, testKindDisplayStr));
+      setTitleToolTip(MessageFormat.format(UIMessages.TestRunnerViewPart_titleToolTip, label, testKindDisplayStr));
     } else {
-      setTitleToolTip(testRunLabel);
+      setTitleToolTip(label);
     }
   }
 
@@ -670,7 +669,6 @@ action enablement
     addDropAdapter(parent);
 
     fOriginalViewImage = getTitleImage();
-    PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IJUnitHelpContextIds.RESULTS_VIEW);
 
     getViewSite().getPage().addPartListener(fPartListener);
 
@@ -681,7 +679,7 @@ action enablement
     }
     fMemento = null;
 
-    fTestRunSessionListener = new TestRunSessionListener();
+    fTestRunSessionListener = new SessionListener();
     TestViewerPlugin.core().getSessionsManager().addTestRunSessionListener(fTestRunSessionListener);
 
     // always show youngest test run in view. simulate "sessionAdded" event to do that
@@ -832,7 +830,7 @@ action enablement
         new ToggleSortingAction(settings, SortingCriterion.SORT_BY_EXECUTION_ORDER),
         new ToggleSortingAction(settings, SortingCriterion.SORT_BY_EXECUTION_TIME),
         new ToggleSortingAction(settings, SortingCriterion.SORT_BY_NAME)};
-    MenuManager fSortByMenu = new MenuManager(JUnitMessages.TestRunnerViewPart_sort_by_menu);
+    MenuManager fSortByMenu = new MenuManager(UIMessages.TestRunnerViewPart_sort_by_menu);
     for (ToggleSortingAction fToggleSortingAction : fToggleSortingActions) {
       fSortByMenu.add(fToggleSortingAction);
     }
@@ -844,7 +842,7 @@ action enablement
         new ToggleOrientationAction(settings, VIEW_ORIENTATION_HORIZONTAL),
         new ToggleOrientationAction(settings, VIEW_ORIENTATION_AUTOMATIC)};
 
-    MenuManager layoutSubMenu = new MenuManager(JUnitMessages.TestRunnerViewPart_layout_menu);
+    MenuManager layoutSubMenu = new MenuManager(UIMessages.TestRunnerViewPart_layout_menu);
     for (ToggleOrientationAction toggleOrientationAction : fToggleOrientationActions) {
       layoutSubMenu.add(toggleOrientationAction);
     }
@@ -952,23 +950,23 @@ action enablement
     SORT_BY_EXECUTION_TIME
   }
 
-  private class TestRunSessionListener implements ITestRunSessionListener {
+  private class SessionListener implements ISessionListener {
     @Override
     public void sessionAdded(final Session session) {
       getDisplay().asyncExec(() -> {
         if (UIPreferencesConstants.getShowInAllViews() || getSite().getWorkbenchWindow() == TestViewerPlugin.ui().getActiveWorkbenchWindow()) {
           if (fInfoMessage == null) {
-            String testRunLabel = BasicElementLabels.getJavaElementName(session.getTestRunName());
+            String testRunLabel = BasicElementLabels.getElementName(session.getName());
             String msg;
             if (session.getLaunch() != null) {
-              msg = MessageFormat.format(JUnitMessages.TestRunnerViewPart_Launching, testRunLabel);
+              msg = MessageFormat.format(UIMessages.TestRunnerViewPart_Launching, testRunLabel);
             } else {
               msg = testRunLabel;
             }
             registerInfoMessage(msg);
           }
 
-          Session deactivatedSession = setActiveTestRunSession(session);
+          Session deactivatedSession = setActiveSession(session);
           if (deactivatedSession != null) {
             deactivatedSession.swapOut();
           }
@@ -983,9 +981,9 @@ action enablement
           var sessions = TestViewerPlugin.core().getSessionsManager().getSessions();
           Session deactivatedSession;
           if (!sessions.isEmpty()) {
-            deactivatedSession = setActiveTestRunSession(sessions.get(0));
+            deactivatedSession = setActiveSession(sessions.get(0));
           } else {
-            deactivatedSession = setActiveTestRunSession(null);
+            deactivatedSession = setActiveSession(null);
           }
           if (deactivatedSession != null) {
             deactivatedSession.swapOut();
@@ -1014,7 +1012,7 @@ action enablement
 
       fTestViewer.registerAutoScrollTarget(null);
 
-      String msg = MessageFormat.format(JUnitMessages.TestRunnerViewPart_message_finish, elapsedTimeAsString(elapsedTime));
+      String msg = MessageFormat.format(UIMessages.TestRunnerViewPart_message_finish, elapsedTimeAsString(elapsedTime));
       registerInfoMessage(msg);
 
       postSyncRunnable(() -> {
@@ -1040,7 +1038,7 @@ action enablement
 
       fTestViewer.registerAutoScrollTarget(null);
 
-      registerInfoMessage(JUnitMessages.TestRunnerViewPart_message_stopped);
+      registerInfoMessage(UIMessages.TestRunnerViewPart_message_stopped);
       handleStopped();
     }
 
@@ -1050,7 +1048,7 @@ action enablement
 
       fTestViewer.registerAutoScrollTarget(null);
 
-      registerInfoMessage(JUnitMessages.TestRunnerViewPart_message_terminated);
+      registerInfoMessage(UIMessages.TestRunnerViewPart_message_terminated);
       handleStopped();
     }
 
@@ -1066,9 +1064,9 @@ action enablement
       fTestViewer.registerAutoScrollTarget(testCaseElement);
       fTestViewer.registerViewerUpdate(testCaseElement);
 
-      String className = BasicElementLabels.getJavaElementName(testCaseElement.getClassName());
-      String method = BasicElementLabels.getJavaElementName(testCaseElement.getTestMethodName());
-      String status = MessageFormat.format(JUnitMessages.TestRunnerViewPart_message_started, className, method);
+      String className = BasicElementLabels.getElementName(testCaseElement.getClassName());
+      String method = BasicElementLabels.getElementName(testCaseElement.getTestMethodName());
+      String status = MessageFormat.format(UIMessages.TestRunnerViewPart_message_started, className, method);
       registerInfoMessage(status);
     }
 
@@ -1144,8 +1142,8 @@ action enablement
     }
   }
 
-  private class JUnitIsRunningJob extends Job {
-    public JUnitIsRunningJob(String name) {
+  private class IsRunningJob extends Job {
+    public IsRunningJob(String name) {
       super(name);
       setSystem(true);
     }
@@ -1153,7 +1151,7 @@ action enablement
     @Override
     public IStatus run(IProgressMonitor monitor) {
       // wait until the test run terminates
-      fJUnitIsRunningLock.acquire();
+      isRunningLock.acquire();
       return Status.OK_STATUS;
     }
 

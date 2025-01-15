@@ -19,7 +19,7 @@ package ru.biatech.edt.junit.ui.report.history;
 import org.eclipse.jface.action.Action;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.model.Session;
-import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.UIMessages;
 
 import java.util.List;
 
@@ -33,7 +33,7 @@ public class ClearAction extends Action {
   public ClearAction(RunnerViewHistory viewHistory) {
     this.viewHistory = viewHistory;
 
-    setText(JUnitMessages.TestRunnerViewPart_clear_history_label);
+    setText(UIMessages.TestRunnerViewPart_clear_history_label);
 
     var enabled = false;
     var sessions = TestViewerPlugin.core().getSessionsManager().getSessions();

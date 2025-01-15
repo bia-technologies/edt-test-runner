@@ -29,7 +29,7 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.IWorkbenchPage;
 import ru.biatech.edt.junit.model.TestElement;
 import ru.biatech.edt.junit.model.TestErrorInfo;
-import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
 import ru.biatech.edt.junit.ui.stacktrace.actions.CompareResultsAction;
 import ru.biatech.edt.junit.ui.stacktrace.actions.CopyTraceAction;
@@ -118,7 +118,7 @@ public class FailureViewer {
 
   private void createLabel() {
     CLabel label = new CLabel(parent, SWT.NONE);
-    label.setText(JUnitMessages.TestRunnerViewPart_label_failure);
+    label.setText(UIMessages.TestRunnerViewPart_label_failure);
     label.setImage(viewPart.getImageProvider().getStackViewIcon());
     parent.setTopLeft(label);
   }

@@ -32,7 +32,7 @@ import ru.biatech.edt.junit.kinds.ITestKind;
 import ru.biatech.edt.junit.kinds.TestKindRegistry;
 import ru.biatech.edt.junit.launcher.LaunchConfigurationTypes;
 import ru.biatech.edt.junit.services.TestsManager;
-import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.ui.dialogs.Dialogs;
 import ru.biatech.edt.junit.v8utils.Projects;
 
@@ -113,9 +113,9 @@ public class LaunchHelper {
     var usedConfiguration = LaunchHelper.getLaunchConfiguration(usedLC);
 
     if (usedLC == null || usedLC.isEmpty()) {
-      throw new CoreException(TestViewerPlugin.log().createErrorStatus(JUnitMessages.LaunchHelper_LaunchConfigurationNotSpecified));
+      throw new CoreException(TestViewerPlugin.log().createErrorStatus(UIMessages.LaunchHelper_LaunchConfigurationNotSpecified));
     } else if (usedConfiguration == null) {
-      throw new CoreException(TestViewerPlugin.log().createErrorStatus(JUnitMessages.LaunchHelper_LaunchConfigurationNotFound));
+      throw new CoreException(TestViewerPlugin.log().createErrorStatus(UIMessages.LaunchHelper_LaunchConfigurationNotFound));
     }
   }
 
@@ -160,7 +160,7 @@ public class LaunchHelper {
     String errorMessage = null;
 
     if (configuration.isEmpty()) {
-      errorMessage = JUnitMessages.LaunchHelper_DefaultLaunchConfigurationNotFound;
+      errorMessage = UIMessages.LaunchHelper_DefaultLaunchConfigurationNotFound;
     } else {
       try {
         checkConfiguration(configuration.get());
@@ -171,7 +171,7 @@ public class LaunchHelper {
     }
 
     if (errorMessage != null) {
-      Dialogs.showError(JUnitMessages.LaunchTest_title, errorMessage);
+      Dialogs.showError(UIMessages.LaunchTest_title, errorMessage);
       return;
     }
 
@@ -180,7 +180,7 @@ public class LaunchHelper {
       copy = configuration.get().copy(PREFIX_LAUNCH_TEST + methodFullName); //$NON-NLS-1$
     } catch (CoreException e) {
       TestViewerPlugin.log().logError(e);
-      Dialogs.showError(JUnitMessages.LaunchTest_title, e.getMessage());
+      Dialogs.showError(UIMessages.LaunchTest_title, e.getMessage());
       return;
     }
 

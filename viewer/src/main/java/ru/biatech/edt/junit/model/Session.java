@@ -106,7 +106,7 @@ public class Session implements ITestRunSession {
    */
   private ILaunch launch;
 
-  private String testRunName;
+  private String name;
 
   private ITestKind testRunnerKind;
 
@@ -142,7 +142,7 @@ public class Session implements ITestRunSession {
     //TODO: check assumptions about non-null fields
 
     Assert.isNotNull(pTestRunName);
-    testRunName = pTestRunName;
+    name = pTestRunName;
     launchedProject = project;
 
     startTime = System.currentTimeMillis();
@@ -192,16 +192,17 @@ public class Session implements ITestRunSession {
     this.launch = launch;
     var launchConfiguration = this.launch.getLaunchConfiguration();
     if (launchConfiguration != null) {
-      testRunName = launchConfiguration.getName();
+      name = launchConfiguration.getName();
       testRunnerKind = LaunchHelper.getTestRunnerKind(launchConfiguration);
     } else {
-      testRunName = launchedProject.getProject().getName();
+      name = launchedProject.getProject().getName();
       testRunnerKind = ITestKind.NULL;
     }
+    running = isStarting();
   }
 
   public String getTestRunPresent() {
-    return testRunName + " " + DateFormat.getDateTimeInstance().format(new Date(startTime));
+    return name + " " + DateFormat.getDateTimeInstance().format(new Date(startTime));
   }
 
   public synchronized void addTestSessionListener(ITestSessionListener listener) {
@@ -355,6 +356,6 @@ public class Session implements ITestRunSession {
 
   @Override
   public String toString() {
-    return testRunName + " " + DateFormat.getDateTimeInstance().format(new Date(startTime)); //$NON-NLS-1$
+    return name + " " + DateFormat.getDateTimeInstance().format(new Date(startTime)); //$NON-NLS-1$
   }
 }

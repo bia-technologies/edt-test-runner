@@ -25,7 +25,7 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 import ru.biatech.edt.junit.BasicElementLabels;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.model.Session;
-import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
 import ru.biatech.edt.junit.ui.report.actions.ActionsSupport;
 import ru.biatech.edt.junit.ui.report.actions.ImportTestRunSessionAction;
@@ -48,12 +48,12 @@ public class RunnerViewHistory extends ViewHistory<Session> {
 
   @Override
   public void configureHistoryListAction(IAction action) {
-    action.setText(JUnitMessages.TestRunnerViewPart_history);
+    action.setText(UIMessages.TestRunnerViewPart_history);
   }
 
   @Override
   public void configureHistoryDropDownAction(IAction action) {
-    action.setToolTipText(JUnitMessages.TestRunnerViewPart_test_run_history);
+    action.setToolTipText(UIMessages.TestRunnerViewPart_test_run_history);
     ActionsSupport.setLocalImageDescriptors(action, "history_list.png"); //$NON-NLS-1$
   }
 
@@ -64,12 +64,12 @@ public class RunnerViewHistory extends ViewHistory<Session> {
 
   @Override
   public String getHistoryListDialogTitle() {
-    return JUnitMessages.TestRunnerViewPart_test_runs;
+    return UIMessages.TestRunnerViewPart_test_runs;
   }
 
   @Override
   public String getHistoryListDialogMessage() {
-    return JUnitMessages.TestRunnerViewPart_select_test_run;
+    return UIMessages.TestRunnerViewPart_select_test_run;
   }
 
   @Override
@@ -84,12 +84,12 @@ public class RunnerViewHistory extends ViewHistory<Session> {
 
   @Override
   public Session getCurrentEntry() {
-    return testRunnerViewPart.getTestRunSession();
+    return testRunnerViewPart.getSession();
   }
 
   @Override
   public void setActiveEntry(Session entry) {
-    var deactivatedSession = testRunnerViewPart.setActiveTestRunSession(entry);
+    var deactivatedSession = testRunnerViewPart.setActiveSession(entry);
     if (deactivatedSession != null) {
       deactivatedSession.swapOut();
     }
@@ -97,7 +97,7 @@ public class RunnerViewHistory extends ViewHistory<Session> {
 
   @Override
   public void setHistoryEntries(List<Session> remainingEntries, Session activeEntry) {
-    testRunnerViewPart.setActiveTestRunSession(activeEntry);
+    testRunnerViewPart.setActiveSession(activeEntry);
 
     var sessions = TestViewerPlugin.core().getSessionsManager().getSessions();
     sessions.removeAll(remainingEntries);
@@ -138,12 +138,12 @@ public class RunnerViewHistory extends ViewHistory<Session> {
 
   @Override
   public String getText(Session session) {
-    var testRunLabel = BasicElementLabels.getJavaElementName(session.getTestRunName());
+    var testRunLabel = BasicElementLabels.getElementName(session.getName());
     if (session.getStartTime() <= 0) {
       return testRunLabel;
     } else {
       var startTime = DateFormat.getDateTimeInstance().format(new Date(session.getStartTime()));
-      return MessageFormat.format(JUnitMessages.TestRunnerViewPart_testName_startTime, testRunLabel, startTime);
+      return MessageFormat.format(UIMessages.TestRunnerViewPart_testName_startTime, testRunLabel, startTime);
     }
   }
 

@@ -19,7 +19,7 @@ package ru.biatech.edt.junit.model;
 public class TestRoot extends TestSuiteElement {
 
   public TestRoot(ITestRunSession session) {
-    super(null, session.getTestRunName(), session.getTestRunName(), null, null, null); //$NON-NLS-1$
+    super(null, session.getName(), session.getName(), null, null, null); //$NON-NLS-1$
   }
 
   @Override

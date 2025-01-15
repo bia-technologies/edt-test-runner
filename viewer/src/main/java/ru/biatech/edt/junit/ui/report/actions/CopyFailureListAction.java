@@ -24,8 +24,7 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 import ru.biatech.edt.junit.TestViewerPlugin;
-import ru.biatech.edt.junit.ui.IJUnitHelpContextIds;
-import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
 import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
 import ru.biatech.edt.junit.utils.ClipboardHelper;
@@ -39,10 +38,9 @@ public class CopyFailureListAction extends Action {
   private final TestRunnerViewPart fRunner;
 
   public CopyFailureListAction(TestRunnerViewPart runner) {
-    super(JUnitMessages.CopyFailureList_action_label);
+    super(UIMessages.CopyFailureList_action_label);
     fRunner = runner;
     IWorkbench workbench = PlatformUI.getWorkbench();
-    workbench.getHelpSystem().setHelp(this, IJUnitHelpContextIds.COPY_FAILURE_LIST_ACTION);
     setImageDescriptor(ImageProvider.getSharedImage(ISharedImages.IMG_TOOL_COPY));
   }
 
@@ -57,7 +55,7 @@ public class CopyFailureListAction extends Action {
       if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD) {
         throw e;
       }
-      if (MessageDialog.openQuestion(TestViewerPlugin.ui().getActiveWorkbenchShell(), JUnitMessages.CopyFailureList_problem, JUnitMessages.CopyFailureList_clipboard_busy)) {
+      if (MessageDialog.openQuestion(TestViewerPlugin.ui().getActiveWorkbenchShell(), UIMessages.CopyFailureList_problem, UIMessages.CopyFailureList_clipboard_busy)) {
         run();
       }
     }

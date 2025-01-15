@@ -34,7 +34,7 @@ import ru.biatech.edt.junit.model.TestCaseElement;
 import ru.biatech.edt.junit.model.TestElement;
 import ru.biatech.edt.junit.model.TestStatus;
 import ru.biatech.edt.junit.model.TestSuiteElement;
-import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
 import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
 
@@ -103,7 +103,7 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
         parentName = testCaseElement.getTestClassName();
       }
     }
-    return MessageFormat.format(JUnitMessages.TestSessionLabelProvider_testMethodName_className, label, BasicElementLabels.getJavaElementName(parentName));
+    return MessageFormat.format(UIMessages.TestSessionLabelProvider_testMethodName_className, label, BasicElementLabels.getElementName(parentName));
   }
 
   private StyledString addElapsedTime(StyledString styledString, double time) {
@@ -141,18 +141,18 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
       return string;
     }
     String formattedTime = timeFormat.format(time);
-    return MessageFormat.format(JUnitMessages.TestSessionLabelProvider_testName_elapsedTimeInSeconds, string, formattedTime);
+    return MessageFormat.format(UIMessages.TestSessionLabelProvider_testName_elapsedTimeInSeconds, string, formattedTime);
   }
 
   private String getSimpleLabel(Object element) {
     if (element instanceof TestCaseElement) {
       TestCaseElement testCaseElement = (TestCaseElement) element;
       String displayName = testCaseElement.getDisplayName();
-      return BasicElementLabels.getJavaElementName(displayName != null ? displayName : testCaseElement.getTestMethodName());
+      return BasicElementLabels.getElementName(displayName != null ? displayName : testCaseElement.getTestMethodName());
     } else if (element instanceof TestSuiteElement) {
       TestSuiteElement testSuiteElement = (TestSuiteElement) element;
       String displayName = testSuiteElement.getDisplayName();
-      return BasicElementLabels.getJavaElementName(displayName != null ? displayName : testSuiteElement.getSuiteTypeName());
+      return BasicElementLabels.getElementName(displayName != null ? displayName : testSuiteElement.getSuiteTypeName());
     }
     return null;
   }

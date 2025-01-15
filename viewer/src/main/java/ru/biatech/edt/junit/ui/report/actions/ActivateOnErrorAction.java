@@ -18,12 +18,12 @@ package ru.biatech.edt.junit.ui.report.actions;
 
 import org.eclipse.jface.action.IAction;
 import ru.biatech.edt.junit.Preferences;
-import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
 
 public class ActivateOnErrorAction extends SettingsChangeAction {
   public ActivateOnErrorAction(TestRunnerViewPart.ReportSettings settings) {
-    super(settings, JUnitMessages.TestRunnerViewPart_activate_on_failure_only, IAction.AS_CHECK_BOX);
+    super(settings, UIMessages.TestRunnerViewPart_activate_on_failure_only, IAction.AS_CHECK_BOX);
   }
 
   public void update() {

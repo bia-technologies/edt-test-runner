@@ -18,7 +18,7 @@
 package ru.biatech.edt.junit.model;
 
 
-public interface ITestRunSessionListener {
+public interface ISessionListener {
 
   /**
    * @param session the new session, or <code>null</code>

@@ -36,7 +36,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import ru.biatech.edt.junit.launcher.lifecycle.LifecycleMonitor;
-import ru.biatech.edt.junit.ui.JUnitUI;
+import ru.biatech.edt.junit.ui.PluginUI;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,7 +47,7 @@ public class TestViewerPlugin extends AbstractUIPlugin {
   private static final IPath ICONS_PATH = new Path("$nl$/icons/full"); //$NON-NLS-1$
   private static TestViewerPlugin plugin;
   Core core;
-  JUnitUI ui;
+  PluginUI ui;
   private BundleContext bundleContext;
   private Injector injector;
   private Logger logger = null;
@@ -55,7 +55,7 @@ public class TestViewerPlugin extends AbstractUIPlugin {
   public TestViewerPlugin() {
     plugin = this;
     core = new Core();
-    ui = new JUnitUI();
+    ui = new PluginUI();
   }
 
   public static TestViewerPlugin getDefault() {
@@ -81,7 +81,7 @@ public class TestViewerPlugin extends AbstractUIPlugin {
     return getDefault().core;
   }
 
-  public static JUnitUI ui() {
+  public static PluginUI ui() {
     return getDefault().ui;
   }
 

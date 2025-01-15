@@ -24,7 +24,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
 
 import java.text.MessageFormat;
@@ -49,9 +49,9 @@ public class CounterPanel extends Composite {
     gridLayout.marginWidth = 0;
     setLayout(gridLayout);
 
-    fNumberOfRuns = createLabel(JUnitMessages.CounterPanel_label_runs, null, " 0/0  "); //$NON-NLS-1$
-    fNumberOfErrors = createLabel(JUnitMessages.CounterPanel_label_errors, provider.getTestErrorIcon(), " 0 "); //$NON-NLS-1$
-    fNumberOfFailures = createLabel(JUnitMessages.CounterPanel_label_failures, provider.getTestFailIcon(), " 0 "); //$NON-NLS-1$
+    fNumberOfRuns = createLabel(UIMessages.CounterPanel_label_runs, null, " 0/0  "); //$NON-NLS-1$
+    fNumberOfErrors = createLabel(UIMessages.CounterPanel_label_errors, provider.getTestErrorIcon(), " 0 "); //$NON-NLS-1$
+    fNumberOfFailures = createLabel(UIMessages.CounterPanel_label_failures, provider.getTestFailIcon(), " 0 "); //$NON-NLS-1$
 
     addDisposeListener(e -> provider.dispose());
   }
@@ -85,17 +85,17 @@ public class CounterPanel extends Composite {
     String runString;
     String runStringTooltip;
     if (ignoredCount == 0 && assumptionFailureCount == 0) {
-      runString = MessageFormat.format(JUnitMessages.CounterPanel_runcount, value, fTotal);
+      runString = MessageFormat.format(UIMessages.CounterPanel_runcount, value, fTotal);
       runStringTooltip = runString;
     } else if (ignoredCount != 0 && assumptionFailureCount == 0) {
-      runString = MessageFormat.format(JUnitMessages.CounterPanel_runcount_skipped, value, fTotal, ignoredCount);
-      runStringTooltip = MessageFormat.format(JUnitMessages.CounterPanel_runcount_ignored, value, fTotal, ignoredCount);
+      runString = MessageFormat.format(UIMessages.CounterPanel_runcount_skipped, value, fTotal, ignoredCount);
+      runStringTooltip = MessageFormat.format(UIMessages.CounterPanel_runcount_ignored, value, fTotal, ignoredCount);
     } else if (ignoredCount == 0 && assumptionFailureCount != 0) {
-      runString = MessageFormat.format(JUnitMessages.CounterPanel_runcount_skipped, value, fTotal, assumptionFailureCount);
-      runStringTooltip = MessageFormat.format(JUnitMessages.CounterPanel_runcount_assumptionsFailed, value, fTotal, assumptionFailureCount);
+      runString = MessageFormat.format(UIMessages.CounterPanel_runcount_skipped, value, fTotal, assumptionFailureCount);
+      runStringTooltip = MessageFormat.format(UIMessages.CounterPanel_runcount_assumptionsFailed, value, fTotal, assumptionFailureCount);
     } else {
-      runString = MessageFormat.format(JUnitMessages.CounterPanel_runcount_skipped, value, fTotal, ignoredCount + assumptionFailureCount);
-      runStringTooltip = MessageFormat.format(JUnitMessages.CounterPanel_runcount_ignored_assumptionsFailed, value, fTotal, ignoredCount, assumptionFailureCount);
+      runString = MessageFormat.format(UIMessages.CounterPanel_runcount_skipped, value, fTotal, ignoredCount + assumptionFailureCount);
+      runStringTooltip = MessageFormat.format(UIMessages.CounterPanel_runcount_ignored_assumptionsFailed, value, fTotal, ignoredCount, assumptionFailureCount);
     }
     fNumberOfRuns.setText(runString);
     fNumberOfRuns.setToolTipText(runStringTooltip);

@@ -56,7 +56,7 @@ import ru.biatech.edt.junit.model.TestResult;
 import ru.biatech.edt.junit.model.TestRoot;
 import ru.biatech.edt.junit.model.TestStatus;
 import ru.biatech.edt.junit.model.TestSuiteElement;
-import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.ui.labelProvider.TestSessionLabelProvider;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart.SortingCriterion;
 import ru.biatech.edt.junit.ui.report.actions.CopyFailureListAction;
@@ -456,10 +456,10 @@ public class TestViewer {
   private void addRerunActions(IMenuManager manager, TestCaseElement testCaseElement) {
     String className = testCaseElement.getClassName();
     if (fTestRunnerPart.lastLaunchIsKeptAlive()) {
-      manager.add(new RerunAction(JUnitMessages.RerunAction_label_rerun, fTestRunnerPart, className, ILaunchManager.RUN_MODE));
+      manager.add(new RerunAction(UIMessages.RerunAction_label_rerun, fTestRunnerPart, className, ILaunchManager.RUN_MODE));
     } else {
-      manager.add(new RerunAction(JUnitMessages.Run_Test_Label, fTestRunnerPart, className, ILaunchManager.RUN_MODE));
-      manager.add(new RerunAction(JUnitMessages.Debug_Test_Label, fTestRunnerPart, className, ILaunchManager.DEBUG_MODE));
+      manager.add(new RerunAction(UIMessages.Run_Test_Label, fTestRunnerPart, className, ILaunchManager.RUN_MODE));
+      manager.add(new RerunAction(UIMessages.Debug_Test_Label, fTestRunnerPart, className, ILaunchManager.DEBUG_MODE));
     }
   }
 
@@ -854,8 +854,8 @@ public class TestViewer {
 
   private class ExpandAllAction extends Action {
     public ExpandAllAction() {
-      setText(JUnitMessages.ExpandAllAction_text);
-      setToolTipText(JUnitMessages.ExpandAllAction_tooltip);
+      setText(UIMessages.ExpandAllAction_text);
+      setToolTipText(UIMessages.ExpandAllAction_tooltip);
       setImageDescriptor(ImageProvider.getImageDescriptor(ImageProvider.ICONS_EXPAND_ALL));
     }
 
@@ -867,8 +867,8 @@ public class TestViewer {
 
   private class CollapseAllAction extends Action {
     public CollapseAllAction() {
-      setText(JUnitMessages.CollapseAllAction_text);
-      setToolTipText(JUnitMessages.CollapseAllAction_tooltip);
+      setText(UIMessages.CollapseAllAction_text);
+      setToolTipText(UIMessages.CollapseAllAction_tooltip);
       setImageDescriptor(ImageProvider.getImageDescriptor(ImageProvider.ICONS_COLLAPSE_ALL));
     }
 

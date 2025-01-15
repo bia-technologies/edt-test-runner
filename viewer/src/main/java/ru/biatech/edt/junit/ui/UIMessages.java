@@ -23,7 +23,7 @@ package ru.biatech.edt.junit.ui;
 
 import org.eclipse.osgi.util.NLS;
 
-public final class JUnitMessages extends NLS {
+public final class UIMessages extends NLS {
 
   private static final String BUNDLE_NAME = "ru.biatech.edt.junit.ui.JUnitMessages";//$NON-NLS-1$
 
@@ -145,10 +145,10 @@ public final class JUnitMessages extends NLS {
   public static String OpenUnderTestMethodAction_error_not_found;
 
   static {
-    NLS.initializeMessages(BUNDLE_NAME, JUnitMessages.class);
+    NLS.initializeMessages(BUNDLE_NAME, UIMessages.class);
   }
 
-  private JUnitMessages() {
+  private UIMessages() {
     // Do not instantiate
   }
 }

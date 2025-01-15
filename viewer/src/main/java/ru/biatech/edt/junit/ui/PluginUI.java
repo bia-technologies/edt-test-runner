@@ -34,7 +34,7 @@ import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
 /**
  * The plug-in runtime class for the JUnit plug-in.
  */
-public class JUnitUI {
+public class PluginUI {
 
   public static final String PLUGIN_ID = "ru.biatech.edt.junit"; //$NON-NLS-1$
 

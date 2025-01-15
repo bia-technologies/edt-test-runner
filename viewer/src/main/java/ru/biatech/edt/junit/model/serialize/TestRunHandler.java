@@ -37,7 +37,7 @@ import ru.biatech.edt.junit.model.TestCaseElement;
 import ru.biatech.edt.junit.model.TestElement;
 import ru.biatech.edt.junit.model.TestStatus;
 import ru.biatech.edt.junit.model.TestSuiteElement;
-import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.v8utils.Projects;
 
 import java.util.Stack;
@@ -90,7 +90,7 @@ public class TestRunHandler extends DefaultHandler {
       if (line - 20 >= lastReportedLine) {
         line -= line % 20;
         lastReportedLine = line;
-        progressMonitor.subTask(NLS.bind(JUnitMessages.TestRunHandler_lines_read, line));
+        progressMonitor.subTask(NLS.bind(UIMessages.TestRunHandler_lines_read, line));
       }
     }
     if (Thread.interrupted())

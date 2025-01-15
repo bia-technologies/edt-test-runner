@@ -29,7 +29,7 @@ import org.eclipse.debug.core.model.IProcess;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.launcher.v8.LaunchConfigurationAttributes;
 import ru.biatech.edt.junit.launcher.v8.LaunchHelper;
-import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.UIMessages;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -227,12 +227,11 @@ public class LifecycleMonitor {
         exitCode = process.getExitValue();
       } catch (DebugException e) { /* do nothing*/ }
       if (exitCode != 0) {
-        TestViewerPlugin.log().warning(JUnitMessages.JUnitLaunchListener_ProcessError, item.getName(), process.getLabel(), exitCode);
+        TestViewerPlugin.log().warning(UIMessages.JUnitLaunchListener_ProcessError, item.getName(), process.getLabel(), exitCode);
         onItemStop(item, LifecycleEvent.FINISHED_WITH_ERROR);
       } else {
         onItemStop(item, LifecycleEvent.FINISHED);
       }
     }
   }
-
 }

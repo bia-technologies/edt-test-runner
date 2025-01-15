@@ -17,7 +17,7 @@
 package ru.biatech.edt.junit.ui.report.actions;
 
 import org.eclipse.jface.action.Action;
-import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
 
 /**
@@ -28,8 +28,8 @@ public class ShowPreviousFailureAction extends Action {
   private final TestRunnerViewPart fPart;
 
   public ShowPreviousFailureAction(TestRunnerViewPart part) {
-    super(JUnitMessages.ShowPreviousFailureAction_label);
-    setToolTipText(JUnitMessages.ShowPreviousFailureAction_tooltip);
+    super(UIMessages.ShowPreviousFailureAction_label);
+    setToolTipText(UIMessages.ShowPreviousFailureAction_tooltip);
 
     ActionsSupport.setLocalImageDescriptors(this, "select_prev.png"); //$NON-NLS-1$
 

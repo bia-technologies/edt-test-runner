@@ -17,14 +17,14 @@
 package ru.biatech.edt.junit.ui.report.actions;
 
 import org.eclipse.jface.action.IAction;
-import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
 
 import static ru.biatech.edt.junit.ui.report.TestRunnerViewPart.LAYOUT_HIERARCHICAL;
 
 public class ShowTestHierarchyAction extends SettingsChangeAction {
   public ShowTestHierarchyAction(TestRunnerViewPart.ReportSettings settings) {
-    super(settings, JUnitMessages.TestRunnerViewPart_hierarchical_layout, IAction.AS_CHECK_BOX);
+    super(settings, UIMessages.TestRunnerViewPart_hierarchical_layout, IAction.AS_CHECK_BOX);
 
     ActionsSupport.setLocalImageDescriptors(this, "hierarchicalLayout.png"); //$NON-NLS-1$
   }

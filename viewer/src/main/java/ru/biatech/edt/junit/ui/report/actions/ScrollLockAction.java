@@ -17,9 +17,7 @@
 package ru.biatech.edt.junit.ui.report.actions;
 
 
-import org.eclipse.ui.PlatformUI;
-import ru.biatech.edt.junit.ui.IJUnitHelpContextIds;
-import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
 
 /**
@@ -28,12 +26,10 @@ import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
 public class ScrollLockAction extends SettingsChangeAction {
 
   public ScrollLockAction(TestRunnerViewPart.ReportSettings settings) {
-    super(settings, JUnitMessages.ScrollLockAction_action_label);
-    setToolTipText(JUnitMessages.ScrollLockAction_action_tooltip);
+    super(settings, UIMessages.ScrollLockAction_action_label);
+    setToolTipText(UIMessages.ScrollLockAction_action_tooltip);
 
     ActionsSupport.setLocalImageDescriptors(this, "lock.png"); //$NON-NLS-1$
-
-    PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJUnitHelpContextIds.OUTPUT_SCROLL_LOCK_ACTION);
   }
 
   /**

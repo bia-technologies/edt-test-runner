@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 BIA-Technologies Limited Liability Company.
+ * Copyright (c) 2025 BIA-Technologies Limited Liability Company.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,14 @@
  * limitations under the License.
  *******************************************************************************/
 
-package ru.biatech.edt.junit.ui.report.actions;
+package ru.biatech.edt.junit;
 
-import org.eclipse.jface.action.IAction;
-import ru.biatech.edt.junit.ui.UIMessages;
-import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
+import lombok.experimental.UtilityClass;
 
-public class ShowWebStackTraceAction extends SettingsChangeAction {
-  public ShowWebStackTraceAction(TestRunnerViewPart.ReportSettings settings) {
-    super(settings, UIMessages.ShowWebStackTraceAction_name, IAction.AS_CHECK_BOX);
-  }
-
-  @Override
-  public void run() {
-    settings.setHtmlStackTrace(isChecked());
-  }
-
-  @Override
-  public void update() {
-    setChecked(settings.isHtmlStackTrace());
-  }
+@UtilityClass
+public class Constants {
+  public static final String PLUGIN_ID = "ru.biatech.edt.junit"; //$NON-NLS-1$
+  public static final String ID_EXTENSION_POINT_TESTRUN_LISTENERS = "ru.biatech.edt.junit.testRunListeners"; //$NON-NLS-1$ //$NON-NLS-2$
+  public static final String ID_EXTENSION_POINT_TEST_KINDS = "ru.biatech.edt.junit.testKinds"; //$NON-NLS-1$ //$NON-NLS-2$
+  public static final String HISTORY_DIR_NAME = "history"; //$NON-NLS-1$
 }

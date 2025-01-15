@@ -23,9 +23,9 @@ package ru.biatech.edt.junit.ui;
 
 import org.eclipse.osgi.util.NLS;
 
-public final class JUnitMessages extends NLS {
+public final class UIMessages extends NLS {
 
-  private static final String BUNDLE_NAME = "ru.biatech.edt.junit.ui.JUnitMessages";//$NON-NLS-1$
+  private static final String BUNDLE_NAME = "ru.biatech.edt.junit.ui.UIMessages";//$NON-NLS-1$
 
   public static String LaunchConfigurationTab_tab_label;
   public static String LaunchConfigurationTab_basic_launch_configuration;
@@ -113,7 +113,6 @@ public final class JUnitMessages extends NLS {
   public static String TestRunnerViewPart_layout_menu;
 
   public static String TestSessionLabelProvider_testName_elapsedTimeInSeconds;
-  public static String TestSessionLabelProvider_testName_JUnitVersion;
   public static String TestSessionLabelProvider_testMethodName_className;
 
   public static String LaunchConfigurationDelegate_Launching;
@@ -146,10 +145,10 @@ public final class JUnitMessages extends NLS {
   public static String OpenUnderTestMethodAction_error_not_found;
 
   static {
-    NLS.initializeMessages(BUNDLE_NAME, JUnitMessages.class);
+    NLS.initializeMessages(BUNDLE_NAME, UIMessages.class);
   }
 
-  private JUnitMessages() {
+  private UIMessages() {
     // Do not instantiate
   }
 }

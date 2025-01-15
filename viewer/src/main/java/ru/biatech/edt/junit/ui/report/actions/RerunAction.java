@@ -18,9 +18,7 @@ package ru.biatech.edt.junit.ui.report.actions;
 
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jface.action.Action;
-import org.eclipse.ui.PlatformUI;
 import ru.biatech.edt.junit.launcher.v8.RerunHelper;
-import ru.biatech.edt.junit.ui.IJUnitHelpContextIds;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
 import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
 
@@ -42,7 +40,6 @@ public class RerunAction extends Action {
    */
   public RerunAction(String actionName, TestRunnerViewPart runner, String className, String launchMode) {
     super(actionName);
-    PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJUnitHelpContextIds.RERUN_ACTION);
     fTestRunner = runner;
     fClassName = className;
     fLaunchMode = launchMode;
@@ -55,6 +52,6 @@ public class RerunAction extends Action {
 
   @Override
   public void run() {
-    RerunHelper.rerunTest(fTestRunner.getTestRunSession(), fClassName, fLaunchMode);
+    RerunHelper.rerunTest(fTestRunner.getSession(), fClassName, fLaunchMode);
   }
 }

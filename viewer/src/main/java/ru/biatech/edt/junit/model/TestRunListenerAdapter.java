@@ -26,10 +26,10 @@ import ru.biatech.edt.junit.TestViewerPlugin;
  */
 public class TestRunListenerAdapter implements ITestSessionListener {
 
-  private final TestRunSession fSession;
+  private final Session session;
 
-  public TestRunListenerAdapter(TestRunSession session) {
-    fSession = session;
+  public TestRunListenerAdapter(Session session) {
+    this.session = session;
   }
 
   private ListenerList<TestRunListener> getListenerList() {
@@ -38,13 +38,13 @@ public class TestRunListenerAdapter implements ITestSessionListener {
 
   private void fireSessionStarted() {
     for (TestRunListener listener : getListenerList()) {
-      listener.sessionStarted(fSession);
+      listener.sessionStarted(session);
     }
   }
 
   private void fireSessionFinished() {
     for (TestRunListener listener : getListenerList()) {
-      listener.sessionFinished(fSession);
+      listener.sessionFinished(session);
     }
   }
 
@@ -69,18 +69,18 @@ public class TestRunListenerAdapter implements ITestSessionListener {
   @Override
   public void sessionEnded(long elapsedTime) {
     fireSessionFinished();
-    fSession.swapOut();
+    session.swapOut();
   }
 
   @Override
   public void sessionStopped(long elapsedTime) {
     fireSessionFinished();
-    fSession.swapOut();
+    session.swapOut();
   }
 
   @Override
   public void sessionTerminated() {
-    fSession.swapOut();
+    session.swapOut();
   }
 
   @Override

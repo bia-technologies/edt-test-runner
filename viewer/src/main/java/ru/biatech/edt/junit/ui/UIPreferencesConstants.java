@@ -27,25 +27,25 @@ import ru.biatech.edt.junit.TestViewerPlugin;
  *
  * @since 3.7
  */
-public class JUnitUIPreferencesConstants {
+public class UIPreferencesConstants {
   /**
    * Boolean preference controlling whether newly launched JUnit tests should be shown in all
    * JUnit views (in all windows).
    */
-  public static final String SHOW_IN_ALL_VIEWS = JUnitUI.PLUGIN_ID + ".show_in_all_views"; //$NON-NLS-1$
+  public static final String SHOW_IN_ALL_VIEWS = PluginUI.PLUGIN_ID + ".show_in_all_views"; //$NON-NLS-1$
 
   public static final boolean SHOW_IN_ALL_VIEWS_DEFAULT = false; // would need a PreferenceInitializer if this was changed to true!
 
-  private JUnitUIPreferencesConstants() {
+  private UIPreferencesConstants() {
     // no instance
   }
 
   public static boolean getShowInAllViews() {
-    return Platform.getPreferencesService().getBoolean(JUnitUI.PLUGIN_ID, SHOW_IN_ALL_VIEWS, SHOW_IN_ALL_VIEWS_DEFAULT, null);
+    return Platform.getPreferencesService().getBoolean(PluginUI.PLUGIN_ID, SHOW_IN_ALL_VIEWS, SHOW_IN_ALL_VIEWS_DEFAULT, null);
   }
 
   public static void setShowInAllViews(boolean show) {
-    IEclipsePreferences preferences = InstanceScope.INSTANCE.getNode(JUnitUI.PLUGIN_ID);
+    IEclipsePreferences preferences = InstanceScope.INSTANCE.getNode(PluginUI.PLUGIN_ID);
     preferences.putBoolean(SHOW_IN_ALL_VIEWS, show);
     try {
       preferences.flush();

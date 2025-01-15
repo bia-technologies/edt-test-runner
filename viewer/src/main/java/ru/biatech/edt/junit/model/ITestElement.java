@@ -66,20 +66,6 @@ public interface ITestElement {
   TestResult getTestResult(boolean includeChildren);
 
   /**
-   * Returns the parent test element container or <code>null</code> if the test element is the test run session.
-   *
-   * @return the parent test suite
-   */
-  ITestElementContainer getParentContainer();
-
-  /**
-   * Returns the test run session.
-   *
-   * @return the parent test run session.
-   */
-  ITestRunSession getTestRunSession();
-
-  /**
    * Returns the estimated total time elapsed in seconds while executing this test element. The
    * total time for a test suite includes the time used for all tests in that suite. The total
    * time for a test session includes the time used for all tests in that session.

@@ -16,16 +16,14 @@
 
 package ru.biatech.edt.junit.ui.report.actions;
 
-import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.action.IAction;
-import ru.biatech.edt.junit.JUnitPreferencesConstants;
-import ru.biatech.edt.junit.TestViewerPlugin;
-import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.Preferences;
+import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
 
 public class ActivateOnErrorAction extends SettingsChangeAction {
   public ActivateOnErrorAction(TestRunnerViewPart.ReportSettings settings) {
-    super(settings, JUnitMessages.TestRunnerViewPart_activate_on_failure_only, IAction.AS_CHECK_BOX);
+    super(settings, UIMessages.TestRunnerViewPart_activate_on_failure_only, IAction.AS_CHECK_BOX);
   }
 
   public void update() {
@@ -35,7 +33,6 @@ public class ActivateOnErrorAction extends SettingsChangeAction {
   @Override
   public void run() {
     settings.setShowOnErrorOnly(isChecked());
-    InstanceScope.INSTANCE.getNode(TestViewerPlugin.getPluginId())
-        .putBoolean(JUnitPreferencesConstants.SHOW_ON_ERROR_ONLY, settings.isShowOnErrorOnly());
+    Preferences.putShowOnErrorOnly(settings.isShowOnErrorOnly());
   }
 }

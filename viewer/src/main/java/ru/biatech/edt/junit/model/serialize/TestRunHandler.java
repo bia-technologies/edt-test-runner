@@ -32,12 +32,12 @@ import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 import ru.biatech.edt.junit.model.Factory;
 import ru.biatech.edt.junit.model.IXMLTags;
+import ru.biatech.edt.junit.model.Session;
 import ru.biatech.edt.junit.model.TestCaseElement;
 import ru.biatech.edt.junit.model.TestElement;
-import ru.biatech.edt.junit.model.TestRunSession;
 import ru.biatech.edt.junit.model.TestStatus;
 import ru.biatech.edt.junit.model.TestSuiteElement;
-import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.v8utils.Projects;
 
 import java.util.Stack;
@@ -55,28 +55,28 @@ public class TestRunHandler extends DefaultHandler {
   private final Stack<Boolean> fNotRun = new Stack<>();
   private final TestRunErrorInfo errorInfo = new TestRunErrorInfo();
   String fDefaultProjectName;
-  private TestRunSession fTestRunSession;
-  private TestSuiteElement fTestSuite;
-  private TestCaseElement fTestCase;
-  private Locator fLocator;
-  private TestStatus fStatus;
-  private IProgressMonitor fMonitor;
-  private int fLastReportedLine;
+  private Session session;
+  private TestSuiteElement testSuite;
+  private TestCaseElement testCase;
+  private Locator locator;
+  private TestStatus testStatus;
+  private IProgressMonitor progressMonitor;
+  private int lastReportedLine;
 
   public TestRunHandler() {
   }
 
   public TestRunHandler(IProgressMonitor monitor) {
-    fMonitor = monitor;
+    progressMonitor = monitor;
   }
 
-  public TestRunHandler(TestRunSession testRunSession) {
-    fTestRunSession = testRunSession;
+  public TestRunHandler(Session session) {
+    this.session = session;
   }
 
   @Override
   public void setDocumentLocator(Locator locator) {
-    fLocator = locator;
+    this.locator = locator;
   }
 
   @Override
@@ -85,12 +85,12 @@ public class TestRunHandler extends DefaultHandler {
 
   @Override
   public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-    if (fLocator != null && fMonitor != null) {
-      int line = fLocator.getLineNumber();
-      if (line - 20 >= fLastReportedLine) {
+    if (locator != null && progressMonitor != null) {
+      int line = locator.getLineNumber();
+      if (line - 20 >= lastReportedLine) {
         line -= line % 20;
-        fLastReportedLine = line;
-        fMonitor.subTask(NLS.bind(JUnitMessages.TestRunHandler_lines_read, line));
+        lastReportedLine = line;
+        progressMonitor.subTask(NLS.bind(UIMessages.TestRunHandler_lines_read, line));
       }
     }
     if (Thread.interrupted())
@@ -98,17 +98,17 @@ public class TestRunHandler extends DefaultHandler {
 
     switch (qName) {
       case IXMLTags.NODE_TESTRUN:
-        if (fTestRunSession == null) {
-          fTestRunSession = readSession(attributes);
+        if (session == null) {
+          session = readSession(attributes);
         } else {
-          fTestRunSession.reset();
+          session.reset();
         }
-        fTestSuite = fTestRunSession.getTestRoot();
+        testSuite = session.getTestRoot();
         break;
       case IXMLTags.NODE_TESTSUITES:
         break;
       case IXMLTags.NODE_TESTSUITE: {
-        fTestSuite = readTestSuite(attributes);
+        testSuite = readTestSuite(attributes);
         break;
       }
       // not interested
@@ -116,19 +116,19 @@ public class TestRunHandler extends DefaultHandler {
       case IXMLTags.NODE_PROPERTY:
         break;
       case IXMLTags.NODE_TESTCASE: {
-        fTestCase = readTestCase(attributes);
+        testCase = readTestCase(attributes);
         break;
       }
       case IXMLTags.NODE_ERROR:
         //TODO: multiple failures: https://bugs.eclipse.org/bugs/show_bug.cgi?id=125296
-        fStatus = TestStatus.ERROR;
+        testStatus = TestStatus.ERROR;
         errorInfo.clean(true);
         errorInfo.message = attributes.getValue(IXMLTags.ATTR_MESSAGE);
         errorInfo.type = attributes.getValue(IXMLTags.ATTR_TYPE);
         break;
       case IXMLTags.NODE_FAILURE:
         //TODO: multiple failures: https://bugs.eclipse.org/bugs/show_bug.cgi?id=125296
-        fStatus = TestStatus.FAILURE;
+        testStatus = TestStatus.FAILURE;
         errorInfo.clean(true);
         errorInfo.message = attributes.getValue(IXMLTags.ATTR_MESSAGE);
         break;
@@ -145,7 +145,7 @@ public class TestRunHandler extends DefaultHandler {
       case IXMLTags.NODE_SKIPPED:
         // before Ant 1.9.0: not an Ant JUnit tag, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=276068
         // later: child of <suite> or <test>, see https://issues.apache.org/bugzilla/show_bug.cgi?id=43969
-        fStatus = TestStatus.OK;
+        testStatus = TestStatus.OK;
         errorInfo.clean(true);
         errorInfo.message = attributes.getValue(IXMLTags.ATTR_MESSAGE);
         if (errorInfo.message != null) {
@@ -153,7 +153,7 @@ public class TestRunHandler extends DefaultHandler {
         }
         break;
       default:
-        throw new SAXParseException("unknown node '" + qName + "'", fLocator);  //$NON-NLS-1$//$NON-NLS-2$
+        throw new SAXParseException("unknown node '" + qName + "'", locator);  //$NON-NLS-1$//$NON-NLS-2$
     }
   }
 
@@ -180,19 +180,19 @@ public class TestRunHandler extends DefaultHandler {
       case IXMLTags.NODE_SYSTEM_ERR:
         break;
       case IXMLTags.NODE_TESTSUITE:
-        handleTestElementEnd(fTestSuite);
-        fTestSuite = fTestSuite.getParent();
+        handleTestElementEnd(testSuite);
+        testSuite = testSuite.getParent();
         //TODO: end suite: compare counters?
         break;
       case IXMLTags.NODE_TESTCASE:
-        handleTestElementEnd(fTestCase);
-        fTestCase = null;
+        handleTestElementEnd(testCase);
+        testCase = null;
         break;
       case IXMLTags.NODE_FAILURE:
       case IXMLTags.NODE_ERROR: {
-        TestElement testElement = fTestCase;
+        TestElement testElement = testCase;
         if (testElement == null)
-          testElement = fTestSuite;
+          testElement = testSuite;
         handleFailure(testElement);
         break;
       }
@@ -207,14 +207,14 @@ public class TestRunHandler extends DefaultHandler {
         errorInfo.trace.setLength(0);
         break;
       case IXMLTags.NODE_SKIPPED: {
-        TestElement testElement = fTestCase;
+        TestElement testElement = testCase;
         if (testElement == null)
-          testElement = fTestSuite;
+          testElement = testSuite;
         if (errorInfo.trace.length() > 0 || !Strings.isNullOrEmpty(errorInfo.message)) {
           handleFailure(testElement);
           testElement.setAssumptionFailure(true);
-        } else if (fTestCase != null) {
-          fTestCase.setIgnored(true);
+        } else if (testCase != null) {
+          testCase.setIgnored(true);
         } else { // not expected
           testElement.setAssumptionFailure(true);
         }
@@ -247,7 +247,7 @@ public class TestRunHandler extends DefaultHandler {
     if (uniqueId != null && uniqueId.isBlank()) {
       uniqueId = null;
     }
-    var testCase = Factory.createTestCase(fTestSuite, testName, displayName, isDynamicTest, paramTypes, uniqueId, context);
+    var testCase = Factory.createTestCase(testSuite, testName, displayName, isDynamicTest, paramTypes, uniqueId, context);
     fNotRun.push(Boolean.parseBoolean(attributes.getValue(IXMLTags.ATTR_INCOMPLETE)));
     testCase.setIgnored(Boolean.parseBoolean(attributes.getValue(IXMLTags.ATTR_IGNORED)));
     readTime(testCase, attributes);
@@ -259,16 +259,16 @@ public class TestRunHandler extends DefaultHandler {
     String name = attributes.getValue(IXMLTags.ATTR_NAME);
     TestSuiteElement parentSuite;
 
-    if (fTestRunSession == null) {
+    if (session == null) {
       // support standalone suites and Ant's 'junitreport' task:
       IV8Project project = null;
       if (!Strings.isNullOrEmpty(fDefaultProjectName)) {
         project = Projects.getProject(fDefaultProjectName); // TODO Подумать как определять проект
       }
-      fTestRunSession = new TestRunSession(name, project);
-      parentSuite = fTestRunSession.getTestRoot();
+      session = new Session(name, project);
+      parentSuite = session.getTestRoot();
     } else {
-      parentSuite = fTestSuite;
+      parentSuite = testSuite;
     }
 
     TestSuiteElement suite;
@@ -296,7 +296,7 @@ public class TestRunHandler extends DefaultHandler {
     return suite;
   }
 
-  TestRunSession readSession(Attributes attributes) {
+  Session readSession(Attributes attributes) {
     String name = attributes.getValue(IXMLTags.ATTR_NAME);
     String projectName = attributes.getValue(IXMLTags.ATTR_PROJECT);
     IV8Project project = null;
@@ -307,17 +307,17 @@ public class TestRunHandler extends DefaultHandler {
     if (!Strings.isNullOrEmpty(projectName)) {
       project = Projects.getProject(projectName);
     }
-    fTestRunSession = new TestRunSession(name, project);
+    session = new Session(name, project);
     String includeTags = attributes.getValue(IXMLTags.ATTR_INCLUDE_TAGS);
     if (includeTags != null && includeTags.trim().length() > 0) {
-      fTestRunSession.setIncludeTags(includeTags);
+      session.setIncludeTags(includeTags);
     }
     String excludeTags = attributes.getValue(IXMLTags.ATTR_EXCLUDE_TAGS);
     if (excludeTags != null && excludeTags.trim().length() > 0) {
-      fTestRunSession.setExcludeTags(excludeTags);
+      session.setExcludeTags(excludeTags);
     }
     //TODO: read counts?
-    return fTestRunSession;
+    return session;
   }
 
   private void readTime(TestElement testElement, Attributes attributes) {
@@ -332,21 +332,21 @@ public class TestRunHandler extends DefaultHandler {
 
   private void handleTestElementEnd(TestElement testElement) {
     boolean completed = fNotRun.pop() != Boolean.TRUE;
-    fTestRunSession.registerTestEnded(testElement, completed);
+    session.registerTestEnded(testElement, completed);
   }
 
   private void handleFailure(TestElement testElement) {
-    testElement.pushErrorInfo(fStatus, errorInfo.message, errorInfo.type, errorInfo.getTrace(), errorInfo.getExpected(), errorInfo.getActual());
-    fTestRunSession.registerTestFailureStatus(testElement);
+    testElement.pushErrorInfo(testStatus, errorInfo.message, errorInfo.type, errorInfo.getTrace(), errorInfo.getExpected(), errorInfo.getActual());
+    session.registerTestFailureStatus(testElement);
     errorInfo.clean(false);
-    fStatus = null;
+    testStatus = null;
   }
 
   private void handleUnknownNode(String qName) throws SAXException {
     //TODO: just log if debug option is enabled?
     StringBuilder msg = new StringBuilder("unknown node '").append(qName).append("'"); //$NON-NLS-1$//$NON-NLS-2$
-    if (fLocator != null) {
-      msg.append(" at line ").append(fLocator.getLineNumber()).append(", column ").append(fLocator.getColumnNumber());  //$NON-NLS-1$//$NON-NLS-2$
+    if (locator != null) {
+      msg.append(" at line ").append(locator.getLineNumber()).append(", column ").append(locator.getColumnNumber());  //$NON-NLS-1$//$NON-NLS-2$
     }
     throw new SAXException(msg.toString());
   }
@@ -364,8 +364,8 @@ public class TestRunHandler extends DefaultHandler {
   /**
    * @return the parsed test run session, or <code>null</code>
    */
-  public TestRunSession getTestRunSession() {
-    return fTestRunSession;
+  public Session getTestRunSession() {
+    return session;
   }
 
   static class TestRunErrorInfo {

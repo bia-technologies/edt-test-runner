@@ -21,7 +21,7 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.graphics.Image;
 import ru.biatech.edt.junit.services.TestsManager;
-import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
 
 public class DebugTestCaseAction implements ITestItemAction {
@@ -35,7 +35,7 @@ public class DebugTestCaseAction implements ITestItemAction {
 
   @Override
   public String getPresent() {
-    return JUnitMessages.Debug_Test_Label;
+    return UIMessages.Debug_Test_Label;
   }
 
   @Override
@@ -45,7 +45,7 @@ public class DebugTestCaseAction implements ITestItemAction {
 
   @Override
   public StyledString getStyledString() {
-    return new StyledString(JUnitMessages.Debug_Test_Label);
+    return new StyledString(UIMessages.Debug_Test_Label);
   }
 
   @Override

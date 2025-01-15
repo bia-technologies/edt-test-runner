@@ -38,7 +38,6 @@ Require-Bundle: org.apache.felix.scr,
  com._1c.g5.v8.bm.integration;bundle-version="11.0.0",
  com._1c.g5.v8.bm.core;bundle-version="8.0.0",
  com._1c.g5.wiring,
- org.apache.commons.lang3,
  com.google.gson
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Import-Package: com._1c.g5.ides.ui.texteditor.xtext.embedded,

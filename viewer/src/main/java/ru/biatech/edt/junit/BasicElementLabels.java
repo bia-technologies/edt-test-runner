@@ -61,7 +61,7 @@ public class BasicElementLabels {
    * @param name the Java element name.
    * @return the label for the Java element
    */
-  public static String getJavaElementName(String name) {
+  public static String getElementName(String name) {
     return markLTR(name, "<>()?,{}.:"); //$NON-NLS-1$
   }
 }

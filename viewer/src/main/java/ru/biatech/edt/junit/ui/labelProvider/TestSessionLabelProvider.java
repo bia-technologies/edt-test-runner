@@ -29,13 +29,12 @@ import org.eclipse.swt.graphics.Image;
 import ru.biatech.edt.junit.BasicElementLabels;
 import ru.biatech.edt.junit.model.ITestCaseElement;
 import ru.biatech.edt.junit.model.ITestElement;
-import ru.biatech.edt.junit.model.ITestRunSession;
 import ru.biatech.edt.junit.model.ITestSuiteElement;
 import ru.biatech.edt.junit.model.TestCaseElement;
 import ru.biatech.edt.junit.model.TestElement;
 import ru.biatech.edt.junit.model.TestStatus;
 import ru.biatech.edt.junit.model.TestSuiteElement;
-import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
 import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
 
@@ -80,13 +79,6 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
       if (element instanceof ITestSuiteElement) {
         text = addContext(text, ((ITestSuiteElement) testElement).getContext());
       }
-      if (testElement.getParentContainer() instanceof ITestRunSession) {
-        String testKindDisplayName = fTestRunnerPart.getTestKindDisplayName();
-        if (testKindDisplayName != null) {
-          String decorated = MessageFormat.format(JUnitMessages.TestSessionLabelProvider_testName_JUnitVersion, text, testKindDisplayName);
-          text = StyledCellLabelProvider.styleDecoratedString(decorated, StyledString.QUALIFIER_STYLER, text);
-        }
-      }
     } else {
       if (element instanceof ITestCaseElement) {
         String decorated = getTextForFlatLayout((TestCaseElement) testElement, label);
@@ -111,7 +103,7 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
         parentName = testCaseElement.getTestClassName();
       }
     }
-    return MessageFormat.format(JUnitMessages.TestSessionLabelProvider_testMethodName_className, label, BasicElementLabels.getJavaElementName(parentName));
+    return MessageFormat.format(UIMessages.TestSessionLabelProvider_testMethodName_className, label, BasicElementLabels.getElementName(parentName));
   }
 
   private StyledString addElapsedTime(StyledString styledString, double time) {
@@ -149,18 +141,18 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
       return string;
     }
     String formattedTime = timeFormat.format(time);
-    return MessageFormat.format(JUnitMessages.TestSessionLabelProvider_testName_elapsedTimeInSeconds, string, formattedTime);
+    return MessageFormat.format(UIMessages.TestSessionLabelProvider_testName_elapsedTimeInSeconds, string, formattedTime);
   }
 
   private String getSimpleLabel(Object element) {
     if (element instanceof TestCaseElement) {
       TestCaseElement testCaseElement = (TestCaseElement) element;
       String displayName = testCaseElement.getDisplayName();
-      return BasicElementLabels.getJavaElementName(displayName != null ? displayName : testCaseElement.getTestMethodName());
+      return BasicElementLabels.getElementName(displayName != null ? displayName : testCaseElement.getTestMethodName());
     } else if (element instanceof TestSuiteElement) {
       TestSuiteElement testSuiteElement = (TestSuiteElement) element;
       String displayName = testSuiteElement.getDisplayName();
-      return BasicElementLabels.getJavaElementName(displayName != null ? displayName : testSuiteElement.getSuiteTypeName());
+      return BasicElementLabels.getElementName(displayName != null ? displayName : testSuiteElement.getSuiteTypeName());
     }
     return null;
   }
@@ -172,17 +164,8 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
       return element.toString();
     }
     ITestElement testElement = (ITestElement) element;
-    if (fLayoutMode == TestRunnerViewPart.LAYOUT_HIERARCHICAL) {
-      if (testElement.getParentContainer() instanceof ITestRunSession) {
-        String testKindDisplayName = fTestRunnerPart.getTestKindDisplayName();
-        if (testKindDisplayName != null) {
-          label = MessageFormat.format(JUnitMessages.TestSessionLabelProvider_testName_JUnitVersion, label, testKindDisplayName);
-        }
-      }
-    } else {
-      if (element instanceof TestCaseElement) {
+    if (fLayoutMode != TestRunnerViewPart.LAYOUT_HIERARCHICAL && element instanceof TestCaseElement) {
         label = getTextForFlatLayout((TestCaseElement) testElement, label);
-      }
     }
     return addElapsedTime(label, testElement.getElapsedTimeInSeconds());
   }

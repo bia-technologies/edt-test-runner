@@ -38,7 +38,7 @@ import org.eclipse.ui.texteditor.MarkerUtilities;
 import org.eclipse.xtext.ui.editor.XtextEditor;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.services.TestsManager;
-import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
 
 public class TestMethodActionDelegate extends AbstractRulerActionDelegate implements IActionDelegate2 {
@@ -157,14 +157,14 @@ public class TestMethodActionDelegate extends AbstractRulerActionDelegate implem
     };
 
     var menuItem = new MenuItem(menu, SWT.NONE);
-    menuItem.setText(JUnitMessages.Run_Test_Label);
+    menuItem.setText(UIMessages.Run_Test_Label);
     menuItem.setData(MODE_ATTRIBUTE, ILaunchManager.RUN_MODE);
 
     menuItem.setImage(imageProvider.getRunTestIcon());
     menuItem.addSelectionListener(listener);
 
     menuItem = new MenuItem(menu, SWT.NONE);
-    menuItem.setText(JUnitMessages.Debug_Test_Label);
+    menuItem.setText(UIMessages.Debug_Test_Label);
     menuItem.setData(MODE_ATTRIBUTE, ILaunchManager.DEBUG_MODE);
     menuItem.setImage(imageProvider.getDebugTestIcon());
     menuItem.addSelectionListener(listener);
@@ -192,7 +192,7 @@ public class TestMethodActionDelegate extends AbstractRulerActionDelegate implem
     try {
       return bslXtextEditor.getResource().findMarkers(RulerAttributes.MARKER_ID, false, 0);
     } catch (CoreException e) {
-      TestViewerPlugin.log().logError(JUnitMessages.TestMethodActionDelegate_CollectingMarkers, e);
+      TestViewerPlugin.log().logError(UIMessages.TestMethodActionDelegate_CollectingMarkers, e);
     }
     return null;
   }

@@ -18,8 +18,8 @@ package ru.biatech.edt.junit.ui.report.history;
 
 import org.eclipse.jface.action.Action;
 import ru.biatech.edt.junit.TestViewerPlugin;
-import ru.biatech.edt.junit.model.TestRunSession;
-import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.model.Session;
+import ru.biatech.edt.junit.ui.UIMessages;
 
 import java.util.List;
 
@@ -33,12 +33,12 @@ public class ClearAction extends Action {
   public ClearAction(RunnerViewHistory viewHistory) {
     this.viewHistory = viewHistory;
 
-    setText(JUnitMessages.TestRunnerViewPart_clear_history_label);
+    setText(UIMessages.TestRunnerViewPart_clear_history_label);
 
-    boolean enabled = false;
-    List<TestRunSession> testRunSessions = TestViewerPlugin.core().getModel().getTestRunSessions();
-    for (TestRunSession testRunSession : testRunSessions) {
-      if (!testRunSession.isRunning() && !testRunSession.isStarting()) {
+    var enabled = false;
+    var sessions = TestViewerPlugin.core().getSessionsManager().getSessions();
+    for (var session : sessions) {
+      if (!session.isRunning() && !session.isStarting()) {
         enabled = true;
         break;
       }
@@ -48,14 +48,14 @@ public class ClearAction extends Action {
 
   @Override
   public void run() {
-    List<TestRunSession> testRunSessions = getRunningSessions();
-    TestRunSession first = testRunSessions.isEmpty() ? null : testRunSessions.get(0);
-    viewHistory.setHistoryEntries(testRunSessions, first);
+    var sessions = getRunningSessions();
+    var first = sessions.isEmpty() ? null : sessions.get(0);
+    viewHistory.setHistoryEntries(sessions, first);
   }
 
-  private List<TestRunSession> getRunningSessions() {
-    List<TestRunSession> testRunSessions = TestViewerPlugin.core().getModel().getTestRunSessions();
-    testRunSessions.removeIf(testRunSession -> !testRunSession.isRunning() && !testRunSession.isStarting());
-    return testRunSessions;
+  private List<Session> getRunningSessions() {
+    var sessions = TestViewerPlugin.core().getSessionsManager().getSessions();
+    sessions.removeIf(testRunSession -> !testRunSession.isRunning() && !testRunSession.isStarting());
+    return sessions;
   }
 }

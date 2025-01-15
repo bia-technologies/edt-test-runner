@@ -31,7 +31,7 @@ import org.eclipse.xtext.validation.Check;
 import org.eclipse.xtext.validation.CheckType;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.services.TestsManager;
-import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.v8utils.MdUtils;
 
 import java.text.MessageFormat;
@@ -59,7 +59,7 @@ public class TestMethodMarker implements IExternalBslValidator {
     try {
       resource.deleteMarkers(RulerAttributes.MARKER_ID, false, 0);
     } catch (CoreException e) {
-      TestViewerPlugin.log().logError(JUnitMessages.TestMethodMarker_MarkersCleanError, e);
+      TestViewerPlugin.log().logError(UIMessages.TestMethodMarker_MarkersCleanError, e);
     }
     Collection<Method> methods = TestsManager.getTestMethods(module);
     methods.forEach(method -> createMarket(resource, method));
@@ -71,13 +71,13 @@ public class TestMethodMarker implements IExternalBslValidator {
     MarkerUtilities.setLineNumber(attributes, node.getStartLine());
     attributes.put(IMarker.SEVERITY, 1);
     attributes.put(RulerAttributes.ATTRIBUTE_METHOD, method.getName());
-    String message = MessageFormat.format(JUnitMessages.TestMethodMarker_LaunchTest, method.getName());
+    String message = MessageFormat.format(UIMessages.TestMethodMarker_LaunchTest, method.getName());
     MarkerUtilities.setMessage(attributes, message);
 
     try {
       MarkerUtilities.createMarker(resource, attributes, RulerAttributes.MARKER_ID);
     } catch (CoreException e) {
-      TestViewerPlugin.log().logError(JUnitMessages.TestMethodMarker_MarkerCreationError, e);
+      TestViewerPlugin.log().logError(UIMessages.TestMethodMarker_MarkerCreationError, e);
     }
   }
 }

@@ -35,7 +35,7 @@ public interface ITestRunSession extends ITestElementContainer {
    *
    * @return returns the test run name
    */
-  String getTestRunName();
+  String getName();
 
   /**
    * Returns the Java project from which this test run session has been launched, or <code>null</code> if not available.

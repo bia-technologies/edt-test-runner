@@ -19,16 +19,13 @@
 package ru.biatech.edt.junit.model;
 
 import com._1c.g5.v8.dt.core.platform.IV8Project;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.debug.core.ILaunch;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.kinds.ITestKind;
-import ru.biatech.edt.junit.launcher.v8.LaunchConfigurationAttributes;
 import ru.biatech.edt.junit.launcher.v8.LaunchHelper;
 
 import java.io.File;
@@ -37,7 +34,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 
@@ -46,7 +42,7 @@ import java.util.stream.Collectors;
  * launch configuration, launch, test tree (including results).
  */
 @Getter
-public class TestRunSession implements ITestRunSession {
+public class Session implements ITestRunSession {
 
   private static final String EMPTY_STRING = ""; //$NON-NLS-1$
   /**
@@ -54,44 +50,37 @@ public class TestRunSession implements ITestRunSession {
    */
   private final IV8Project launchedProject;
 
-  @Getter(AccessLevel.NONE)
-  private final ListenerList<ITestSessionListener> fSessionListeners = new ListenerList<>();
+  private final ListenerList<ITestSessionListener> sessionListeners = new ListenerList<>();
 
   /**
    * Number of tests started during this test run.
    */
-  @Getter(AccessLevel.NONE)
-  private final AtomicInteger startedCount = new AtomicInteger(0);
+  private int startedCount = 0;
 
   /**
    * Number of tests ignored during this test run.
    */
-  @Getter(AccessLevel.NONE)
-  private final AtomicInteger ignoredCount = new AtomicInteger(0);
+  private int ignoredCount = 0;
 
   /**
    * Number of tests whose assumption failed during this test run.
    */
-  @Getter(AccessLevel.NONE)
-  private final AtomicInteger assumptionFailureCount = new AtomicInteger(0);
+  private int assumptionFailureCount = 0;
 
   /**
    * Number of errors during this test run.
    */
-  @Getter(AccessLevel.NONE)
-  private final AtomicInteger errorCount = new AtomicInteger(0);
+  private int errorCount = 0;
 
   /**
    * Number of failures during this test run.
    */
-  @Getter(AccessLevel.NONE)
-  private final AtomicInteger failureCount = new AtomicInteger(0);
+  private int failureCount = 0;
 
   /**
    * Total number of tests to run.
    */
-  @Getter(AccessLevel.NONE)
-  private final AtomicInteger totalCount = new AtomicInteger(0);
+  private int totalCount = 0;
 
   /**
    * <ul>
@@ -117,7 +106,7 @@ public class TestRunSession implements ITestRunSession {
    */
   private ILaunch launch;
 
-  private String testRunName;
+  private String name;
 
   private ITestKind testRunnerKind;
 
@@ -129,21 +118,18 @@ public class TestRunSession implements ITestRunSession {
   /**
    * The test run session's cached result, or <code>null</code> if <code>fTestRoot != null</code>.
    */
-  @Getter(AccessLevel.NONE)
   private TestResult fTestResult;
 
   /**
    * Tags included in this test run.
    */
   @Setter
-  @Getter(AccessLevel.NONE)
   private String includeTags;
 
   /**
    * Tags excluded from this test run.
    */
   @Setter
-  @Getter(AccessLevel.NONE)
   private String excludeTags;
 
   /**
@@ -152,11 +138,11 @@ public class TestRunSession implements ITestRunSession {
    * @param pTestRunName name of the test run
    * @param project      may be <code>null</code>
    */
-  public TestRunSession(String pTestRunName, IV8Project project) {
+  public Session(String pTestRunName, IV8Project project) {
     //TODO: check assumptions about non-null fields
 
     Assert.isNotNull(pTestRunName);
-    testRunName = pTestRunName;
+    name = pTestRunName;
     launchedProject = project;
 
     startTime = System.currentTimeMillis();
@@ -166,12 +152,12 @@ public class TestRunSession implements ITestRunSession {
   }
 
   public void reset() {
-    startedCount.set(0);
-    failureCount.set(0);
-    assumptionFailureCount.set(0);
-    errorCount.set(0);
-    ignoredCount.set(0);
-    totalCount.set(0);
+    startedCount = 0;
+    failureCount = 0;
+    assumptionFailureCount = 0;
+    errorCount = 0;
+    ignoredCount = 0;
+    totalCount = 0;
 
     testRoot = Factory.createRoot(this);
     fTestResult = null;
@@ -202,39 +188,30 @@ public class TestRunSession implements ITestRunSession {
     return getTestRoot().getChildren();
   }
 
-  @Override
-  public ITestElementContainer getParentContainer() {
-    return null;
-  }
-
-  @Override
-  public ITestRunSession getTestRunSession() {
-    return this;
-  }
-
   public void setLaunch(ILaunch launch) {
     this.launch = launch;
     var launchConfiguration = this.launch.getLaunchConfiguration();
     if (launchConfiguration != null) {
-      testRunName = launchConfiguration.getName();
+      name = launchConfiguration.getName();
       testRunnerKind = LaunchHelper.getTestRunnerKind(launchConfiguration);
     } else {
-      testRunName = launchedProject.getProject().getName();
+      name = launchedProject.getProject().getName();
       testRunnerKind = ITestKind.NULL;
     }
+    running = isStarting();
   }
 
   public String getTestRunPresent() {
-    return testRunName + " " + DateFormat.getDateTimeInstance().format(new Date(startTime));
+    return name + " " + DateFormat.getDateTimeInstance().format(new Date(startTime));
   }
 
   public synchronized void addTestSessionListener(ITestSessionListener listener) {
 //		swapIn();
-    fSessionListeners.add(listener);
+    sessionListeners.add(listener);
   }
 
   public void removeTestSessionListener(ITestSessionListener listener) {
-    fSessionListeners.remove(listener);
+    sessionListeners.remove(listener);
   }
 
   public synchronized void swapOut() { // TODO Не ясно, нужно или нет
@@ -309,22 +286,22 @@ public class TestRunSession implements ITestRunSession {
   public void registerTestFailureStatus(TestElement testElement) {
     if (!testElement.isAssumptionFailure()) {
       if (testElement.getStatus().isError()) {
-        errorCount.incrementAndGet();
+        errorCount++;
       } else if (testElement.getStatus().isFailure()) {
-        failureCount.incrementAndGet();
+        failureCount++;
       }
     }
   }
 
   public void registerTestEnded(TestElement testElement, boolean completed) {
     if (testElement instanceof TestCaseElement) {
-      totalCount.incrementAndGet();
+      totalCount++;
       if (!completed) {
         return;
       }
-      startedCount.incrementAndGet();
+      startedCount++;
       if (((TestCaseElement) testElement).isIgnored()) {
-        ignoredCount.incrementAndGet();
+        ignoredCount++;
       }
       if (!testElement.getStatus().isErrorOrFailure()) {
         setStatus(testElement, TestStatus.OK);
@@ -332,7 +309,7 @@ public class TestRunSession implements ITestRunSession {
     }
 
     if (testElement.isAssumptionFailure()) {
-      assumptionFailureCount.incrementAndGet();
+      assumptionFailureCount++;
     }
   }
 
@@ -377,67 +354,8 @@ public class TestRunSession implements ITestRunSession {
     return "Test session";
   }
 
-  public String getIncludeTags() {
-    if (launch != null) {
-      try {
-        var launchConfig = launch.getLaunchConfiguration();
-        if (launchConfig != null) {
-          var hasIncludeTags = launchConfig.getAttribute(LaunchConfigurationAttributes.ATTR_TEST_HAS_INCLUDE_TAGS, false);
-          if (hasIncludeTags) {
-            return launchConfig.getAttribute(LaunchConfigurationAttributes.ATTR_TEST_INCLUDE_TAGS, EMPTY_STRING);
-          }
-        }
-      } catch (CoreException ignore) {
-      }
-      return EMPTY_STRING;
-    }
-    return includeTags;
-  }
-
-  public String getExcludeTags() {
-    if (launch != null) {
-      try {
-        var launchConfig = launch.getLaunchConfiguration();
-        if (launchConfig != null) {
-          var hasExcludeTags = launchConfig.getAttribute(LaunchConfigurationAttributes.ATTR_TEST_HAS_EXCLUDE_TAGS, false);
-          if (hasExcludeTags) {
-            return launchConfig.getAttribute(LaunchConfigurationAttributes.ATTR_TEST_EXCLUDE_TAGS, EMPTY_STRING);
-          }
-        }
-      } catch (CoreException e) {
-        //ignore
-      }
-      return EMPTY_STRING;
-    }
-    return excludeTags;
-  }
-
-  public int getStartedCount() {
-    return startedCount.get();
-  }
-
-  public int getIgnoredCount() {
-    return ignoredCount.get();
-  }
-
-  public int getAssumptionFailureCount() {
-    return assumptionFailureCount.get();
-  }
-
-  public int getErrorCount() {
-    return errorCount.get();
-  }
-
-  public int getFailureCount() {
-    return failureCount.get();
-  }
-
-  public int getTotalCount() {
-    return totalCount.get();
-  }
-
   @Override
   public String toString() {
-    return testRunName + " " + DateFormat.getDateTimeInstance().format(new Date(startTime)); //$NON-NLS-1$
+    return name + " " + DateFormat.getDateTimeInstance().format(new Date(startTime)); //$NON-NLS-1$
   }
 }

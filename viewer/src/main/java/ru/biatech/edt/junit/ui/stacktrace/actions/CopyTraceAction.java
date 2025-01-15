@@ -26,8 +26,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.SelectionListenerAction;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.model.ITraceable;
-import ru.biatech.edt.junit.ui.IJUnitHelpContextIds;
-import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
 import ru.biatech.edt.junit.utils.ClipboardHelper;
 import ru.biatech.edt.junit.utils.StringUtilities;
@@ -39,10 +38,9 @@ public class CopyTraceAction extends SelectionListenerAction {
   private ITraceable testElement;
 
   public CopyTraceAction() {
-    super(JUnitMessages.CopyTrace_action_label);
+    super(UIMessages.CopyTrace_action_label);
     setEnabled(false);
     IWorkbench workbench = PlatformUI.getWorkbench();
-    workbench.getHelpSystem().setHelp(this, IJUnitHelpContextIds.COPY_TRACE_ACTION);
     setImageDescriptor(ImageProvider.getSharedImage(ISharedImages.IMG_TOOL_COPY));
   }
 
@@ -71,7 +69,7 @@ public class CopyTraceAction extends SelectionListenerAction {
     } catch (SWTError e) {
       if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD)
         throw e;
-      if (MessageDialog.openQuestion(TestViewerPlugin.ui().getShell(), JUnitMessages.CopyTraceAction_problem, JUnitMessages.CopyTraceAction_clipboard_busy))
+      if (MessageDialog.openQuestion(TestViewerPlugin.ui().getShell(), UIMessages.CopyTraceAction_problem, UIMessages.CopyTraceAction_clipboard_busy))
         run();
     }
   }

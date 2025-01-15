@@ -24,8 +24,8 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.xml.sax.SAXException;
 import ru.biatech.edt.junit.BasicElementLabels;
 import ru.biatech.edt.junit.TestViewerPlugin;
-import ru.biatech.edt.junit.model.TestRunSession;
-import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.model.Session;
+import ru.biatech.edt.junit.ui.UIMessages;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
@@ -46,7 +46,7 @@ public class Serializer {
    * @return the imported test run session
    * @throws CoreException if the import failed
    */
-  public TestRunSession importTestRunSession(File file, String defaultProjectName) throws CoreException {
+  public Session importTestRunSession(File file, String defaultProjectName) throws CoreException {
     try {
       TestViewerPlugin.log().debug("Импорт отчета о тестировании: " + file.getAbsolutePath());
       var parserFactory = SAXParserFactory.newInstance();
@@ -56,9 +56,10 @@ public class Serializer {
       parser.parse(file, handler);
       var session = handler.getTestRunSession();
       if(session!=null){
-        TestViewerPlugin.core().getModel().addTestRunSession(session);}
+        TestViewerPlugin.core().getSessionsManager().addSession(session);
+      }
       else{
-        TestViewerPlugin.log().logError(JUnitMessages.JUnitModel_ReportIsEmpty);
+        TestViewerPlugin.log().logError(UIMessages.JUnitModel_ReportIsEmpty);
       }
       return session;
     } catch (ParserConfigurationException | SAXException e) {
@@ -82,14 +83,14 @@ public class Serializer {
    * @throws InterruptedException      if the import was cancelled
    * @since 3.6
    */
-  public TestRunSession importTestRunSession(String url, String defaultProjectName, IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-    monitor.beginTask(JUnitMessages.JUnitModel_importing_from_url, IProgressMonitor.UNKNOWN);
+  public Session importTestRunSession(String url, String defaultProjectName, IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+    monitor.beginTask(UIMessages.JUnitModel_importing_from_url, IProgressMonitor.UNKNOWN);
     final var trimmedUrl = url.trim().replaceAll("\r\n?|\n", ""); //$NON-NLS-1$ //$NON-NLS-2$
     final var handler = new TestRunHandler(monitor);
     handler.fDefaultProjectName = defaultProjectName;
 
     final CoreException[] exception = {null};
-    final TestRunSession[] session = {null};
+    final Session[] session = {null};
 
     var importThread = new Thread("JUnit URL importer") { //$NON-NLS-1$
       @Override
@@ -114,7 +115,7 @@ public class Serializer {
 
       private void storeImportError(Exception e) {
         exception[0] = new CoreException(new org.eclipse.core.runtime.Status(IStatus.ERROR,
-            TestViewerPlugin.getPluginId(), JUnitMessages.JUnitModel_could_not_import, e));
+            TestViewerPlugin.getPluginId(), UIMessages.JUnitModel_could_not_import, e));
       }
     };
     importThread.start();
@@ -135,18 +136,18 @@ public class Serializer {
       }
     }
 
-    TestViewerPlugin.core().getModel().addTestRunSession(session[0]);
+    TestViewerPlugin.core().getSessionsManager().addSession(session[0]);
     monitor.done();
     return session[0];
   }
 
-  public void importIntoTestRunSession(File swapFile, TestRunSession testRunSession) throws CoreException {
+  public void importIntoTestRunSession(File swapFile, Session session) throws CoreException {
     try {
       TestViewerPlugin.log().debug("Обновление отчета о тестировании: " + swapFile.getAbsolutePath());
       var parserFactory = SAXParserFactory.newInstance();
 //			parserFactory.setValidating(true); // TODO: add DTD and debug flag
       var parser = parserFactory.newSAXParser();
-      var handler = new TestRunHandler(testRunSession);
+      var handler = new TestRunHandler(session);
       parser.parse(swapFile, handler);
     } catch (ParserConfigurationException | SAXException e) {
       throwImportError(swapFile, e);
@@ -159,7 +160,7 @@ public class Serializer {
   }
 
   private void throwImportError(File file, Exception e) throws CoreException {
-    var message = MessageFormat.format(JUnitMessages.JUnitModel_could_not_read, BasicElementLabels.getPathLabel(file));
+    var message = MessageFormat.format(UIMessages.JUnitModel_could_not_read, BasicElementLabels.getPathLabel(file));
     throw new CoreException(TestViewerPlugin.log().createErrorStatus(message, e));
   }
 }

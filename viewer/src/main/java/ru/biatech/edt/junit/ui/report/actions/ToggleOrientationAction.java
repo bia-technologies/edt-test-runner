@@ -17,9 +17,7 @@
 package ru.biatech.edt.junit.ui.report.actions;
 
 import org.eclipse.jface.action.IAction;
-import org.eclipse.ui.PlatformUI;
-import ru.biatech.edt.junit.ui.IJUnitHelpContextIds;
-import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
 
 public class ToggleOrientationAction extends SettingsChangeAction {
@@ -29,22 +27,21 @@ public class ToggleOrientationAction extends SettingsChangeAction {
     super(settings, "", IAction.AS_RADIO_BUTTON); //$NON-NLS-1$
     switch (orientation) {
       case TestRunnerViewPart.VIEW_ORIENTATION_HORIZONTAL:
-        setText(JUnitMessages.TestRunnerViewPart_toggle_horizontal_label);
+        setText(UIMessages.TestRunnerViewPart_toggle_horizontal_label);
         ActionsSupport.setLocalImageDescriptors(this, "th_horizontal.png"); //$NON-NLS-1$
         break;
       case TestRunnerViewPart.VIEW_ORIENTATION_VERTICAL:
-        setText(JUnitMessages.TestRunnerViewPart_toggle_vertical_label);
+        setText(UIMessages.TestRunnerViewPart_toggle_vertical_label);
         ActionsSupport.setLocalImageDescriptors(this, "th_vertical.png"); //$NON-NLS-1$
         break;
       case TestRunnerViewPart.VIEW_ORIENTATION_AUTOMATIC:
-        setText(JUnitMessages.TestRunnerViewPart_toggle_automatic_label);
+        setText(UIMessages.TestRunnerViewPart_toggle_automatic_label);
         ActionsSupport.setLocalImageDescriptors(this, "th_automatic.png"); //$NON-NLS-1$
         break;
       default:
         break;
     }
     actionOrientation = orientation;
-    PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJUnitHelpContextIds.RESULTS_VIEW_TOGGLE_ORIENTATION_ACTION);
   }
 
   @Override

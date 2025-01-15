@@ -17,14 +17,14 @@
 package ru.biatech.edt.junit.ui.report.actions;
 
 import org.eclipse.jface.action.IAction;
-import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
 import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
 
 public class IgnoredOnlyFilterAction extends SettingsChangeAction {
   public IgnoredOnlyFilterAction(TestRunnerViewPart.ReportSettings settings) {
-    super(settings, JUnitMessages.TestRunnerViewPart_show_ignored_only, IAction.AS_CHECK_BOX);
-    setToolTipText(JUnitMessages.TestRunnerViewPart_show_ignored_only);
+    super(settings, UIMessages.TestRunnerViewPart_show_ignored_only, IAction.AS_CHECK_BOX);
+    setToolTipText(UIMessages.TestRunnerViewPart_show_ignored_only);
     setImageDescriptor(ImageProvider.getImageDescriptor(ImageProvider.TEST_IGNORED_ICON));
   }
 

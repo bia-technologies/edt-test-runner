@@ -126,19 +126,6 @@ public abstract class TestElement implements ITestElement, ITraceable {
     return status.convertToResult();
   }
 
-  @Override
-  public ITestRunSession getTestRunSession() {
-    return getRoot().getTestRunSession();
-  }
-
-  @Override
-  public ITestElementContainer getParentContainer() {
-    if (parent instanceof TestRoot) {
-      return getTestRunSession();
-    }
-    return parent;
-  }
-
   public void pushErrorInfo(TestStatus status, String message, String type, String trace, String expected, String actual) {
     var first = errorsList.isEmpty();
     if (first) {

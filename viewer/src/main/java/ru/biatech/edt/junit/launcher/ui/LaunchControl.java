@@ -30,7 +30,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import ru.biatech.edt.junit.launcher.v8.LaunchHelper;
-import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.UIMessages;
 
 import java.util.stream.Collectors;
 
@@ -47,27 +47,27 @@ public class LaunchControl extends Composite {
 
     setLayout(new GridLayout(2, false));
 
-    appendLabel(this, JUnitMessages.LaunchConfigurationTab_basic_launch_configuration);
+    appendLabel(this, UIMessages.LaunchConfigurationTab_basic_launch_configuration);
     usedLaunchConfigurationControl = appendAutoCompleteComboViewer(this);
-    usedLaunchConfigurationControl.getCombo().setToolTipText(JUnitMessages.LaunchConfigurationTab_basic_launch_configuration_tooltip);
+    usedLaunchConfigurationControl.getCombo().setToolTipText(UIMessages.LaunchConfigurationTab_basic_launch_configuration_tooltip);
 
     Group grpFilter = new Group(this, SWT.NONE);
-    grpFilter.setText(JUnitMessages.LaunchConfigurationTab_filter_group);
+    grpFilter.setText(UIMessages.LaunchConfigurationTab_filter_group);
     grpFilter.setLayout(new GridLayout(2, false));
     grpFilter.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 2));
 
-    appendLabel(grpFilter, JUnitMessages.LaunchConfigurationTab_filter_test_extension);
+    appendLabel(grpFilter, UIMessages.LaunchConfigurationTab_filter_test_extension);
     testExtensionControl = appendAutoCompleteComboViewer(grpFilter);
 
-    appendLabel(grpFilter, JUnitMessages.LaunchConfigurationTab_filter_test_module);
+    appendLabel(grpFilter, UIMessages.LaunchConfigurationTab_filter_test_module);
     testModuleControl = appendAutoCompleteComboViewer(grpFilter);
 
     Group grpSettings = new Group(this, SWT.NONE);
-    grpSettings.setText(JUnitMessages.LaunchConfigurationTab_SettingsTab);
+    grpSettings.setText(UIMessages.LaunchConfigurationTab_SettingsTab);
     grpSettings.setLayout(new GridLayout(3, false));
     grpSettings.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 2));
 
-    appendLabel(grpSettings, JUnitMessages.LaunchConfigurationTab_ProjectPath);
+    appendLabel(grpSettings, UIMessages.LaunchConfigurationTab_ProjectPath);
     projectPathControl = new Text(grpSettings, SWT.BORDER);
     projectPathControl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 

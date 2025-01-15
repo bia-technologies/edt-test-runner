@@ -25,7 +25,7 @@ import org.eclipse.osgi.util.NLS;
 
 public final class UIMessages extends NLS {
 
-  private static final String BUNDLE_NAME = "ru.biatech.edt.junit.ui.JUnitMessages";//$NON-NLS-1$
+  private static final String BUNDLE_NAME = "ru.biatech.edt.junit.ui.UIMessages";//$NON-NLS-1$
 
   public static String LaunchConfigurationTab_tab_label;
   public static String LaunchConfigurationTab_basic_launch_configuration;

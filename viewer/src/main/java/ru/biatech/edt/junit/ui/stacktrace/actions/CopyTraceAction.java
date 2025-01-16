@@ -28,8 +28,8 @@ import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.model.ITraceable;
 import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
-import ru.biatech.edt.junit.utils.ClipboardHelper;
-import ru.biatech.edt.junit.utils.StringUtilities;
+import ru.biatech.edt.junit.ui.utils.ClipboardHelper;
+import ru.biatech.edt.junit.ui.utils.StringUtilities;
 
 /**
  * Copies a test failure stack trace to the clipboard.

@@ -30,6 +30,7 @@ import ru.biatech.edt.junit.kinds.IUnitLauncher;
 import ru.biatech.edt.junit.kinds.TestKindRegistry;
 import ru.biatech.edt.junit.launcher.v8.LaunchConfigurationAttributes;
 import ru.biatech.edt.junit.launcher.v8.LaunchHelper;
+import ru.biatech.edt.junit.yaxunit.remote.RemoteLaunchManager;
 
 import java.io.Writer;
 import java.nio.file.Files;
@@ -40,6 +41,10 @@ public class Launcher implements IUnitLauncher {
   @Override
   public void launch(ILaunchConfiguration configuration, String launchMode, ILaunch launch, IProgressMonitor monitor) throws CoreException {
     TestViewerPlugin.log().debug(Messages.Launcher_Launch, configuration);
+
+    if (LaunchConfigurationAttributes.getKeepAlive(configuration)) {
+      RemoteLaunchManager.start();
+    }
 
     var settings = LaunchSettings.fromConfiguration(configuration);
 
@@ -58,12 +63,6 @@ public class Launcher implements IUnitLauncher {
     oneCConfigurationCopy.launch(launchMode, SubMonitor.convert(monitor, 1));
   }
 
-  @Override
-  public void configure(ILaunchConfigurationWorkingCopy configuration, ILaunchConfiguration basicConfiguration) {
-    var settings = LaunchSettings.fromConfiguration(basicConfiguration);
-    configure(configuration, settings);
-  }
-
   public void configure(ILaunchConfigurationWorkingCopy oneCConfiguration, LaunchSettings settings) {
     var startupParameters = Constants.RUN_PARAMETERS + createConfig(settings);
 
@@ -71,6 +70,9 @@ public class Launcher implements IUnitLauncher {
     oneCConfiguration.setAttribute(LaunchConfigurationAttributes.WORK_PATH, settings.getWorkPath());
     oneCConfiguration.setAttribute(LaunchConfigurationAttributes.PROJECT, settings.getExtensionName());
     oneCConfiguration.setAttribute(LaunchConfigurationAttributes.ATTR_TEST_RUNNER_KIND, TestKindRegistry.YAXUNIT_TEST_KIND_ID);
+    if (settings.rpc != null) {
+      oneCConfiguration.setAttribute(LaunchConfigurationAttributes.ATTR_RPC_KEY, settings.rpc.key);
+    }
   }
 
   protected String createConfig(LaunchSettings settings) {

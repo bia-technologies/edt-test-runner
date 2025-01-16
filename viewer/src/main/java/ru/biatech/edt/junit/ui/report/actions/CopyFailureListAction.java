@@ -21,14 +21,12 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.PlatformUI;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
 import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
-import ru.biatech.edt.junit.utils.ClipboardHelper;
-import ru.biatech.edt.junit.utils.StringUtilities;
+import ru.biatech.edt.junit.ui.utils.ClipboardHelper;
+import ru.biatech.edt.junit.ui.utils.StringUtilities;
 
 /**
  * Copies the names of the methods that failed and their traces to the clipboard.
@@ -40,7 +38,6 @@ public class CopyFailureListAction extends Action {
   public CopyFailureListAction(TestRunnerViewPart runner) {
     super(UIMessages.CopyFailureList_action_label);
     fRunner = runner;
-    IWorkbench workbench = PlatformUI.getWorkbench();
     setImageDescriptor(ImageProvider.getSharedImage(ISharedImages.IMG_TOOL_COPY));
   }
 

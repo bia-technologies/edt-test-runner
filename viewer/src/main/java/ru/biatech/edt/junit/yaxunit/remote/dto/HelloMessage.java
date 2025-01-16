@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022-2023 BIA-Technologies Limited Liability Company.
+ * Copyright (c) 2025 BIA-Technologies Limited Liability Company.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,25 @@
  * limitations under the License.
  *******************************************************************************/
 
-package ru.biatech.edt.junit.kinds;
+package ru.biatech.edt.junit.yaxunit.remote.dto;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.debug.core.ILaunch;
-import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 
-public interface IUnitLauncher {
+import com.fasterxml.jackson.annotation.JsonTypeName;
+import lombok.Data;
 
-  IUnitLauncher NULL = (configuration, mode, launch, monitor) -> {
-    // do nothing
-  };
+import static ru.biatech.edt.junit.yaxunit.remote.dto.Message.HELLO_TYPE;
 
-  void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor) throws CoreException;
+@JsonTypeName(HELLO_TYPE)
+public class HelloMessage extends Message<HelloMessage.Params> {
+
+
+  public HelloMessage() {
+    super(HELLO_TYPE);
+  }
+
+  @Data
+  public static class Params {
+    String key;
+    String protocolVersion;
+  }
 }

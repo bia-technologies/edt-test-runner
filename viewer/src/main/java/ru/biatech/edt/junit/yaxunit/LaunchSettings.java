@@ -19,10 +19,12 @@ package ru.biatech.edt.junit.yaxunit;
 import com.google.common.base.Strings;
 import com.google.gson.annotations.Expose;
 import lombok.Getter;
+import lombok.Setter;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import ru.biatech.edt.junit.launcher.v8.LaunchConfigurationAttributes;
 import ru.biatech.edt.junit.launcher.v8.LaunchHelper;
 import ru.biatech.edt.junit.v8utils.Projects;
+import ru.biatech.edt.junit.yaxunit.remote.RemoteLaunchManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,6 +46,9 @@ public class LaunchSettings {
   Filter filter;
   @Expose
   LoggingSettings logging;
+  @Expose
+  RpcSettings rpc;
+
   String extensionName;
 
   public static class Filter {
@@ -101,7 +106,24 @@ public class LaunchSettings {
     settings.logging = logging;
     settings.projectPath = LaunchConfigurationAttributes.getProjectPath(configuration);
 
+    if (LaunchConfigurationAttributes.getKeepAlive(configuration)) {
+      settings.rpc = new RpcSettings();
+      RemoteLaunchManager.configureLaunch(settings.rpc);
+    }
+
     return settings;
+  }
+
+  @Setter
+  public static class RpcSettings {
+    @Expose
+    int port;
+    @Expose
+    boolean keepAlive;
+    @Expose
+    String key;
+    @Expose
+    String transport = "ws";
   }
 
   public static class LoggingSettings {

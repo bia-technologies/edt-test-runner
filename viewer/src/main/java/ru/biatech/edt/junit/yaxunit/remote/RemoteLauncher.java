@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022-2023 BIA-Technologies Limited Liability Company.
+ * Copyright (c) 2025 BIA-Technologies Limited Liability Company.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,13 @@
  * limitations under the License.
  *******************************************************************************/
 
-package ru.biatech.edt.junit.kinds;
+package ru.biatech.edt.junit.yaxunit.remote;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.debug.core.ILaunch;
-import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-
-public interface IUnitLauncher {
-
-  IUnitLauncher NULL = (configuration, mode, launch, monitor) -> {
-    // do nothing
-  };
-
-  void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor) throws CoreException;
+public interface RemoteLauncher {
+  void start();
+  void stop();
+  void launchTest(String clientKey, String module, String method, boolean server, boolean client, boolean ordinaryClient) throws ClientNotFound;
+  void launchTest(String module, String method, boolean server, boolean client, boolean ordinaryClient) throws ClientNotFound;
+  int getPort();
+  boolean isAvailable();
 }

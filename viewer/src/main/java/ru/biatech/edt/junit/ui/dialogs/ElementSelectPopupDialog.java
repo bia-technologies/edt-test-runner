@@ -33,7 +33,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
-import ru.biatech.edt.junit.utils.StringUtilities;
+import ru.biatech.edt.junit.ui.utils.StringUtilities;
 
 import java.util.function.Consumer;
 

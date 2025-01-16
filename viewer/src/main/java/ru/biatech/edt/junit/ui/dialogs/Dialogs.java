@@ -39,7 +39,7 @@ import ru.biatech.edt.junit.ui.labelProvider.MethodReferenceLabelProvider;
 import ru.biatech.edt.junit.ui.labelProvider.TestItemActionLabelProvider;
 import ru.biatech.edt.junit.ui.testitemaction.ITestItemAction;
 import ru.biatech.edt.junit.ui.viewsupport.ColoringLabelProvider;
-import ru.biatech.edt.junit.utils.StringUtilities;
+import ru.biatech.edt.junit.ui.utils.StringUtilities;
 import ru.biatech.edt.junit.v8utils.MethodReference;
 import ru.biatech.edt.junit.v8utils.Present;
 import ru.biatech.edt.junit.yaxunit.Engine;

@@ -37,6 +37,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import ru.biatech.edt.junit.launcher.lifecycle.LifecycleMonitor;
 import ru.biatech.edt.junit.ui.PluginUI;
+import ru.biatech.edt.junit.yaxunit.remote.RemoteLaunchManager;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -137,6 +138,7 @@ public class TestViewerPlugin extends AbstractUIPlugin {
   public void stop(BundleContext bundleContext) throws Exception {
     LifecycleMonitor.stop();
     core().getSessionsManager().stop();
+    RemoteLaunchManager.stop();
     plugin = null;
     super.stop(bundleContext);
   }

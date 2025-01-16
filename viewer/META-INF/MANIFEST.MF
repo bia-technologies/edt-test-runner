@@ -38,7 +38,13 @@ Require-Bundle: org.apache.felix.scr,
  com._1c.g5.v8.bm.integration;bundle-version="11.0.0",
  com._1c.g5.v8.bm.core;bundle-version="8.0.0",
  com._1c.g5.wiring,
- com.google.gson
+ com.google.gson,
+ Java-WebSocket;bundle-version="1.6.0",
+ slf4j.api;bundle-version="2.0.16",
+ slf4j.simple;bundle-version="2.0.16",
+ com.fasterxml.jackson.core.jackson-annotations;bundle-version="2.10.3",
+ com.fasterxml.jackson.core.jackson-databind;bundle-version="2.10.3",
+ com.fasterxml.jackson.core.jackson-core;bundle-version="2.10.3"
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Import-Package: com._1c.g5.ides.ui.texteditor.xtext.embedded,
  lombok;resolution:=optional,

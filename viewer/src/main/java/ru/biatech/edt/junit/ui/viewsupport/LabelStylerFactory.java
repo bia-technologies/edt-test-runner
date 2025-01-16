@@ -24,7 +24,7 @@ import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.xtext.ui.label.StylerFactory;
-import ru.biatech.edt.junit.utils.StringUtilities;
+import ru.biatech.edt.junit.ui.utils.StringUtilities;
 
 import java.text.MessageFormat;
 

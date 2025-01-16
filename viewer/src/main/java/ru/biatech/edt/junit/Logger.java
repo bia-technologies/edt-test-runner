@@ -23,7 +23,7 @@ import java.text.MessageFormat;
 
 public class Logger {
 
-  private static final boolean debug = Boolean.parseBoolean(System.getProperty("ru.biatech.edt.junit.debug", "false"));
+  private static final boolean debug = Boolean.parseBoolean(System.getProperty("ru.biatech.edt.junit.debug", "true"));
 
   private String getPluginID() {
     return Constants.PLUGIN_ID;

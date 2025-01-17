@@ -17,8 +17,6 @@
 package ru.biatech.edt.junit.ui.stacktrace;
 
 import com._1c.g5.v8.dt.stacktraces.model.IStacktraceElement;
-import com._1c.g5.v8.dt.stacktraces.model.IStacktraceError;
-import com._1c.g5.v8.dt.stacktraces.model.IStacktraceFrame;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.util.IOpenEventListener;
@@ -36,10 +34,10 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
-import ru.biatech.edt.junit.model.TestElement;
-import ru.biatech.edt.junit.model.TestErrorInfo;
-import ru.biatech.edt.junit.model.TestStatus;
+import ru.biatech.edt.junit.model.ITestElement;
+import ru.biatech.edt.junit.model.report.ErrorInfo;
 import ru.biatech.edt.junit.ui.stacktrace.events.Listener;
+import ru.biatech.edt.junit.ui.viewsupport.IconResolver;
 import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
 
 import java.util.List;
@@ -60,10 +58,10 @@ public class StackTraceTreeView extends TreeViewer implements StackTraceView {
   }
 
   /**
-   * {@link StackTraceView#viewFailure(TestElement)}
+   * {@link StackTraceView#viewFailure(ITestElement)}
    */
   @Override
-  public void viewFailure(TestElement testElement) {
+  public void viewFailure(ITestElement testElement) {
     mixin.setTestElement(testElement);
   }
 
@@ -87,7 +85,7 @@ public class StackTraceTreeView extends TreeViewer implements StackTraceView {
    * {@link StackTraceView#getSelectedError()}
    */
   @Override
-  public TestErrorInfo getSelectedError() {
+  public ErrorInfo getSelectedError() {
     return mixin.getSelectedError();
   }
 
@@ -192,11 +190,10 @@ public class StackTraceTreeView extends TreeViewer implements StackTraceView {
     public Image getImage(Object element) {
       var item = (StackTraceTreeBuilder.TreeItem) element;
       var data = item.getData();
-      if (data instanceof TestErrorInfo) {
-        var status = ((TestErrorInfo) item.getData()).getStatus();
-        return getIcon(status);
+      if (data instanceof ErrorInfo) {
+        return IconResolver.getIcon((ErrorInfo) data, imageProvider);
       } else if (data instanceof IStacktraceElement) {
-        return getIcon((IStacktraceElement) data);
+        return IconResolver.getIcon((IStacktraceElement) data, imageProvider);
       } else {
         return super.getImage(element);
       }
@@ -216,29 +213,7 @@ public class StackTraceTreeView extends TreeViewer implements StackTraceView {
         return item.getText();
       }
     }
-
-    Image getIcon(TestStatus status) {
-      switch (status) {
-        case ERROR:
-          return imageProvider.getTestErrorIcon();
-        case FAILURE:
-          return imageProvider.getTestFailIcon();
-        default:
-          return imageProvider.getMessageIcon();
-      }
-    }
-
-    Image getIcon(IStacktraceElement element) {
-      if (element instanceof IStacktraceError) {
-        return imageProvider.getErrorIcon();
-      } else if (element instanceof IStacktraceFrame) {
-        return imageProvider.getStackIcon();
-      } else {
-        return null;
-      }
-    }
   }
-
   private static class TreeItemContentProvider implements ITreeContentProvider {
     @Override
     public Object[] getElements(Object inputElement) {

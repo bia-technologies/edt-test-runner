@@ -21,6 +21,7 @@ import lombok.Value;
 import org.java_websocket.WebSocket;
 import ru.biatech.edt.junit.yaxunit.remote.dto.HelloMessage;
 import ru.biatech.edt.junit.yaxunit.remote.dto.Message;
+import ru.biatech.edt.junit.yaxunit.remote.dto.ReportMessage;
 import ru.biatech.edt.junit.yaxunit.remote.dto.RunMessage;
 
 import java.util.HashMap;
@@ -97,7 +98,14 @@ public class RemoteLauncherImpl implements RemoteLauncher, Handler, AutoCloseabl
   public void onMessageReceive(WebSocket socket, Message<?> message) {
     if (message instanceof HelloMessage) {
       handleHandshake(socket, (HelloMessage) message);
+    } else if (message instanceof ReportMessage) {
+      handleReport((ReportMessage) message);
     }
+  }
+
+  private void handleReport(ReportMessage message) {
+//    var session = new Session(null, null);
+//    session.getTestRoot().addChild(Factory.createTestSuite());
   }
 
   @SneakyThrows

@@ -84,7 +84,7 @@ public class TestRunListenerAdapter implements ITestSessionListener {
   }
 
   @Override
-  public void testAdded(TestElement testElement) {
+  public void testAdded(ITestElement testElement) {
     // do nothing
   }
 
@@ -94,22 +94,22 @@ public class TestRunListenerAdapter implements ITestSessionListener {
   }
 
   @Override
-  public void testStarted(TestCaseElement testCaseElement) {
+  public void testStarted(ITestCaseElement testCaseElement) {
     fireTestCaseStarted(testCaseElement);
   }
 
   @Override
-  public void testEnded(TestCaseElement testCaseElement) {
+  public void testEnded(ITestCaseElement testCaseElement) {
     fireTestCaseFinished(testCaseElement);
   }
 
   @Override
-  public void testFailed(TestElement testElement, TestStatus status, String trace, String expected, String actual) {
+  public void testFailed(ITestElement testElement, TestStatus status, String trace, String expected, String actual) {
     // ignore
   }
 
   @Override
-  public void testRerun(TestCaseElement testCaseElement, TestStatus status, String trace, String expectedResult, String actualResult) {
+  public void testRerun(ITestCaseElement testCaseElement, TestStatus status, String trace, String expectedResult, String actualResult) {
     // ignore
   }
 

@@ -125,10 +125,7 @@ public final class UIMessages extends NLS {
   public static String JUnitModel_ReportFileNotFound;
   public static String JUnitModel_UnknownErrorOnReportLoad;
 
-  public static String JUnitModel_could_not_import;
   public static String JUnitModel_could_not_read;
-  public static String JUnitModel_importing_from_url;
-  public static String TestRunHandler_lines_read;
   public static String TestMethodActionDelegate_CollectingMarkers;
   public static String TestMethodMarker_LaunchTest;
   public static String TestMethodMarker_MarkerCreationError;

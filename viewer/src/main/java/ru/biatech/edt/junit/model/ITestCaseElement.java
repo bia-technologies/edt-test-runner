@@ -17,6 +17,10 @@
 
 package ru.biatech.edt.junit.model;
 
+import ru.biatech.edt.junit.model.report.ErrorInfo;
+
+import java.util.stream.Stream;
+
 /**
  * Represents a test case element.
  * <p>
@@ -27,21 +31,21 @@ package ru.biatech.edt.junit.model;
  * @noextend This interface is not intended to be extended by clients.
  * @since 3.3
  */
-public interface ITestCaseElement extends ITestElement, ITraceable {
+public interface ITestCaseElement extends ITestElement {
 
   /**
    * Returns the name of the test method.
    *
    * @return returns the name of the test method.
    */
-  String getTestMethodName();
+  String getMethodName();
 
   /**
    * Returns the qualified type name of the class the test is contained in.
    *
    * @return the qualified type name of the class the test is contained in.
    */
-  String getTestClassName();
+  String getClassName();
 
   /**
    * Возвращает имя контекста исполнения теста
@@ -49,4 +53,8 @@ public interface ITestCaseElement extends ITestElement, ITraceable {
    * @return имя контекста исполнения теста
    */
   String getContext();
+
+  String getDisplayName();
+
+  Stream<ErrorInfo> getErrorsList();
 }

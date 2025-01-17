@@ -31,8 +31,6 @@ import ru.biatech.edt.junit.model.ITestCaseElement;
 import ru.biatech.edt.junit.model.ITestElement;
 import ru.biatech.edt.junit.model.ITestSuiteElement;
 import ru.biatech.edt.junit.model.TestCaseElement;
-import ru.biatech.edt.junit.model.TestElement;
-import ru.biatech.edt.junit.model.TestStatus;
 import ru.biatech.edt.junit.model.TestSuiteElement;
 import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
@@ -97,11 +95,7 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
     if (parentDisplayName != null) {
       parentName = parentDisplayName;
     } else {
-      if (testCaseElement.isDynamicTest()) {
-        parentName = testCaseElement.getTestMethodName();
-      } else {
-        parentName = testCaseElement.getTestClassName();
-      }
+      parentName = testCaseElement.getClassName();
     }
     return MessageFormat.format(UIMessages.TestSessionLabelProvider_testMethodName_className, label, BasicElementLabels.getElementName(parentName));
   }
@@ -145,14 +139,14 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
   }
 
   private String getSimpleLabel(Object element) {
-    if (element instanceof TestCaseElement) {
-      TestCaseElement testCaseElement = (TestCaseElement) element;
-      String displayName = testCaseElement.getDisplayName();
-      return BasicElementLabels.getElementName(displayName != null ? displayName : testCaseElement.getTestMethodName());
-    } else if (element instanceof TestSuiteElement) {
-      TestSuiteElement testSuiteElement = (TestSuiteElement) element;
-      String displayName = testSuiteElement.getDisplayName();
-      return BasicElementLabels.getElementName(displayName != null ? displayName : testSuiteElement.getSuiteTypeName());
+    if (element instanceof ITestCaseElement) {
+
+      return BasicElementLabels.getElementName(((ITestCaseElement) element).getDisplayName());
+
+    } else if (element instanceof ITestSuiteElement) {
+
+      return BasicElementLabels.getElementName(((ITestSuiteElement) element).getDisplayName());
+
     }
     return null;
   }
@@ -172,43 +166,36 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 
   @Override
   public Image getImage(Object element) {
-    if (element instanceof TestElement && ((TestElement) element).isAssumptionFailure())
-      return imageProvider.getTestAssumptionFailureIcon();
-
     if (element instanceof TestCaseElement) {
-      TestCaseElement testCaseElement = ((TestCaseElement) element);
-      if (testCaseElement.isIgnored())
-        return imageProvider.getTestIgnoredIcon();
-
-      TestStatus status = testCaseElement.getStatus();
-      if (status.isNotRun())
-        return imageProvider.getTestIcon();
-      else if (status.isRunning())
-        throw new IllegalStateException("Running tests not supported");
-      else if (status.isError())
-        return imageProvider.getTestErrorIcon();
-      else if (status.isFailure())
-        return imageProvider.getTestFailIcon();
-      else if (status.isOK())
-        return imageProvider.getTestOkIcon();
-      else
-        throw new IllegalStateException(element.toString());
+      switch (((TestCaseElement) element).getResultStatus(true)) {
+        case SKIPPED:
+          return imageProvider.getTestSkippedIcon();
+        case ERROR:
+          return imageProvider.getTestErrorIcon();
+        case FAILURE:
+          return imageProvider.getTestFailIcon();
+        case OK:
+          return imageProvider.getTestOkIcon();
+        case UNDEFINED:
+          return imageProvider.getTestIgnoredIcon();
+        default:
+          throw new IllegalStateException(element.toString());
+      }
 
     } else if (element instanceof TestSuiteElement) {
-      TestStatus status = ((TestSuiteElement) element).getStatus();
-      if (status.isNotRun())
-        return imageProvider.getSuiteIcon();
-      else if (status.isRunning())
-        return imageProvider.getSuiteRunningIcon();
-      else if (status.isError())
-        return imageProvider.getSuiteErrorIcon();
-      else if (status.isFailure())
-        return imageProvider.getSuiteFailIcon();
-      else if (status.isOK())
-        return imageProvider.getSuiteOkIcon();
-      else
-        throw new IllegalStateException(element.toString());
-
+      switch (((TestSuiteElement) element).getResultStatus(true)) {
+        case SKIPPED:
+        case UNDEFINED:
+          return imageProvider.getSuiteIcon();
+        case ERROR:
+          return imageProvider.getSuiteErrorIcon();
+        case FAILURE:
+          return imageProvider.getSuiteFailIcon();
+        case OK:
+          return imageProvider.getSuiteOkIcon();
+        default:
+          throw new IllegalStateException(element.toString());
+      }
     } else {
       throw new IllegalArgumentException(String.valueOf(element));
     }

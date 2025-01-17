@@ -17,7 +17,9 @@
 package ru.biatech.edt.junit.yaxunit.remote;
 
 public class ClientNotFound extends Exception {
-    public ClientNotFound(String clientId) {
+  private static final long serialVersionUID = -3418542665532762433L;
+
+  public ClientNotFound(String clientId) {
     super("Не найден подключенный клиент с ключом " + clientId);
   }
 }

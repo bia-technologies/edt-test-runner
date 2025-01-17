@@ -1,81 +1,86 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
- * Copyright (c) 2022-2023 BIA-Technologies Limited Liability Company.
+ * Copyright (c) 2025 BIA-Technologies Limited Liability Company.
  *
- * This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License 2.0
- * which accompanies this distribution, and is available at
- * https://www.eclipse.org/legal/epl-2.0/, or the Apache License, Version 2.0
- * which is available at https://www.apache.org/licenses/LICENSE-2.0.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Contributors:
- *     IBM Corporation - initial API and implementation
- *     Xavier Coulon <xcoulon@redhat.com> - https://bugs.eclipse.org/bugs/show_bug.cgi?id=102512 - [JUnit] test method name cut off before (
- *     BIA-Technologies LLC - adaptation for EDT
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *******************************************************************************/
 
 package ru.biatech.edt.junit.model;
 
 import lombok.Getter;
-import lombok.NonNull;
-import lombok.Setter;
+import ru.biatech.edt.junit.model.report.ErrorInfo;
+import ru.biatech.edt.junit.model.report.TestCase;
 
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.stream.Stream;
 
-public class TestCaseElement extends TestElement implements ITestCaseElement {
+@Getter
+public class TestCaseElement extends TestCase implements ITestCaseElement {
 
-  @Getter
-  @Setter
-  private boolean ignored;
-  private final boolean fIsDynamicTest;
+  private ITestSuiteElement parent;
+  private TestStatus status;
 
-  public TestCaseElement(@NonNull TestSuiteElement parent, @NonNull String testName, String displayName, boolean isDynamicTest, String[] parameterTypes, String uniqueId, String context) {
-    super(parent, testName, displayName, parameterTypes, uniqueId, context);
-    fIsDynamicTest = isDynamicTest;
+  public String getDisplayName() {
+    return getName();
   }
 
   @Override
-  public String getTestMethodName() {
-    String testName = getTestName();
+  public Stream<ErrorInfo> getErrorsList() {
+    return Stream.of(getError(), getFailure(), getSkipped())
+        .filter(Objects::nonNull)
+        .flatMap(Arrays::stream);
+  }
+
+  @Override
+  public String getMethodName() {
+    String testName = getName();
     int index = testName.lastIndexOf('(');
-    if (index > 0)
+    if (index > 0) {
       return testName.substring(0, index);
-    index = testName.indexOf('@');
-    if (index > 0)
-      return testName.substring(0, index);
-    return testName;
-  }
-
-  /**
-   * {@inheritDoc}
-   *
-   * @see ru.biatech.edt.junit.model.ITestCaseElement#getTestClassName()
-   */
-  @Override
-  public String getTestClassName() {
-    return getClassName();
-  }
-
-  /*
-   * @see ru.biatech.edt.junit.model.TestElement#getTestResult(boolean)
-   * @since 3.6
-   */
-  @Override
-  public TestResult getTestResult(boolean includeChildren) {
-    if (ignored) {
-      return TestResult.IGNORED;
     } else {
-      return super.getTestResult(includeChildren);
+      return testName;
     }
   }
 
   @Override
-  public String toString() {
-    return "TestCase: " + getTestClassName() + "." + getTestMethodName() + " : " + super.toString(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+  public ProgressState getProgressState() {
+    return null;
   }
 
-  public boolean isDynamicTest() {
-    return fIsDynamicTest;
+  @Override
+  public TestResult getResultStatus(boolean includeChildren) {
+    return status.convertToResult();
+  }
+
+  @Override
+  public double getElapsedTimeInSeconds() {
+    return this.getTime();
+  }
+
+  void init(TestSuiteElement suite) {
+    parent = suite;
+    computeStatus();
+  }
+
+  private void computeStatus() {
+    if (getError() != null) {
+      status = TestStatus.ERROR;
+    } else if (getFailure() != null) {
+      status = TestStatus.FAILURE;
+    } else if (getSkipped() != null) {
+      status = TestStatus.SKIPPED;
+    } else {
+      status = TestStatus.OK;
+    }
   }
 }

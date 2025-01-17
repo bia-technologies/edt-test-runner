@@ -51,7 +51,7 @@ public interface ITestSessionListener {
    *
    * @param testElement the test
    */
-  void testAdded(TestElement testElement);
+  void testAdded(ITestElement testElement);
 
   /**
    * All test have been added and running begins
@@ -63,14 +63,14 @@ public interface ITestSessionListener {
    *
    * @param testCaseElement the test
    */
-  void testStarted(TestCaseElement testCaseElement);
+  void testStarted(ITestCaseElement testCaseElement);
 
   /**
    * An individual test has ended.
    *
    * @param testCaseElement the test
    */
-  void testEnded(TestCaseElement testCaseElement);
+  void testEnded(ITestCaseElement testCaseElement);
 
   /**
    * An individual test has failed with a stack trace.
@@ -83,7 +83,7 @@ public interface ITestSessionListener {
    * @param expected    expected value
    * @param actual      actual value
    */
-  void testFailed(TestElement testElement, TestStatus status, String trace, String expected, String actual);
+  void testFailed(ITestElement testElement, TestStatus status, String trace, String expected, String actual);
 
   /**
    * An individual test has been rerun.
@@ -96,7 +96,7 @@ public interface ITestSessionListener {
    * @param expectedResult  expected value
    * @param actualResult    actual value
    */
-  void testRerun(TestCaseElement testCaseElement, TestStatus status, String trace, String expectedResult, String actualResult);
+  void testRerun(ITestCaseElement testCaseElement, TestStatus status, String trace, String expectedResult, String actualResult);
 
   /**
    * @return <code>true</code> if the test run session can be swapped to disk although

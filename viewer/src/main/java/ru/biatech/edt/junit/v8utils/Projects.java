@@ -20,6 +20,7 @@ import com._1c.g5.v8.dt.core.platform.IConfigurationAware;
 import com._1c.g5.v8.dt.core.platform.IConfigurationProject;
 import com._1c.g5.v8.dt.core.platform.IExtensionProject;
 import com._1c.g5.v8.dt.core.platform.IV8Project;
+import com.google.common.base.Strings;
 import lombok.experimental.UtilityClass;
 import org.eclipse.emf.ecore.EObject;
 
@@ -40,7 +41,7 @@ public class Projects {
    * @return проект
    */
   public IV8Project getProject(String name) {
-    if (name == null || name.isEmpty()) {
+    if (Strings.isNullOrEmpty(name)) {
       return null;
     }
 

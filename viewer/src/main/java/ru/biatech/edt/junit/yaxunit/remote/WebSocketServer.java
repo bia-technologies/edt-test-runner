@@ -17,11 +17,11 @@
 package ru.biatech.edt.junit.yaxunit.remote;
 
 import lombok.Getter;
+import org.java_websocket.WebSocket;
+import org.java_websocket.handshake.ClientHandshake;
 import ru.biatech.edt.junit.Logger;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.yaxunit.remote.dto.Message;
-import org.java_websocket.WebSocket;
-import org.java_websocket.handshake.ClientHandshake;
 
 import java.net.InetSocketAddress;
 
@@ -78,6 +78,7 @@ public class WebSocketServer extends org.java_websocket.server.WebSocketServer {
 
   @Override
   public void onStart() {
+    log.debug("Web socket server started on {0}", getPort());
     started = true;
   }
 }

@@ -31,8 +31,9 @@ import org.eclipse.swt.browser.ProgressListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import ru.biatech.edt.junit.TestViewerPlugin;
-import ru.biatech.edt.junit.model.TestElement;
-import ru.biatech.edt.junit.model.TestErrorInfo;
+import ru.biatech.edt.junit.model.ITestElement;
+import ru.biatech.edt.junit.model.report.ErrorInfo;
+import ru.biatech.edt.junit.model.report.Failure;
 import ru.biatech.edt.junit.ui.stacktrace.actions.CompareResultsAction;
 import ru.biatech.edt.junit.ui.stacktrace.actions.CopyTraceAction;
 import ru.biatech.edt.junit.ui.stacktrace.events.Listener;
@@ -77,10 +78,10 @@ public class StackTraceHtmlView implements StackTraceView {
   }
 
   /**
-   * {@link StackTraceView#viewFailure(TestElement)}
+   * {@link StackTraceView#viewFailure(ITestElement)}
    */
   @Override
-  public void viewFailure(TestElement testElement) {
+  public void viewFailure(ITestElement testElement) {
     mixin.setTestElement(testElement);
   }
 
@@ -104,7 +105,7 @@ public class StackTraceHtmlView implements StackTraceView {
    * {@link StackTraceView#getSelectedError()}
    */
   @Override
-  public TestErrorInfo getSelectedError() {
+  public ErrorInfo getSelectedError() {
     return mixin.getSelectedError();
   }
 
@@ -324,16 +325,13 @@ public class StackTraceHtmlView implements StackTraceView {
 
   private String getCssClassName(StackTraceTreeBuilder.TreeItem item) {
     var data = item.getData();
-    if (data instanceof TestErrorInfo) {
-      var status = ((TestErrorInfo) item.getData()).getStatus();
-      switch (status) {
-        case FAILURE:
-          return "failure";
-        case ERROR:
-          return "error";
-        default:
-          return "message";
+    if (data instanceof ErrorInfo) {
+      if (data instanceof Failure) {
+        return "failure";
+      } else {
+        return "error";
       }
+
     } else if (data instanceof IStacktraceElement) {
       if (data instanceof IStacktraceError) {
         return "error";

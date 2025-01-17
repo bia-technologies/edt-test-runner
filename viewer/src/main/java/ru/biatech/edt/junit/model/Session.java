@@ -27,14 +27,17 @@ import org.eclipse.debug.core.ILaunch;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.kinds.ITestKind;
 import ru.biatech.edt.junit.launcher.v8.LaunchHelper;
+import ru.biatech.edt.junit.model.report.ErrorInfo;
+import ru.biatech.edt.junit.model.report.Report;
 
 import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 /**
@@ -42,13 +45,14 @@ import java.util.stream.Collectors;
  * launch configuration, launch, test tree (including results).
  */
 @Getter
-public class Session implements ITestRunSession {
+public class Session extends Report<TestSuiteElement> implements ITestRunSession {
 
   private static final String EMPTY_STRING = ""; //$NON-NLS-1$
   /**
    * Ссылка на 1С проект, or <code>null</code>.
    */
-  private final IV8Project launchedProject;
+  @Setter
+  private IV8Project launchedProject;
 
   private final ListenerList<ITestSessionListener> sessionListeners = new ListenerList<>();
 
@@ -111,11 +115,6 @@ public class Session implements ITestRunSession {
   private ITestKind testRunnerKind;
 
   /**
-   * The model root, or <code>null</code> if swapped to disk.
-   */
-  private TestRoot testRoot;
-
-  /**
    * The test run session's cached result, or <code>null</code> if <code>fTestRoot != null</code>.
    */
   private TestResult fTestResult;
@@ -132,6 +131,12 @@ public class Session implements ITestRunSession {
   @Setter
   private String excludeTags;
 
+  public Session() {
+    testRunnerKind = ITestKind.NULL; //TODO
+    startTime = System.currentTimeMillis();
+    reset();
+  }
+
   /**
    * Creates a test run session.
    *
@@ -139,13 +144,11 @@ public class Session implements ITestRunSession {
    * @param project      may be <code>null</code>
    */
   public Session(String pTestRunName, IV8Project project) {
-    //TODO: check assumptions about non-null fields
-
+    this();
     Assert.isNotNull(pTestRunName);
     name = pTestRunName;
     launchedProject = project;
 
-    startTime = System.currentTimeMillis();
     testRunnerKind = ITestKind.NULL; //TODO
 
     reset();
@@ -159,8 +162,21 @@ public class Session implements ITestRunSession {
     ignoredCount = 0;
     totalCount = 0;
 
-    testRoot = Factory.createRoot(this);
     fTestResult = null;
+  }
+
+  @Override
+  public ITestSuiteElement getParent() {
+    return null;
+  }
+
+  @Override
+  public TestStatus getStatus() {
+    var status = TestStatus.OK;
+    for (var item : getTestsuite()) {
+      status = TestStatus.combineStatus(status, item.getStatus());
+    }
+    return status;
   }
 
   @Override
@@ -175,17 +191,13 @@ public class Session implements ITestRunSession {
   }
 
   @Override
-  public TestResult getTestResult(boolean includeChildren) {
-    if (testRoot != null) {
-      return testRoot.getTestResult(true);
-    } else {
-      return fTestResult;
-    }
+  public TestResult getResultStatus(boolean includeChildren) {
+    return getStatus().convertToResult();
   }
 
   @Override
   public ITestElement[] getChildren() {
-    return getTestRoot().getChildren();
+    return getTestsuite();
   }
 
   public void setLaunch(ILaunch launch) {
@@ -283,79 +295,54 @@ public class Session implements ITestRunSession {
     return false;
   }
 
-  public void registerTestFailureStatus(TestElement testElement) {
-    if (!testElement.isAssumptionFailure()) {
-      if (testElement.getStatus().isError()) {
-        errorCount++;
-      } else if (testElement.getStatus().isFailure()) {
-        failureCount++;
-      }
-    }
-  }
-
-  public void registerTestEnded(TestElement testElement, boolean completed) {
-    if (testElement instanceof TestCaseElement) {
-      totalCount++;
-      if (!completed) {
-        return;
-      }
-      startedCount++;
-      if (((TestCaseElement) testElement).isIgnored()) {
-        ignoredCount++;
-      }
-      if (!testElement.getStatus().isErrorOrFailure()) {
-        setStatus(testElement, TestStatus.OK);
-      }
-    }
-
-    if (testElement.isAssumptionFailure()) {
-      assumptionFailureCount++;
-    }
-  }
-
-  private void setStatus(TestElement testElement, TestStatus status) {
-    testElement.setStatus(status);
-  }
-
   public ITestCaseElement[] getAllFailedTestElements() {
-    var failures = new ArrayList<ITestCaseElement>();
-    addFailures(failures, getTestRoot());
-    return failures.toArray(ITestCaseElement[]::new);
+    return getFailures()
+        .toArray(ITestCaseElement[]::new);
   }
 
   public List<String> getAllFailedTestNames() {
-    var failures = new ArrayList<ITestCaseElement>();
-    addFailures(failures, getTestRoot());
-    return failures.stream()
-        .map(ITestCaseElement::getTestClassName)
+    return getFailures()
+        .map(ITestCaseElement::getClassName)
         .collect(Collectors.toList());
   }
 
-  private void addFailures(ArrayList<ITestCaseElement> failures, ITestElement testElement) {
-    var testResult = testElement.getTestResult(true);
-    if (testElement instanceof ITestCaseElement && (testResult == TestResult.ERROR || testResult == TestResult.FAILURE)) {
-      failures.add((ITestCaseElement) testElement);
-    }
-    if (testElement instanceof ITestElementContainer) {
-      var children = ((ITestElementContainer) testElement).getChildren();
-      for (var child : children) {
-        addFailures(failures, child);
-      }
-    }
+  private Stream<ITestCaseElement> getFailures() {
+    return Arrays.stream(getTestsuite())
+        .flatMap(s -> Arrays.stream(s.getChildren()))
+        .filter(this::isFailure)
+        .map(ITestCaseElement.class::cast);
+  }
+
+  private boolean isFailure(ITestElement element) {
+    var res = element.getResultStatus(true);
+    return res == TestResult.ERROR || res == TestResult.FAILURE;
   }
 
   @Override
   public double getElapsedTimeInSeconds() {
-    return testRoot == null ? Double.NaN : testRoot.getElapsedTimeInSeconds();
+    return Arrays.stream(getTestsuite())
+        .map(ITestElement::getElapsedTimeInSeconds)
+        .mapToDouble(x -> x).sum();
   }
 
   @Override
-  public String getTestName() {
+  public String getName() {
     return "Test session";
+  }
+
+  @Override
+  public Stream<ErrorInfo> getErrorsList() {
+    return Stream.empty();
   }
 
   @Override
   public String toString() {
     return name + " " + DateFormat.getDateTimeInstance().format(new Date(startTime)); //$NON-NLS-1$
+  }
+
+  void init() {
+    for (var suite : getTestsuite()) {
+      suite.init();
+    }
   }
 }

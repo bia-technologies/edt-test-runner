@@ -37,4 +37,8 @@ public interface ITestSuiteElement extends ITestElementContainer {
   String getSuiteTypeName();
 
   String getContext();
+
+  String getDisplayName();
+
+  String getClassName();
 }

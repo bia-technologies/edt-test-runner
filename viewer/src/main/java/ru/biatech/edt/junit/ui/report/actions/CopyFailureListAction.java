@@ -24,9 +24,9 @@ import org.eclipse.ui.ISharedImages;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
-import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
 import ru.biatech.edt.junit.ui.utils.ClipboardHelper;
 import ru.biatech.edt.junit.ui.utils.StringUtilities;
+import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
 
 /**
  * Copies the names of the methods that failed and their traces to the clipboard.
@@ -64,7 +64,7 @@ public class CopyFailureListAction extends Action {
     var lineSeparator = System.lineSeparator();
 
     for (var failure : failures) {
-      buf.append(failure.getTestName()).append(lineSeparator);
+      buf.append(failure.getName()).append(lineSeparator);
       buf.append(StringUtilities.getTrace(failure));
     }
     return buf.toString();

@@ -44,7 +44,8 @@ Require-Bundle: org.apache.felix.scr,
  slf4j.simple;bundle-version="2.0.16",
  com.fasterxml.jackson.core.jackson-annotations;bundle-version="2.10.3",
  com.fasterxml.jackson.core.jackson-databind;bundle-version="2.10.3",
- com.fasterxml.jackson.core.jackson-core;bundle-version="2.10.3"
+ com.fasterxml.jackson.core.jackson-core;bundle-version="2.10.3",
+ com.fasterxml.jackson.dataformat.jackson-dataformat-xml;bundle-version="2.9.7"
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Import-Package: com._1c.g5.ides.ui.texteditor.xtext.embedded,
  lombok;resolution:=optional,

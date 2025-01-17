@@ -52,7 +52,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import ru.biatech.edt.junit.TestViewerPlugin;
-import ru.biatech.edt.junit.model.TestErrorInfo;
+import ru.biatech.edt.junit.model.report.Failure;
 import ru.biatech.edt.junit.ui.UIMessages;
 
 import java.io.ByteArrayInputStream;
@@ -173,7 +173,7 @@ public class CompareResultDialog extends TrayDialog {
 
   private CompareViewerPane fCompareViewerPane;
 
-  public CompareResultDialog(Shell parentShell, TestErrorInfo element) {
+  public CompareResultDialog(Shell parentShell, Failure element) {
     super(parentShell);
     setShellStyle((getShellStyle() & ~SWT.APPLICATION_MODAL) | SWT.TOOL);
     setFailedTest(element);
@@ -184,8 +184,8 @@ public class CompareResultDialog extends TrayDialog {
     return true;
   }
 
-  private void setFailedTest(TestErrorInfo failedTest) {
-    fTestName = failedTest.getTestName();
+  private void setFailedTest(Failure failedTest) {
+    fTestName = failedTest.getMessage();
     fExpected = failedTest.getExpected();
     fActual = failedTest.getActual();
     computePrefixSuffix();
@@ -271,7 +271,7 @@ public class CompareResultDialog extends TrayDialog {
     }
   }
 
-  public void setInput(TestErrorInfo failedTest) {
+  public void setInput(Failure failedTest) {
     setFailedTest(failedTest);
     setCompareViewerInput();
   }

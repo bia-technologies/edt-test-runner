@@ -26,6 +26,7 @@ public enum TestStatus {
 
   ERROR("ERROR"), //$NON-NLS-1$
   FAILURE("FAILURE"), //$NON-NLS-1$
+  SKIPPED("SKIPPED"), //$NON-NLS-1$
   OK("OK"), //$NON-NLS-1$
   NOT_RUN("NOT_RUN"); //$NON-NLS-1$
 
@@ -53,6 +54,7 @@ public enum TestStatus {
   private static TestStatus combineError(TestStatus one, TestStatus two) {
     if (one.isError() || two.isError()) return ERROR;
     else if (one.isFailure() || two.isFailure()) return FAILURE;
+    else if (one.isSkipped() || two.isSkipped()) return SKIPPED;
     else return OK;
   }
 
@@ -60,6 +62,7 @@ public enum TestStatus {
     if (progress.isDone()) {
       if (error.isError()) return ERROR;
       if (error.isFailure()) return FAILURE;
+      if (error.isSkipped()) return SKIPPED;
       return OK;
     }
 
@@ -104,16 +107,20 @@ public enum TestStatus {
   }
 
   public boolean isDone() {
-    return this == OK || this == FAILURE || this == ERROR;
+    return this == OK || this == FAILURE || this == ERROR || this == SKIPPED;
+  }
+
+  public boolean isSkipped() {
+    return this == SKIPPED;
   }
 
   public TestResult convertToResult() {
     if (isNotRun()) return TestResult.UNDEFINED;
     if (isError()) return TestResult.ERROR;
     if (isFailure()) return TestResult.FAILURE;
-    if (isRunning()) {
-      return TestResult.UNDEFINED;
-    }
+    if (isSkipped()) return TestResult.SKIPPED;
+    if (isRunning()) return TestResult.UNDEFINED;
+
     return TestResult.OK;
   }
 

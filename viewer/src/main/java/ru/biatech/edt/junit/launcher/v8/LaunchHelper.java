@@ -32,6 +32,7 @@ import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.kinds.ITestKind;
 import ru.biatech.edt.junit.kinds.TestKindRegistry;
 import ru.biatech.edt.junit.launcher.LaunchConfigurationTypes;
+import ru.biatech.edt.junit.model.SessionsManager;
 import ru.biatech.edt.junit.services.TestsManager;
 import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.ui.dialogs.Dialogs;
@@ -175,11 +176,11 @@ public class LaunchHelper {
     var module = moduleOpt.get();
 
     var content = Modules.getModuleContent(module);
-    RemoteLaunchManager.getLauncher().launchTest(content, methodName, module.isServer(), module.isClientManagedApplication(), module.isClientOrdinaryApplication());
+    SessionsManager.getInstance().startSession(configuration);
+    RemoteLaunchManager.getLauncher().launchTest(content, moduleName, methodName, module.isServer(), module.isClientManagedApplication(), module.isClientOrdinaryApplication());
   }
+
   public void runTestMethod(String moduleName, String methodName, String launchMode) {
-
-
     var methodFullName = moduleName + "." + methodName; //$NON-NLS-1$
 
     var configuration = getTestLaunchConfigurations().findFirst();

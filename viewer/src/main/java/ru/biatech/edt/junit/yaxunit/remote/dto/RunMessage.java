@@ -25,25 +25,24 @@ public class RunMessage extends Message<RunMessage.Params> {
   }
 
   @Builder
-  public RunMessage(String module, String method, boolean server, boolean client, boolean ordinaryClient) {
+  public RunMessage(String module, String moduleName, String method, boolean server, boolean client, boolean ordinaryClient) {
     this();
-    data = new Params(module, method, server, client, ordinaryClient);
+    data = new Params();
+    data.module = module;
+    data.moduleName = moduleName;
+    data.method = method;
+    data.server = server;
+    data.client = client;
+    data.ordinaryClient = ordinaryClient;
   }
 
   @Data
   public static class Params {
     String module;
+    String moduleName;
     String method;
     boolean server;
     boolean client;
     boolean ordinaryClient;
-
-    public Params(String module, String method, boolean server, boolean client, boolean ordinaryClient) {
-      this.module = module;
-      this.method = method;
-      this.server = server;
-      this.client = client;
-      this.ordinaryClient = ordinaryClient;
-    }
   }
 }

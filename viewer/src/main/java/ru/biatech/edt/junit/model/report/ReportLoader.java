@@ -19,6 +19,11 @@ public class ReportLoader {
   }
 
   @SneakyThrows
+  public <T> T loadInto(File path, T object) {
+    return mapper.readerForUpdating(object).readValue(path);
+  }
+
+  @SneakyThrows
   public static String dump(Report report) {
     return mapper.writeValueAsString(report);
   }

@@ -19,8 +19,8 @@ package ru.biatech.edt.junit.yaxunit.remote;
 public interface RemoteLauncher {
   void start();
   void stop();
-  void launchTest(String clientKey, String module, String method, boolean server, boolean client, boolean ordinaryClient) throws ClientNotFound;
-  void launchTest(String module, String method, boolean server, boolean client, boolean ordinaryClient) throws ClientNotFound;
+
+  void launchTest(String module, String moduleName, String method, boolean server, boolean client, boolean ordinaryClient) throws ClientNotFound;
   int getPort();
   boolean isAvailable();
 }

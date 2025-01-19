@@ -18,11 +18,14 @@
 
 package ru.biatech.edt.junit.model;
 
+import com.google.common.base.Strings;
+import lombok.Getter;
 import lombok.NonNull;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.ILaunchConfiguration;
 import ru.biatech.edt.junit.BasicElementLabels;
 import ru.biatech.edt.junit.Core;
 import ru.biatech.edt.junit.Preferences;
@@ -45,12 +48,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
+
+import static ru.biatech.edt.junit.TestViewerPlugin.log;
 
 /**
  * Central registry for JUnit test runs.
  */
 public final class SessionsManager {
 
+  @Getter
   private static SessionsManager instance;
 
   public SessionsManager() {
@@ -62,27 +69,35 @@ public final class SessionsManager {
    */
   private final LinkedList<Session> sessions = new LinkedList<>();
   private LifecycleListener lifecycleListener;
+  private Session activeSession;
 
-  public static void importSession(LifecycleItem item) {
-    TestViewerPlugin.log().debug(UIMessages.JUnitModel_LoadReport);
+  public void importSession(LifecycleItem item) {
+    log().debug(UIMessages.JUnitModel_LoadReport);
 
     try {
       var launch = item.getMainLaunch();
 
       var configuration = launch.getLaunchConfiguration();
-      var project = LaunchConfigurationAttributes.getProject(configuration);
 
+      var project = LaunchConfigurationAttributes.getProject(configuration);
       var reportPath = LaunchHelper.getReportPath(configuration);
-      TestViewerPlugin.log().debug(UIMessages.JUnitModel_ReportFile, reportPath.toAbsolutePath());
+
+      log().debug(UIMessages.JUnitModel_ReportFile, reportPath.toAbsolutePath());
 
       if (!Files.exists(reportPath)) {
-        TestViewerPlugin.log().logError(UIMessages.JUnitModel_ReportFileNotFound);
+        log().logError(UIMessages.JUnitModel_ReportFileNotFound);
         return;
       }
 
-      var session = importSession(reportPath.toFile(), project);
+      Session session;
+      if (activeSession != null) {
+        session = importActiveSession(reportPath.toFile());
+      } else {
+        log().debug("Импорт отчета о тестировании: " + reportPath.toAbsolutePath());
+        session = importSession(reportPath.toFile(), project);
+      }
       if (session == null) {
-        TestViewerPlugin.log().logError("Session is null after import.");
+        log().logError("Session is null after import.");
         return;
       }
       session.setLaunch(item.getTestLaunch());
@@ -91,7 +106,7 @@ public final class SessionsManager {
 
       Files.deleteIfExists(reportPath);
     } catch (CoreException | IOException e) {
-      TestViewerPlugin.log().logError(UIMessages.JUnitModel_UnknownErrorOnReportLoad, e);
+      log().logError(UIMessages.JUnitModel_UnknownErrorOnReportLoad, e);
     }
   }
 
@@ -102,25 +117,32 @@ public final class SessionsManager {
    * @return the imported test run session
    * @throws CoreException if the import failed
    */
-  public static Session importSession(File file, String projectName) throws CoreException {
-    TestViewerPlugin.log().debug("Импорт отчета о тестировании: " + file.getAbsolutePath());
+  public Session importSession(File file, String projectName) throws CoreException {
     Session session;
     try {
+      log().debug("Загрузку отчета в новую сессию");
       session = ReportLoader.load(file, Session.class);
       if (session == null) {
-        TestViewerPlugin.log().logError(UIMessages.JUnitModel_ReportIsEmpty);
+        log().logError(UIMessages.JUnitModel_ReportIsEmpty);
         return null;
       }
     } catch (Exception e) {
       var message = MessageFormat.format(UIMessages.JUnitModel_could_not_read, BasicElementLabels.getPathLabel(file));
-      throw new CoreException(TestViewerPlugin.log().createErrorStatus(message, e));
+      throw new CoreException(log().createErrorStatus(message, e));
     }
     appendSession(session, projectName);
     return session;
   }
 
-  public static void importSession(TestSuiteElement[] data) {
-    Session session = new Session();
+  private Session importActiveSession(File file) {
+    log().debug("Загрузку отчета в активную сессию");
+    ReportLoader.loadInto(file, activeSession);
+    appendSession(activeSession, null);
+    return activeSession;
+  }
+
+  public void importSession(TestSuiteElement[] data) {
+    var session = Objects.requireNonNullElseGet(activeSession, Session::new);
     var suites = Arrays.stream(data)
         .map(TestSuiteElement::new)
         .toArray(TestSuiteElement[]::new);
@@ -128,19 +150,25 @@ public final class SessionsManager {
     appendSession(session, null);
   }
 
-  private static void appendSession(Session session, String projectName) {
+  private void appendSession(Session session, String projectName) {
     session.init();
-    session.setLaunchedProject(Projects.getProject(projectName));
+    if (!Strings.isNullOrEmpty(projectName)) {
+      session.setLaunchedProject(Projects.getProject(projectName));
+    }
     instance.addSession(session);
   }
+
   public void startSession(LifecycleItem item) {
-    var session = new Session(item.getName(), LaunchHelper.getProject(item.getTestLaunch().getLaunchConfiguration()));
-    session.setLaunch(item.getTestLaunch());
+    activeSession = new Session(item.getName(), LaunchHelper.getProject(item.getTestLaunch().getLaunchConfiguration()));
+    activeSession.setLaunch(item.getTestLaunch());
+    log().debug("Start session: {0}", activeSession);
   }
 
-  /**
-   * Starts the model (called by the {@link Core} on startup).
-   */
+  public void startSession(ILaunchConfiguration configuration) {
+    activeSession = new Session(configuration.getName(), LaunchHelper.getProject(configuration));
+    log().debug("Start session: {0}", activeSession);
+  }
+
   public void start() {
     LifecycleMonitor.addListener(lifecycleListener = (eventType, item) -> {
       if (LifecycleEvent.START == eventType) {
@@ -335,5 +363,7 @@ public final class SessionsManager {
     }
   }
 
-
+  /**
+   * Starts the model (called by the {@link Core} on startup).
+   */
 }

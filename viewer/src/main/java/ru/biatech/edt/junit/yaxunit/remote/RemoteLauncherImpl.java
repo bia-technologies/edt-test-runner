@@ -65,34 +65,12 @@ public class RemoteLauncherImpl implements RemoteLauncher, Handler, AutoCloseabl
   }
 
   @Override
-  public void launchTest(String module, String method, boolean isServer, boolean isClient, boolean isOrdinaryClient) throws ClientNotFound {
+  public void launchTest(String module, String moduleName, String method, boolean isServer, boolean isClient, boolean isOrdinaryClient) throws ClientNotFound {
     if (clientsByKey.isEmpty()) {
       throw new ClientNotFound("Нет подключенных клиентов");
     }
     var clientKey = clientsByKey.keySet().stream().findFirst().get();
-    launchTest(clientKey, module, method, isServer, isClient, isOrdinaryClient);
-  }
-
-  @Override
-  public void launchTest(String clientKey, String module, String method, boolean isServer, boolean isClient, boolean isOrdinaryClient) throws ClientNotFound {
-    var client = clientsByKey.getOrDefault(clientKey, null);
-    if (client == null) {
-      throw new ClientNotFound(clientKey);
-    }
-    var message = RunMessage.builder()
-        .module(module)
-        .method(method)
-        .client(isClient)
-        .server(isServer)
-        .ordinaryClient(isOrdinaryClient)
-        .build();
-    setMessageId(message);
-
-    server.send(client.socket, message);
-  }
-
-  private void setMessageId(Message<?> message) {
-    message.setId(lastMessageId.getAndIncrement());
+    launchTest(clientKey, module, moduleName, method, isServer, isClient, isOrdinaryClient);
   }
 
   @Override
@@ -105,41 +83,13 @@ public class RemoteLauncherImpl implements RemoteLauncher, Handler, AutoCloseabl
   }
 
   private void handleReport(ReportMessage message) {
-    SessionsManager.importSession(message.getData());
+    SessionsManager.getInstance().importSession(message.getData());
   }
 
   @SneakyThrows
   private void handleHandshake(WebSocket socket, HelloMessage message) {
     var client = new ClientInfo(message.getData().getKey(), message.getData().getProtocolVersion(), socket);
     addClient(client);
-    launchTest(client.key, "Процедура ИсполняемыеСценарии() Экспорт\n" +
-        "\n" +
-        "\tЮТТесты\n" +
-        "\t\t.ДобавитьТест(\"ТестУспешно\")\n" +
-        "\t\t.ДобавитьТест(\"ТестОшибка\")\n" +
-        "\t\t.ДобавитьТест(\"ТестСломан\")\n" +
-        "\t;\n" +
-        "\n" +
-        "КонецПроцедуры\n" +
-        "\n" +
-        "Процедура ТестУспешно() Экспорт\n" +
-        "\n" +
-        "\tРезультат = СтрНайти(\"90\", \"9\");\n" +
-        "\tЮТест.ОжидаетЧто(Результат).Равно(1);\n" +
-        "\n" +
-        "КонецПроцедуры\n" +
-        "\n" +
-        "Процедура ТестОшибка() Экспорт\n" +
-        "\n" +
-        "\tЮТест.ОжидаетЧто(1).Равно(2);\n" +
-        "\n" +
-        "КонецПроцедуры\n" +
-        "\n" +
-        "Процедура ТестСломан() Экспорт\n" +
-        "\n" +
-        "\tЮТест.ОжидаетЧто(1).ОтсутствующийМетод(2);\n" +
-        "\n" +
-        "КонецПроцедуры", "ИсполняемыеСценарии", true, false, false);
   }
 
   @Override
@@ -148,6 +98,28 @@ public class RemoteLauncherImpl implements RemoteLauncher, Handler, AutoCloseabl
     if (client != null) {
       removeClient(client);
     }
+  }
+
+  private void launchTest(String clientKey, String module, String moduleName, String method, boolean isServer, boolean isClient, boolean isOrdinaryClient) throws ClientNotFound {
+    var client = clientsByKey.getOrDefault(clientKey, null);
+    if (client == null) {
+      throw new ClientNotFound(clientKey);
+    }
+    var message = RunMessage.builder()
+        .module(module)
+        .moduleName(moduleName)
+        .method(method)
+        .client(isClient)
+        .server(isServer)
+        .ordinaryClient(isOrdinaryClient)
+        .build();
+    setMessageId(message);
+
+    server.send(client.socket, message);
+  }
+
+  private void setMessageId(Message<?> message) {
+    message.setId(lastMessageId.getAndIncrement());
   }
 
   synchronized private void addClient(ClientInfo client) {

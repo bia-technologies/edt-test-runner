@@ -17,15 +17,37 @@
 package ru.biatech.edt.junit.model;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import ru.biatech.edt.junit.model.report.ErrorInfo;
 import ru.biatech.edt.junit.model.report.TestSuite;
 
+import java.util.Arrays;
 import java.util.stream.Stream;
 
+@NoArgsConstructor
 public class TestSuiteElement extends TestSuite<TestCaseElement> implements ITestSuiteElement {
   @Getter
   private TestStatus status;
   private TestStatus childrenStatus;
+
+  public TestSuiteElement(TestSuite<?> suite) {
+    this.id = suite.getId();
+    this.packageName = suite.getPackageName();
+    this.className = suite.getClassName();
+    this.name = suite.getName();
+    this.timestamp = suite.getTimestamp();
+    this.hostname = suite.getHostname();
+    this.time = suite.getTime();
+    this.context = suite.getContext();
+    this.tests = suite.getTests();
+    this.errors = suite.getErrors();
+    this.skipped = suite.getSkipped();
+    this.failures = suite.getFailures();
+
+    this.testcase = Arrays.stream(suite.getTestcase())
+        .map(TestCaseElement::new)
+        .toArray(TestCaseElement[]::new);
+  }
 
   @Override
   public ITestSuiteElement getParent() {

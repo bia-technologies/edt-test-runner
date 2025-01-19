@@ -17,13 +17,15 @@
 package ru.biatech.edt.junit.yaxunit.remote;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import ru.biatech.edt.junit.yaxunit.remote.dto.Message;
 
 public class Serializer {
-  private final ObjectMapper mapper = new ObjectMapper().configure(
-      DeserializationFeature.FAIL_ON_MISSING_EXTERNAL_TYPE_ID_PROPERTY, false);
+  private final ObjectMapper mapper = new ObjectMapper()
+      .configure(DeserializationFeature.FAIL_ON_MISSING_EXTERNAL_TYPE_ID_PROPERTY, false)
+      .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
 
   @SneakyThrows
   public Message<?> readMessage(String message) {

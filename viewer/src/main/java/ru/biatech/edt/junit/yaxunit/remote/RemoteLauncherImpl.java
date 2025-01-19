@@ -19,6 +19,7 @@ package ru.biatech.edt.junit.yaxunit.remote;
 import lombok.SneakyThrows;
 import lombok.Value;
 import org.java_websocket.WebSocket;
+import ru.biatech.edt.junit.model.SessionsManager;
 import ru.biatech.edt.junit.yaxunit.remote.dto.HelloMessage;
 import ru.biatech.edt.junit.yaxunit.remote.dto.Message;
 import ru.biatech.edt.junit.yaxunit.remote.dto.ReportMessage;
@@ -104,8 +105,7 @@ public class RemoteLauncherImpl implements RemoteLauncher, Handler, AutoCloseabl
   }
 
   private void handleReport(ReportMessage message) {
-//    var session = new Session(null, null);
-//    session.getTestRoot().addChild(Factory.createTestSuite());
+    SessionsManager.importSession(message.getData());
   }
 
   @SneakyThrows

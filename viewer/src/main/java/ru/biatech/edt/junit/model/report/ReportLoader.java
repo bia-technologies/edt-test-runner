@@ -1,6 +1,7 @@
 package ru.biatech.edt.junit.model.report;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import lombok.SneakyThrows;
@@ -25,6 +26,7 @@ public class ReportLoader {
   ObjectMapper init() {
     return new XmlMapper()
         .setDefaultUseWrapper(false)
-        .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+        .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
   }
 }

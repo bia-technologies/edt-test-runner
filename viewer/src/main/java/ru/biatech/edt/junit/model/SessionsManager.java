@@ -42,6 +42,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -101,7 +102,7 @@ public final class SessionsManager {
    * @return the imported test run session
    * @throws CoreException if the import failed
    */
-  public static Session importSession(File file, String defaultProjectName) throws CoreException {
+  public static Session importSession(File file, String projectName) throws CoreException {
     TestViewerPlugin.log().debug("Импорт отчета о тестировании: " + file.getAbsolutePath());
     Session session;
     try {
@@ -110,18 +111,28 @@ public final class SessionsManager {
         TestViewerPlugin.log().logError(UIMessages.JUnitModel_ReportIsEmpty);
         return null;
       }
-
-
     } catch (Exception e) {
       var message = MessageFormat.format(UIMessages.JUnitModel_could_not_read, BasicElementLabels.getPathLabel(file));
       throw new CoreException(TestViewerPlugin.log().createErrorStatus(message, e));
     }
-    session.init();
-    session.setLaunchedProject(Projects.getProject(defaultProjectName));
-    instance.addSession(session);
+    appendSession(session, projectName);
     return session;
   }
 
+  public static void importSession(TestSuiteElement[] data) {
+    Session session = new Session();
+    var suites = Arrays.stream(data)
+        .map(TestSuiteElement::new)
+        .toArray(TestSuiteElement[]::new);
+    session.setTestsuite(suites);
+    appendSession(session, null);
+  }
+
+  private static void appendSession(Session session, String projectName) {
+    session.init();
+    session.setLaunchedProject(Projects.getProject(projectName));
+    instance.addSession(session);
+  }
   public void startSession(LifecycleItem item) {
     var session = new Session(item.getName(), LaunchHelper.getProject(item.getTestLaunch().getLaunchConfiguration()));
     session.setLaunch(item.getTestLaunch());

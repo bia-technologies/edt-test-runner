@@ -17,6 +17,7 @@
 package ru.biatech.edt.junit.model;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import ru.biatech.edt.junit.model.report.ErrorInfo;
 import ru.biatech.edt.junit.model.report.TestCase;
 
@@ -25,10 +26,23 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 @Getter
+@NoArgsConstructor
 public class TestCaseElement extends TestCase implements ITestCaseElement {
 
   private ITestSuiteElement parent;
   private TestStatus status;
+
+  public TestCaseElement(TestCase testCase) {
+    this.className = testCase.getClassName();
+    this.name = testCase.getName();
+    this.time = testCase.getTime();
+    this.skipped = testCase.getSkipped();
+    this.error = testCase.getError();
+    this.failure = testCase.getFailure();
+    this.systemOut = testCase.getSystemOut();
+    this.systemErr = testCase.getSystemErr();
+    this.context = testCase.getContext();
+  }
 
   public String getDisplayName() {
     return getName();

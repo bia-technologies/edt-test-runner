@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="java.websocket.Java.WebSocket" type="repository">
+    <properties maven-id="org.java-websocket:Java-WebSocket:1.6.0" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/java-websocket/Java-WebSocket/1.6.0/Java-WebSocket-1.6.0.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-api/2.0.13/slf4j-api-2.0.13.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

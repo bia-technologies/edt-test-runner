@@ -20,7 +20,6 @@ import com._1c.g5.v8.dt.core.platform.IExtensionProject;
 import com._1c.g5.v8.dt.core.platform.IV8Project;
 import com._1c.g5.v8.dt.launching.core.ILaunchConfigurationTypes;
 import com._1c.g5.v8.dt.metadata.mdclass.CommonModule;
-import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Platform;
@@ -32,13 +31,10 @@ import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.kinds.ITestKind;
 import ru.biatech.edt.junit.kinds.TestKindRegistry;
 import ru.biatech.edt.junit.launcher.LaunchConfigurationTypes;
-import ru.biatech.edt.junit.model.SessionsManager;
 import ru.biatech.edt.junit.services.TestsManager;
 import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.ui.dialogs.Dialogs;
-import ru.biatech.edt.junit.v8utils.Modules;
 import ru.biatech.edt.junit.v8utils.Projects;
-import ru.biatech.edt.junit.yaxunit.remote.RemoteLaunchManager;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -161,25 +157,6 @@ public class LaunchHelper {
     return path;
   }
 
-  public boolean useRemoteLaunch(ILaunchConfiguration configuration) {
-    return RemoteLaunchManager.isAvailable() && LaunchConfigurationAttributes.getKeepAlive(configuration);
-  }
-
-  @SneakyThrows
-  public void remoteLaunchTest(ILaunchConfiguration configuration, String moduleName, String methodName) {
-
-    var project = LaunchHelper.getProject(configuration);
-    var moduleOpt = Modules.findCommonModule(project, moduleName);
-    if (moduleOpt.isEmpty()) {
-      return;
-    }
-    var module = moduleOpt.get();
-
-    var content = Modules.getModuleContent(module);
-    SessionsManager.getInstance().startSession(configuration);
-    RemoteLaunchManager.getLauncher().launchTest(content, moduleName, methodName, module.isServer(), module.isClientManagedApplication(), module.isClientOrdinaryApplication());
-  }
-
   public void runTestMethod(String moduleName, String methodName, String launchMode) {
     var methodFullName = moduleName + "." + methodName; //$NON-NLS-1$
 
@@ -199,11 +176,6 @@ public class LaunchHelper {
 
     if (errorMessage != null) {
       Dialogs.showError(UIMessages.LaunchTest_title, errorMessage);
-      return;
-    }
-
-    if (useRemoteLaunch(configuration.get())) {
-      remoteLaunchTest(configuration.get(), moduleName, methodName);
       return;
     }
 

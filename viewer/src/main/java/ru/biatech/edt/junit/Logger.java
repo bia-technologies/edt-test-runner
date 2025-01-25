@@ -63,6 +63,10 @@ public class Logger {
     }
   }
 
+  public void info(String message) {
+    log(new Status(IStatus.INFO, getPluginID(), 0, message, null));
+  }
+
   public void debug(String template, Object... objects) {
     if (debug) {
       String message = MessageFormat.format(template, objects);

@@ -27,8 +27,7 @@ import ru.biatech.edt.junit.ui.UIMessages;
 public class LaunchConfigurationDelegate implements ILaunchConfigurationDelegate {
 
   @Override
-  public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor)
-          throws CoreException {
+  public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor) throws CoreException {
 
     monitor.beginTask(UIMessages.LaunchConfigurationDelegate_Launching, 1);
 

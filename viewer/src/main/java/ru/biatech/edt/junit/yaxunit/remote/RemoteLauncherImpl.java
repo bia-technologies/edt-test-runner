@@ -19,14 +19,17 @@ package ru.biatech.edt.junit.yaxunit.remote;
 import lombok.SneakyThrows;
 import lombok.Value;
 import org.java_websocket.WebSocket;
-import ru.biatech.edt.junit.model.SessionsManager;
+import ru.biatech.edt.junit.TestViewerPlugin;
+import ru.biatech.edt.junit.model.TestSuiteElement;
 import ru.biatech.edt.junit.yaxunit.remote.dto.HelloMessage;
 import ru.biatech.edt.junit.yaxunit.remote.dto.Message;
 import ru.biatech.edt.junit.yaxunit.remote.dto.ReportMessage;
 import ru.biatech.edt.junit.yaxunit.remote.dto.RunMessage;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -36,6 +39,8 @@ public class RemoteLauncherImpl implements RemoteLauncher, Handler, AutoCloseabl
   private final AtomicBoolean available = new AtomicBoolean(false);
   private final AtomicInteger lastMessageId = new AtomicInteger(0);
   private WebSocketServer server;
+
+  private final Map<String, CompletableFuture<TestSuiteElement[]>> runs = new HashMap<>();
 
   @Override
   @SneakyThrows
@@ -65,12 +70,12 @@ public class RemoteLauncherImpl implements RemoteLauncher, Handler, AutoCloseabl
   }
 
   @Override
-  public void launchTest(String module, String moduleName, String method, boolean isServer, boolean isClient, boolean isOrdinaryClient) throws ClientNotFound {
+  public CompletableFuture<TestSuiteElement[]> launchTest(String module, String moduleName, List<String> methods, boolean isServer, boolean isClient, boolean isOrdinaryClient) throws ClientNotFound {
     if (clientsByKey.isEmpty()) {
       throw new ClientNotFound("Нет подключенных клиентов");
     }
     var clientKey = clientsByKey.keySet().stream().findFirst().get();
-    launchTest(clientKey, module, moduleName, method, isServer, isClient, isOrdinaryClient);
+    return launchTest(clientKey, module, moduleName, methods, isServer, isClient, isOrdinaryClient);
   }
 
   @Override
@@ -83,7 +88,14 @@ public class RemoteLauncherImpl implements RemoteLauncher, Handler, AutoCloseabl
   }
 
   private void handleReport(ReportMessage message) {
-    SessionsManager.getInstance().importSession(message.getData());
+    var runKey = runKey(clientKey(), message.getId());
+    var future = runs.getOrDefault(runKey, null);
+    if (future == null) {
+      TestViewerPlugin.log().logError("Получен отчет о тестировании, но не обнаружен запуск");
+      return;
+    }
+    runs.remove(runKey);
+    future.complete(message.getData());
   }
 
   @SneakyThrows
@@ -100,7 +112,8 @@ public class RemoteLauncherImpl implements RemoteLauncher, Handler, AutoCloseabl
     }
   }
 
-  private void launchTest(String clientKey, String module, String moduleName, String method, boolean isServer, boolean isClient, boolean isOrdinaryClient) throws ClientNotFound {
+  private CompletableFuture<TestSuiteElement[]> launchTest(String clientKey, String module, String moduleName, List<String> methods, boolean isServer, boolean isClient, boolean isOrdinaryClient) throws ClientNotFound {
+
     var client = clientsByKey.getOrDefault(clientKey, null);
     if (client == null) {
       throw new ClientNotFound(clientKey);
@@ -108,14 +121,23 @@ public class RemoteLauncherImpl implements RemoteLauncher, Handler, AutoCloseabl
     var message = RunMessage.builder()
         .module(module)
         .moduleName(moduleName)
-        .method(method)
+        .methods(methods)
         .client(isClient)
         .server(isServer)
         .ordinaryClient(isOrdinaryClient)
         .build();
     setMessageId(message);
 
+
+    if (!client.socket.isOpen()) {
+      removeClient(client);
+      return CompletableFuture.failedFuture(new Exception("Web socket is closed"));
+    }
     server.send(client.socket, message);
+    var runKey = runKey(clientKey, message.getId());
+    var future = new CompletableFuture<TestSuiteElement[]>();
+    runs.put(runKey, future);
+    return future;
   }
 
   private void setMessageId(Message<?> message) {
@@ -132,7 +154,7 @@ public class RemoteLauncherImpl implements RemoteLauncher, Handler, AutoCloseabl
     clients.remove(client.socket);
     clientsByKey.remove(client.key);
     var empty = clients.isEmpty();
-    available.weakCompareAndSetPlain(!empty, empty);
+    available.weakCompareAndSetPlain(empty, !empty);
   }
 
   public boolean isAvailable() {
@@ -149,5 +171,13 @@ public class RemoteLauncherImpl implements RemoteLauncher, Handler, AutoCloseabl
     String key;
     String protocolVersion;
     WebSocket socket;
+  }
+
+  String clientKey() {
+    return clientsByKey.keySet().stream().findFirst().orElse(null);
+  }
+
+  private String runKey(String clientKey, int operationId) {
+    return String.format("%s----%d", clientKey, operationId);
   }
 }

@@ -29,6 +29,8 @@ import ru.biatech.edt.junit.yaxunit.remote.RemoteLaunchManager;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Getter
 public class LaunchSettings {
@@ -50,6 +52,7 @@ public class LaunchSettings {
   RpcSettings rpc;
 
   String extensionName;
+  Set<String> usedModules;
 
   public static class Filter {
     @Expose
@@ -84,6 +87,12 @@ public class LaunchSettings {
     }
 
     var tests = LaunchConfigurationAttributes.getTestMethods(configuration);
+
+    if (tests != null) {
+      settings.usedModules = tests.stream().map(t -> t.split("\\.")[0])
+          .collect(Collectors.toUnmodifiableSet());
+    }
+    
     if (tests != null && tests.size() == 1) {
       var chunks = tests.get(0).split("\\."); //$NON-NLS-1$
       if (chunks.length == 2 && chunks[1].equalsIgnoreCase(Constants.REGISTRATION_METHOD_NAME)) {
@@ -91,6 +100,7 @@ public class LaunchSettings {
         tests = Collections.emptyList();
       }
     }
+
     filter.tests = tests;
 
     var logging = new LoggingSettings();
@@ -99,6 +109,7 @@ public class LaunchSettings {
       logging.level = "debug"; //$NON-NLS-1$
     }
 
+    settings.closeAfterTests = !LaunchConfigurationAttributes.getKeepAlive(configuration);
     settings.name = configuration.getName();
     settings.workPath = LaunchHelper.getWorkPath(settings.name).toString();
     settings.reportPath = settings.workPath;
@@ -119,7 +130,7 @@ public class LaunchSettings {
     @Expose
     int port;
     @Expose
-    boolean keepAlive;
+    boolean enable;
     @Expose
     String key;
     @Expose

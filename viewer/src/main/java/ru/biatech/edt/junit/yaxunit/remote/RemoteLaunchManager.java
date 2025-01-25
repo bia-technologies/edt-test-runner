@@ -18,9 +18,12 @@ package ru.biatech.edt.junit.yaxunit.remote;
 
 import lombok.Getter;
 import lombok.experimental.UtilityClass;
+import ru.biatech.edt.junit.model.TestSuiteElement;
 import ru.biatech.edt.junit.yaxunit.LaunchSettings;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @UtilityClass
 public class RemoteLaunchManager {
@@ -41,6 +44,10 @@ public class RemoteLaunchManager {
     }
   }
 
+  public CompletableFuture<TestSuiteElement[]> launchTest(String module, String moduleName, List<String> methods, boolean server, boolean client, boolean ordinaryClient) throws ClientNotFound{
+    return launcher.launchTest(module, moduleName, methods, server, client, ordinaryClient);
+  }
+
   public boolean isAvailable() {
     return launcher != null && launcher.isAvailable();
   }
@@ -49,7 +56,7 @@ public class RemoteLaunchManager {
     if (launcher == null) {
       return;
     }
-    rpc.setKeepAlive(true);
+    rpc.setEnable(true);
     rpc.setPort(launcher.getPort());
     rpc.setKey(UUID.randomUUID().toString());
     rpc.setTransport("ws");

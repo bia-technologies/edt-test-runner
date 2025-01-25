@@ -102,8 +102,6 @@ public final class SessionsManager {
       }
       session.setLaunch(item.getTestLaunch());
 
-      TestViewerPlugin.ui().asyncShowTestRunnerViewPart();
-
       Files.deleteIfExists(reportPath);
     } catch (CoreException | IOException e) {
       log().logError(UIMessages.JUnitModel_UnknownErrorOnReportLoad, e);
@@ -141,13 +139,14 @@ public final class SessionsManager {
     return activeSession;
   }
 
-  public void importSession(TestSuiteElement[] data) {
+  public Session importSession(TestSuiteElement[] data) {
     var session = Objects.requireNonNullElseGet(activeSession, Session::new);
     var suites = Arrays.stream(data)
         .map(TestSuiteElement::new)
         .toArray(TestSuiteElement[]::new);
     session.setTestsuite(suites);
     appendSession(session, null);
+    return session;
   }
 
   private void appendSession(Session session, String projectName) {
@@ -156,6 +155,9 @@ public final class SessionsManager {
       session.setLaunchedProject(Projects.getProject(projectName));
     }
     instance.addSession(session);
+
+    // TODO: Генерировать событие и отображать панель оттуда
+    TestViewerPlugin.ui().asyncShowTestRunnerViewPart();
   }
 
   public void startSession(LifecycleItem item) {

@@ -52,7 +52,7 @@ public class CopyTraceAction extends SelectionListenerAction {
       return;
     }
 
-    String trace = null;
+    String trace;
     if (errorInfo != null) {
       trace = errorInfo.getTrace();
     } else {

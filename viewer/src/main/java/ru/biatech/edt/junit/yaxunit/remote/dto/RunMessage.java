@@ -19,18 +19,20 @@ package ru.biatech.edt.junit.yaxunit.remote.dto;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.List;
+
 public class RunMessage extends Message<RunMessage.Params> {
   public RunMessage() {
     super(RUN_TEST_TYPE);
   }
 
   @Builder
-  public RunMessage(String module, String moduleName, String method, boolean server, boolean client, boolean ordinaryClient) {
+  public RunMessage(String module, String moduleName, List<String> methods, boolean server, boolean client, boolean ordinaryClient) {
     this();
     data = new Params();
     data.module = module;
     data.moduleName = moduleName;
-    data.method = method;
+    data.methods = methods;
     data.server = server;
     data.client = client;
     data.ordinaryClient = ordinaryClient;
@@ -40,7 +42,7 @@ public class RunMessage extends Message<RunMessage.Params> {
   public static class Params {
     String module;
     String moduleName;
-    String method;
+    List<String> methods;
     boolean server;
     boolean client;
     boolean ordinaryClient;

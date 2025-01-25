@@ -38,10 +38,6 @@ public class WebSocketServer extends org.java_websocket.server.WebSocketServer {
     log = TestViewerPlugin.log();
   }
 
-  public void send(Message<?> message) {
-    broadcast(serializer.writeMessage(message));
-  }
-
   public void send(WebSocket socket, Message<?> message) {
     var messageText = serializer.writeMessage(message);
     log.debug("Send message to {0}\n{1}", socket.getRemoteSocketAddress().getAddress(),messageText);
@@ -55,7 +51,11 @@ public class WebSocketServer extends org.java_websocket.server.WebSocketServer {
 
   @Override
   public void onClose(WebSocket socket, int code, String reason, boolean remote) {
-    log.debug("Disconnect from {0}", socket.getRemoteSocketAddress().getAddress());
+    if (socket != null && socket.getRemoteSocketAddress() != null) {
+      log.debug("Client ({0}) disconnect", socket.getRemoteSocketAddress().getAddress());
+    } else {
+      log.debug("Client disconnect");
+    }
     handler.onClientDisconnect(socket);
   }
 

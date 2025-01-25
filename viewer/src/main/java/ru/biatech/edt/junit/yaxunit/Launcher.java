@@ -17,8 +17,10 @@
 package ru.biatech.edt.junit.yaxunit;
 
 import com._1c.g5.v8.dt.launching.core.ILaunchConfigurationAttributes;
+import com._1c.g5.v8.dt.metadata.mdclass.CommonModule;
 import com.google.common.base.Strings;
 import com.google.gson.GsonBuilder;
+import lombok.SneakyThrows;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
@@ -30,11 +32,15 @@ import ru.biatech.edt.junit.kinds.IUnitLauncher;
 import ru.biatech.edt.junit.kinds.TestKindRegistry;
 import ru.biatech.edt.junit.launcher.v8.LaunchConfigurationAttributes;
 import ru.biatech.edt.junit.launcher.v8.LaunchHelper;
+import ru.biatech.edt.junit.model.SessionsManager;
+import ru.biatech.edt.junit.v8utils.Modules;
+import ru.biatech.edt.junit.v8utils.Projects;
 import ru.biatech.edt.junit.yaxunit.remote.RemoteLaunchManager;
 
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 
 public class Launcher implements IUnitLauncher {
 
@@ -56,6 +62,10 @@ public class Launcher implements IUnitLauncher {
     }
 
     var oneCConfigurationCopy = oneCConfiguration.copy("YAX. " + configuration.getName()); //$NON-NLS-1$
+
+    if (remoteLaunchTest(configuration, settings, launch, monitor)) {
+      return;
+    }
 
     configure(oneCConfigurationCopy, settings);
     copyAttributes(configuration, oneCConfigurationCopy);
@@ -101,5 +111,48 @@ public class Launcher implements IUnitLauncher {
         oneCConfiguration.setAttribute(attribute, value);
       }
     }
+  }
+
+  @SneakyThrows
+  public boolean remoteLaunchTest(ILaunchConfiguration configuration, LaunchSettings settings, ILaunch launch, IProgressMonitor monitor) {
+    if (!RemoteLaunchManager.isAvailable() && LaunchConfigurationAttributes.getKeepAlive(configuration)) {
+      return false;
+    }
+
+    if (settings.usedModules == null || settings.usedModules.size() != 1) {
+      TestViewerPlugin.log().info("Будет выполнен перезапуск предприятия. Запуск тестов без перезапуска работает только для одного модуля.");
+      return false;
+    }
+
+    var moduleName = settings.usedModules.stream().findFirst().get();
+
+    var project = LaunchHelper.getProject(configuration);
+    Optional<CommonModule> moduleOpt;
+    if (project == null) {
+      moduleOpt = Projects.getExtensions().stream()
+          .map(p -> Modules.findCommonModule(p, moduleName))
+          .filter(Optional::isPresent)
+          .map(Optional::get)
+          .findAny();
+    } else {
+      moduleOpt = Modules.findCommonModule(project, moduleName);
+    }
+    if (moduleOpt.isEmpty()) {
+      TestViewerPlugin.log().logError("Не удалось найти модуль " + moduleName);
+      return false;
+    }
+    var module = moduleOpt.get();
+
+    var content = Modules.getModuleContent(module);
+    SessionsManager.getInstance().startSession(configuration);
+
+    RemoteLaunchManager.launchTest(content, moduleName, settings.filter.tests, module.isServer(), module.isClientManagedApplication(), module.isClientOrdinaryApplication())
+        .thenAccept(suites -> {
+          var session = SessionsManager.getInstance().importSession(suites);
+          session.setLaunch(launch);
+          monitor.done();
+        });
+
+    return true;
   }
 }

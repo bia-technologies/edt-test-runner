@@ -16,11 +16,16 @@
 
 package ru.biatech.edt.junit.yaxunit.remote;
 
+import ru.biatech.edt.junit.model.TestSuiteElement;
+
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
 public interface RemoteLauncher {
   void start();
   void stop();
 
-  void launchTest(String module, String moduleName, String method, boolean server, boolean client, boolean ordinaryClient) throws ClientNotFound;
+  CompletableFuture<TestSuiteElement[]> launchTest(String module, String moduleName, List<String> method, boolean server, boolean client, boolean ordinaryClient) throws ClientNotFound;
   int getPort();
   boolean isAvailable();
 }

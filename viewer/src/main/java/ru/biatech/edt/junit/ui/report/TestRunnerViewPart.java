@@ -657,7 +657,7 @@ action enablement
     TestViewerPlugin.core().getSessionsManager().addTestRunSessionListener(fTestRunSessionListener);
 
     // always show youngest test run in view. simulate "sessionAdded" event to do that
-    List<Session> sessions = TestViewerPlugin.core().getSessionsManager().getSessions();
+    var sessions = TestViewerPlugin.core().getSessionsManager().getSessions();
     if (!sessions.isEmpty()) {
       fTestRunSessionListener.sessionAdded(sessions.get(0));
     }

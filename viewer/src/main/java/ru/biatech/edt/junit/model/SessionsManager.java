@@ -18,14 +18,13 @@
 
 package ru.biatech.edt.junit.model;
 
-import com.google.common.base.Strings;
 import lombok.Getter;
 import lombok.NonNull;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunch;
 import ru.biatech.edt.junit.BasicElementLabels;
 import ru.biatech.edt.junit.Core;
 import ru.biatech.edt.junit.Preferences;
@@ -34,11 +33,9 @@ import ru.biatech.edt.junit.launcher.lifecycle.LifecycleEvent;
 import ru.biatech.edt.junit.launcher.lifecycle.LifecycleItem;
 import ru.biatech.edt.junit.launcher.lifecycle.LifecycleListener;
 import ru.biatech.edt.junit.launcher.lifecycle.LifecycleMonitor;
-import ru.biatech.edt.junit.launcher.v8.LaunchConfigurationAttributes;
 import ru.biatech.edt.junit.launcher.v8.LaunchHelper;
 import ru.biatech.edt.junit.model.report.ReportLoader;
 import ru.biatech.edt.junit.ui.UIMessages;
-import ru.biatech.edt.junit.v8utils.Projects;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,7 +45,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
 
 import static ru.biatech.edt.junit.TestViewerPlugin.log;
 
@@ -78,8 +74,6 @@ public final class SessionsManager {
       var launch = item.getMainLaunch();
 
       var configuration = launch.getLaunchConfiguration();
-
-      var project = LaunchConfigurationAttributes.getProject(configuration);
       var reportPath = LaunchHelper.getReportPath(configuration);
 
       log().debug(UIMessages.JUnitModel_ReportFile, reportPath.toAbsolutePath());
@@ -89,19 +83,18 @@ public final class SessionsManager {
         return;
       }
 
+      log().debug("Импорт отчета о тестировании: " + reportPath.toAbsolutePath());
       Session session;
-      if (activeSession != null) {
-        session = importActiveSession(reportPath.toFile());
+      if (activeSession != null && activeSession.isRunning()) {
+        importActiveSession(reportPath.toFile());
       } else {
-        log().debug("Импорт отчета о тестировании: " + reportPath.toAbsolutePath());
-        session = importSession(reportPath.toFile(), project);
+        session = importSession(reportPath.toFile());
+        if (session == null) {
+          log().logError("Session is null after import.");
+          return;
+        }
+        session.setLaunch(item.getTestLaunch());
       }
-      if (session == null) {
-        log().logError("Session is null after import.");
-        return;
-      }
-      session.setLaunch(item.getTestLaunch());
-
       Files.deleteIfExists(reportPath);
     } catch (CoreException | IOException e) {
       log().logError(UIMessages.JUnitModel_UnknownErrorOnReportLoad, e);
@@ -115,7 +108,7 @@ public final class SessionsManager {
    * @return the imported test run session
    * @throws CoreException if the import failed
    */
-  public Session importSession(File file, String projectName) throws CoreException {
+  public Session importSession(File file) throws CoreException {
     Session session;
     try {
       log().debug("Загрузку отчета в новую сессию");
@@ -128,32 +121,29 @@ public final class SessionsManager {
       var message = MessageFormat.format(UIMessages.JUnitModel_could_not_read, BasicElementLabels.getPathLabel(file));
       throw new CoreException(log().createErrorStatus(message, e));
     }
-    appendSession(session, projectName);
+    appendSession(session);
     return session;
   }
 
-  private Session importActiveSession(File file) {
+  public void importActiveSession(File file) {
     log().debug("Загрузку отчета в активную сессию");
     ReportLoader.loadInto(file, activeSession);
-    appendSession(activeSession, null);
-    return activeSession;
+    appendSession(activeSession);
+    activeSession = null;
   }
 
-  public Session importSession(TestSuiteElement[] data) {
-    var session = Objects.requireNonNullElseGet(activeSession, Session::new);
+  public void importSession(TestSuiteElement[] data, ILaunch launch) {
+    var session = new Session();
+    session.setLaunch(launch);
     var suites = Arrays.stream(data)
         .map(TestSuiteElement::new)
         .toArray(TestSuiteElement[]::new);
     session.setTestsuite(suites);
-    appendSession(session, null);
-    return session;
+    appendSession(session);
   }
 
-  private void appendSession(Session session, String projectName) {
+  private void appendSession(Session session) {
     session.init();
-    if (!Strings.isNullOrEmpty(projectName)) {
-      session.setLaunchedProject(Projects.getProject(projectName));
-    }
     instance.addSession(session);
 
     // TODO: Генерировать событие и отображать панель оттуда
@@ -161,13 +151,8 @@ public final class SessionsManager {
   }
 
   public void startSession(LifecycleItem item) {
-    activeSession = new Session(item.getName(), LaunchHelper.getProject(item.getTestLaunch().getLaunchConfiguration()));
+    activeSession = new Session();
     activeSession.setLaunch(item.getTestLaunch());
-    log().debug("Start session: {0}", activeSession);
-  }
-
-  public void startSession(ILaunchConfiguration configuration) {
-    activeSession = new Session(configuration.getName(), LaunchHelper.getProject(configuration));
     log().debug("Start session: {0}", activeSession);
   }
 

@@ -27,10 +27,15 @@ import lombok.NoArgsConstructor;
 @JsonSubTypes(value = {
     @JsonSubTypes.Type(value = HelloMessage.class, name = Message.HELLO_TYPE),
     @JsonSubTypes.Type(value = RunMessage.class, name = Message.RUN_TEST_TYPE),
-    @JsonSubTypes.Type(value = ReportMessage.class, name = Message.REPORT_TYPE)
+    @JsonSubTypes.Type(value = ReportMessage.class, name = Message.REPORT_TYPE),
+    @JsonSubTypes.Type(value = ReportFileMessage.class, name = Message.REPORT_FILE_TYPE)
 })
 public abstract class Message<T> {
-  public static final String HELLO_TYPE = "hello", RUN_TEST_TYPE = "runTest", REPORT_TYPE = "report";
+  public static final String
+      HELLO_TYPE = "hello",
+      RUN_TEST_TYPE = "runTest",
+      REPORT_TYPE = "report",
+      REPORT_FILE_TYPE = "reportFile";
 
   String type;
   int id;

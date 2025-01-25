@@ -144,12 +144,9 @@ public class Launcher implements IUnitLauncher {
     var module = moduleOpt.get();
 
     var content = Modules.getModuleContent(module);
-    SessionsManager.getInstance().startSession(configuration);
-
     RemoteLaunchManager.launchTest(content, moduleName, settings.filter.tests, module.isServer(), module.isClientManagedApplication(), module.isClientOrdinaryApplication())
         .thenAccept(suites -> {
-          var session = SessionsManager.getInstance().importSession(suites);
-          session.setLaunch(launch);
+          SessionsManager.getInstance().importSession(suites, launch);
           monitor.done();
         });
 

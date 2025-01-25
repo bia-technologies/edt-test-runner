@@ -20,9 +20,11 @@ import lombok.SneakyThrows;
 import lombok.Value;
 import org.java_websocket.WebSocket;
 import ru.biatech.edt.junit.TestViewerPlugin;
+import ru.biatech.edt.junit.model.SessionsManager;
 import ru.biatech.edt.junit.model.TestSuiteElement;
 import ru.biatech.edt.junit.yaxunit.remote.dto.HelloMessage;
 import ru.biatech.edt.junit.yaxunit.remote.dto.Message;
+import ru.biatech.edt.junit.yaxunit.remote.dto.ReportFileMessage;
 import ru.biatech.edt.junit.yaxunit.remote.dto.ReportMessage;
 import ru.biatech.edt.junit.yaxunit.remote.dto.RunMessage;
 
@@ -84,7 +86,13 @@ public class RemoteLauncherImpl implements RemoteLauncher, Handler, AutoCloseabl
       handleHandshake(socket, (HelloMessage) message);
     } else if (message instanceof ReportMessage) {
       handleReport((ReportMessage) message);
+    } else if (message instanceof ReportFileMessage) {
+      handleReportFile((ReportFileMessage) message);
     }
+  }
+
+  private void handleReportFile(ReportFileMessage message) {
+    SessionsManager.getInstance().importActiveSession(message.getData().getReportFile().toFile());
   }
 
   private void handleReport(ReportMessage message) {
@@ -162,7 +170,7 @@ public class RemoteLauncherImpl implements RemoteLauncher, Handler, AutoCloseabl
   }
 
   @Override
-  public void close() throws Exception {
+  public void close() {
     stop();
   }
 

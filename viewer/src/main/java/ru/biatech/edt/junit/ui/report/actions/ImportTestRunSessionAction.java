@@ -57,7 +57,7 @@ import java.io.File;
     File file = new File(path);
 
     try {
-      SessionsManager.getInstance().importSession(file, null);
+      SessionsManager.getInstance().importSession(file);
     } catch (CoreException e) {
       TestViewerPlugin.log().logError(e);
       ErrorDialog.openError(shell, UIMessages.TestRunnerViewPart_ImportTestRunSessionAction_error_title, e.getStatus().getMessage(), e.getStatus());

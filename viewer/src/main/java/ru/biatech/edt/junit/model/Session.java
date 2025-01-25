@@ -19,16 +19,18 @@
 package ru.biatech.edt.junit.model;
 
 import com._1c.g5.v8.dt.core.platform.IV8Project;
+import com.google.common.base.Strings;
 import lombok.Getter;
 import lombok.Setter;
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.debug.core.ILaunch;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.kinds.ITestKind;
+import ru.biatech.edt.junit.launcher.v8.LaunchConfigurationAttributes;
 import ru.biatech.edt.junit.launcher.v8.LaunchHelper;
 import ru.biatech.edt.junit.model.report.ErrorInfo;
 import ru.biatech.edt.junit.model.report.Report;
+import ru.biatech.edt.junit.v8utils.Projects;
 
 import java.io.File;
 import java.text.DateFormat;
@@ -51,8 +53,8 @@ public class Session extends Report<TestSuiteElement> implements ITestRunSession
   /**
    * Ссылка на 1С проект, or <code>null</code>.
    */
-  @Setter
   private IV8Project launchedProject;
+  private String projectName;
 
   private final ListenerList<ITestSessionListener> sessionListeners = new ListenerList<>();
 
@@ -137,23 +139,6 @@ public class Session extends Report<TestSuiteElement> implements ITestRunSession
     reset();
   }
 
-  /**
-   * Creates a test run session.
-   *
-   * @param pTestRunName name of the test run
-   * @param project      may be <code>null</code>
-   */
-  public Session(String pTestRunName, IV8Project project) {
-    this();
-    Assert.isNotNull(pTestRunName);
-    name = pTestRunName;
-    launchedProject = project;
-
-    testRunnerKind = ITestKind.NULL; //TODO
-
-    reset();
-  }
-
   public void reset() {
     startedCount = 0;
     failureCount = 0;
@@ -206,8 +191,9 @@ public class Session extends Report<TestSuiteElement> implements ITestRunSession
     if (launchConfiguration != null) {
       name = launchConfiguration.getName();
       testRunnerKind = LaunchHelper.getTestRunnerKind(launchConfiguration);
+      projectName = LaunchConfigurationAttributes.getTestExtensionName(launchConfiguration);
     } else {
-      name = launchedProject.getProject().getName();
+      name = "<unknown>";
       testRunnerKind = ITestKind.NULL;
     }
     running = isStarting();
@@ -217,6 +203,15 @@ public class Session extends Report<TestSuiteElement> implements ITestRunSession
     return name + " " + DateFormat.getDateTimeInstance().format(new Date(startTime));
   }
 
+  public IV8Project getLaunchedProject() {
+    if (launchedProject != null) {
+      return launchedProject;
+    } else if (!Strings.isNullOrEmpty(projectName)) {
+      return launchedProject = Projects.getProject(projectName);
+    } else {
+      return null;
+    }
+  }
   public synchronized void addTestSessionListener(ITestSessionListener listener) {
 //		swapIn();
     sessionListeners.add(listener);

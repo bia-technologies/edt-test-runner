@@ -123,14 +123,4 @@ public enum TestStatus {
 
     return TestResult.OK;
   }
-
-  public ProgressState convertToProgressState() {
-    if (isRunning()) {
-      return ProgressState.RUNNING;
-    }
-    if (isDone()) {
-      return ProgressState.COMPLETED;
-    }
-    return ProgressState.NOT_STARTED;
-  }
 }

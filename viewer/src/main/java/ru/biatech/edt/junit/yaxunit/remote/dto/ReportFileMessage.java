@@ -21,6 +21,11 @@ import lombok.Data;
 import java.nio.file.Path;
 
 public class ReportFileMessage extends Message<ReportFileMessage.Params> {
+
+  public ReportFileMessage() {
+    super(REPORT_FILE_TYPE);
+  }
+
   @Data
   public static class Params {
     Path reportFile;

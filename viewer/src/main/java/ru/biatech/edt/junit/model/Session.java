@@ -165,17 +165,6 @@ public class Session extends Report<TestSuiteElement> implements ITestRunSession
   }
 
   @Override
-  public ProgressState getProgressState() {
-    if (isRunning()) {
-      return ProgressState.RUNNING;
-    }
-    if (isStopped()) {
-      return ProgressState.STOPPED;
-    }
-    return ProgressState.COMPLETED;
-  }
-
-  @Override
   public TestResult getResultStatus(boolean includeChildren) {
     return getStatus().convertToResult();
   }

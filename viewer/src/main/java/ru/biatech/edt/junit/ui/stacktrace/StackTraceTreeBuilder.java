@@ -30,9 +30,11 @@ import ru.biatech.edt.junit.model.report.ErrorInfo;
 import ru.biatech.edt.junit.v8utils.VendorServices;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class StackTraceTreeBuilder {
+  private static final List<String> SIDE_MODULE_PREFIXES = Arrays.asList("ЮТ", "Мокито");
   private final IStacktraceParser stacktraceParser;
 
   public StackTraceTreeBuilder() {
@@ -66,12 +68,18 @@ public class StackTraceTreeBuilder {
   private void fillModel(List<TreeItem> treeItems, List<IStacktraceElement> elements, Tree parent, ErrorInfo error, String fullMethodName) {
     for (var item : elements) {
       var moduleName = getModuleName(item);
-      boolean isSide = moduleName.startsWith("ЮТ")||moduleName.startsWith("Мокито"); // TODO Возможны ложные срабатывания
-      boolean isMain = !isSide && !moduleName.isBlank() && fullMethodName.contains(moduleName); // TODO Возможны ложные срабатывания
-      var treeItem = new TreeItem(error, item, parent, isMain, isSide);
+      boolean isEngineModule = isEngineModule(moduleName);
+      boolean isMain = !isEngineModule && !moduleName.isBlank() && fullMethodName.contains(moduleName);
+
+      var treeItem = new TreeItem(error, item, parent, isMain, isEngineModule);
       treeItems.add(treeItem);
       fillModel(treeItem.getChildren(), item.getChilden(), treeItem, error, fullMethodName);
     }
+  }
+
+  private boolean isEngineModule(String moduleName) {
+    return SIDE_MODULE_PREFIXES.stream()
+        .anyMatch(moduleName::startsWith);
   }
 
   String getModuleName(IStacktraceElement element) {

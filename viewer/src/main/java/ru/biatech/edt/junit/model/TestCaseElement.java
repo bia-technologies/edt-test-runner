@@ -67,11 +67,6 @@ public class TestCaseElement extends TestCase implements ITestCaseElement {
   }
 
   @Override
-  public ProgressState getProgressState() {
-    return null;
-  }
-
-  @Override
   public TestResult getResultStatus(boolean includeChildren) {
     return status.convertToResult();
   }

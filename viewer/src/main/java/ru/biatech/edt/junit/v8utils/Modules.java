@@ -138,19 +138,39 @@ public class Modules {
     return newCommonModule;
   }
 
+  /**
+   * Возвращает содержимое общего модуля в виде строки
+   *
+   * @param module общий модуль
+   * @return содержимое модуля
+   * @throws CoreException при ошибке доступа к ресурсу модуля
+   * @throws IOException   при ошибке чтения содержимого
+   */
   public String getModuleContent(CommonModule module) throws CoreException, IOException {
     return getModuleContent(module.getModule());
   }
 
+  /**
+   * Возвращает содержимое общего модуля в виде строки
+   *
+   * @param module модуль
+   * @return содержимое модуля
+   * @throws CoreException при ошибке доступа к ресурсу модуля
+   * @throws IOException   при ошибке чтения содержимого
+   */
   public String getModuleContent(Module module) throws CoreException, IOException {
-    var resource = Resources.getModuleResource(module);
-    var result = new ByteArrayOutputStream();
-    byte[] buffer = new byte[1024];
-    var inputStream = resource.getContents();
-
-    for (int length; (length = inputStream.read(buffer)) != -1; ) {
-      result.write(buffer, 0, length);
+    if (module == null) {
+      throw new IllegalArgumentException("module cannot be null");
     }
-    return result.toString(resource.getCharset());
+
+    var resource = Resources.getModuleResource(module);
+    byte[] buffer = new byte[8192];
+
+    try (var inputStream = resource.getContents(); var result = new ByteArrayOutputStream()) {
+      for (int length; (length = inputStream.read(buffer)) != -1; ) {
+        result.write(buffer, 0, length);
+      }
+      return result.toString(resource.getCharset());
+    }
   }
 }

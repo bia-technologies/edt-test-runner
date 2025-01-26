@@ -55,21 +55,12 @@ public class TestSuiteElement extends TestSuite<TestCaseElement> implements ITes
   }
 
   @Override
-  public ProgressState getProgressState() {
-    return null;
-  }
-
-  @Override
   public TestResult getResultStatus(boolean includeChildren) {
-    if (includeChildren && !isEmpty()) {
-      return getCommonStatus().convertToResult();
+    if (includeChildren && isNotEmpty()) {
+      return TestStatus.combineStatus(childrenStatus, status).convertToResult();
     } else {
       return status.convertToResult();
     }
-  }
-
-  private TestStatus getCommonStatus() {
-    return TestStatus.combineStatus(childrenStatus, status);
   }
 
   @Override
@@ -98,9 +89,14 @@ public class TestSuiteElement extends TestSuite<TestCaseElement> implements ITes
   }
 
 
-  private boolean isEmpty() {
-    return getError() == null || getError().length == 0;
+  private boolean withErrors() {
+    return getError() != null && getError().length != 0;
   }
+
+  private boolean isNotEmpty() {
+    return testcase != null && testcase.length != 0;
+  }
+
   private TestStatus getCumulatedStatus() {
     var children = this.getTestcase();
     if (children.length == 0)
@@ -119,7 +115,7 @@ public class TestSuiteElement extends TestSuite<TestCaseElement> implements ITes
       test.init(this);
     }
 
-    status = isEmpty() ? TestStatus.OK : TestStatus.ERROR;
+    status = withErrors() ? TestStatus.ERROR : TestStatus.OK;
     childrenStatus = getCumulatedStatus();
   }
 }

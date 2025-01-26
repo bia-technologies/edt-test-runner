@@ -20,6 +20,7 @@ import com._1c.g5.v8.dt.core.platform.IExtensionProject;
 import com._1c.g5.v8.dt.core.platform.IV8Project;
 import com._1c.g5.v8.dt.launching.core.ILaunchConfigurationTypes;
 import com._1c.g5.v8.dt.metadata.mdclass.CommonModule;
+import com.google.common.base.Strings;
 import lombok.experimental.UtilityClass;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Platform;
@@ -130,7 +131,12 @@ public class LaunchHelper {
   }
 
   public IV8Project getProject(ILaunchConfiguration configuration) {
-    return Projects.getProject(LaunchConfigurationAttributes.getTestExtensionName(configuration));
+    String extensionName;
+    if (configuration == null || Strings.isNullOrEmpty(extensionName = LaunchConfigurationAttributes.getTestExtensionName(configuration))) {
+      return null;
+    }
+
+    return Projects.getProject(extensionName);
   }
 
   public Stream<CommonModule> getTestModulesStream(IExtensionProject extensionProject) {

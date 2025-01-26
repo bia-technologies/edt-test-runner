@@ -181,37 +181,7 @@
 			<unit id="org.eclipse.pde.feature.group" version="0.0.0"/>
 			<unit id="org.eclipse.pde.source.feature.group" version="0.0.0"/>
 		</location>
-		<location includeDependencyDepth="none" includeDependencyScopes="compile" includeSource="true" missingManifest="generate" type="Maven">
-			<dependencies>
-				<dependency>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-simple</artifactId>
-					<version>2.0.16</version>
-					<type>jar</type>
-				</dependency>
-			</dependencies>
-		</location>
-		<location includeDependencyDepth="none" includeDependencyScopes="compile" includeSource="true" missingManifest="generate" type="Maven">
-			<dependencies>
-				<dependency>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-api</artifactId>
-					<version>2.0.16</version>
-					<type>jar</type>
-				</dependency>
-			</dependencies>
-		</location>
-		<location includeDependencyDepth="none" includeDependencyScopes="compile" includeSource="true" missingManifest="generate" type="Maven">
-			<dependencies>
-				<dependency>
-					<groupId>org.java-websocket</groupId>
-					<artifactId>Java-WebSocket</artifactId>
-					<version>1.6.0</version>
-					<type>jar</type>
-				</dependency>
-			</dependencies>
-		</location>
-		<location includeDependencyDepth="none" includeSource="true" missingManifest="generate" type="Maven">
+		<location includeDependencyDepth="infinite" missingManifest="generate" type="Maven">
 			<dependencies>
 				<dependency>
 					<groupId>com.fasterxml.jackson.dataformat</groupId>
@@ -221,7 +191,17 @@
 				</dependency>
 			</dependencies>
 		</location>
-		<location includeDependencyDepth="none" includeSource="true" missingManifest="generate" type="Maven">
+		<location includeDependencyDepth="infinite" missingManifest="generate" type="Maven">
+			<dependencies>
+				<dependency>
+					<groupId>org.java-websocket</groupId>
+					<artifactId>Java-WebSocket</artifactId>
+					<version>1.5.3</version>
+					<type>jar</type>
+				</dependency>
+			</dependencies>
+		</location>
+		<location includeDependencyDepth="infinite" includeSource="true" missingManifest="generate" type="Maven">
 			<dependencies>
 				<dependency>
 					<groupId>org.projectlombok</groupId>

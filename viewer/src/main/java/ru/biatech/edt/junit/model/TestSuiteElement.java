@@ -30,25 +30,6 @@ public class TestSuiteElement extends TestSuite<TestCaseElement> implements ITes
   private TestStatus status;
   private TestStatus childrenStatus;
 
-  public TestSuiteElement(TestSuite<?> suite) {
-    this.id = suite.getId();
-    this.packageName = suite.getPackageName();
-    this.className = suite.getClassName();
-    this.name = suite.getName();
-    this.timestamp = suite.getTimestamp();
-    this.hostname = suite.getHostname();
-    this.time = suite.getTime();
-    this.context = suite.getContext();
-    this.tests = suite.getTests();
-    this.errors = suite.getErrors();
-    this.skipped = suite.getSkipped();
-    this.failures = suite.getFailures();
-
-    this.testcase = Arrays.stream(suite.getTestcase())
-        .map(TestCaseElement::new)
-        .toArray(TestCaseElement[]::new);
-  }
-
   @Override
   public ITestSuiteElement getParent() {
     return null;
@@ -110,6 +91,9 @@ public class TestSuiteElement extends TestSuite<TestCaseElement> implements ITes
     return cumulated;
   }
 
+  /**
+   * Заполняет необходимые поля. Вызывается после полного заполнения.
+   */
   void init() {
     for (var test : getTestcase()) {
       test.init(this);

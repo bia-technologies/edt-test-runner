@@ -42,7 +42,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -135,10 +134,7 @@ public final class SessionsManager {
   public void importSession(TestSuiteElement[] data, ILaunch launch) {
     var session = new Session();
     session.setLaunch(launch);
-    var suites = Arrays.stream(data)
-        .map(TestSuiteElement::new)
-        .toArray(TestSuiteElement[]::new);
-    session.setTestsuite(suites);
+    session.setTestsuite(data);
     appendSession(session);
   }
 

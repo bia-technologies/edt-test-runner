@@ -324,6 +324,10 @@ public class Session extends Report<TestSuiteElement> implements ITestRunSession
     return name + " " + DateFormat.getDateTimeInstance().format(new Date(startTime)); //$NON-NLS-1$
   }
 
+  /**
+   * Инициализирует все тестовые наборы и тесты в сессии.
+   * Заполняет необходимые поля. Вызывается после полного заполнения.
+   */
   void init() {
     for (var suite : getTestsuite()) {
       suite.init();

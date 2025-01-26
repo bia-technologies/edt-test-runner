@@ -32,18 +32,6 @@ public class TestCaseElement extends TestCase implements ITestCaseElement {
   private ITestSuiteElement parent;
   private TestStatus status = TestStatus.NOT_RUN;
 
-  public TestCaseElement(TestCase testCase) {
-    this.className = testCase.getClassName();
-    this.name = testCase.getName();
-    this.time = testCase.getTime();
-    this.skipped = testCase.getSkipped();
-    this.error = testCase.getError();
-    this.failure = testCase.getFailure();
-    this.systemOut = testCase.getSystemOut();
-    this.systemErr = testCase.getSystemErr();
-    this.context = testCase.getContext();
-  }
-
   public String getDisplayName() {
     return getName();
   }
@@ -76,6 +64,9 @@ public class TestCaseElement extends TestCase implements ITestCaseElement {
     return this.getTime();
   }
 
+  /**
+   * Заполняет необходимые поля. Вызывается после полного заполнения.
+   */
   void init(TestSuiteElement suite) {
     parent = suite;
     computeStatus();

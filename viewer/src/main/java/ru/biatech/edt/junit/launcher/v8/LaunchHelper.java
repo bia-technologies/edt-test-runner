@@ -195,7 +195,7 @@ public class LaunchHelper {
 
   public ITestKind getTestRunnerKind(ILaunchConfiguration launchConfiguration) {
     try {
-      String loaderId = launchConfiguration.getAttribute(LaunchConfigurationAttributes.ATTR_TEST_RUNNER_KIND, (String) null);
+      String loaderId = launchConfiguration.getAttribute(LaunchConfigurationAttributes.TEST_RUNNER_KIND, (String) null);
       if (loaderId != null) {
         return TestKindRegistry.getDefault().getKind(loaderId);
       }

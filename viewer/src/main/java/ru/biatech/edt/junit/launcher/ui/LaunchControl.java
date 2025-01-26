@@ -41,6 +41,7 @@ public class LaunchControl extends Composite {
   ComboViewer testModuleControl;
   Text projectPathControl;
   Button loggingControl;
+  Button useRemoteLaunchControl;
 
   public LaunchControl(Composite parent, int style) {
     super(parent, style);
@@ -74,10 +75,12 @@ public class LaunchControl extends Composite {
     appendLabel(grpSettings, "Выводить лог в консоль");
     loggingControl = new Button(grpSettings, SWT.CHECK);
     loggingControl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-  }
 
-  @Override
-  protected void checkSubclass() {
+    var toolTip = "Запуск тестов без перезапуска.1С:Предприятие на закрывается и слушает команды 1С:EDT";
+    appendLabel(grpSettings, "Запуск тестов без перезапуска.", toolTip);
+    useRemoteLaunchControl = new Button(grpSettings, SWT.CHECK);
+    useRemoteLaunchControl.setToolTipText(toolTip);
+    useRemoteLaunchControl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
   }
 
   void initializeFrom() {
@@ -87,9 +90,14 @@ public class LaunchControl extends Composite {
   }
 
   private void appendLabel(Composite parent, String text) {
+    appendLabel(parent, text, null);
+  }
+
+  private void appendLabel(Composite parent, String text, String tooltip) {
     Label label = new Label(parent, SWT.NONE);
     label.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
     label.setText(text);
+    label.setToolTipText(tooltip);
   }
 
   private AutoCompleteComboViewer appendAutoCompleteComboViewer(Composite parent) {

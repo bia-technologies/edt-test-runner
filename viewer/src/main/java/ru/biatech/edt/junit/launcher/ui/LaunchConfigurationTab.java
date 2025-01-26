@@ -51,6 +51,7 @@ public class LaunchConfigurationTab extends AbstractLaunchConfigurationTab {
     control.testModuleControl.addSelectionChangedListener(this::selectionChanged);
     control.projectPathControl.addModifyListener(e -> onChanged());
     control.loggingControl.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> onChanged()));
+    control.useRemoteLaunchControl.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> onChanged()));
   }
 
   @Override
@@ -77,6 +78,26 @@ public class LaunchConfigurationTab extends AbstractLaunchConfigurationTab {
     updateParametersFromConfig(configuration);
   }
 
+  private void updateParametersFromConfig(ILaunchConfiguration configuration) {
+    try {
+      var usedConfiguration = LaunchHelper.getTargetConfiguration(configuration);
+      var project = LaunchHelper.getTestExtension(configuration);
+      var moduleName = LaunchConfigurationAttributes.getTestModuleName(configuration);
+      var projectPath = LaunchConfigurationAttributes.getProjectPath(configuration);
+      var logging = LaunchConfigurationAttributes.getLoggingToConsole(configuration);
+      var useRemoteLaunch = LaunchConfigurationAttributes.useRemoteLaunch(configuration);
+
+      UtilsUI.setSelection(control.usedLaunchConfigurationControl, usedConfiguration);
+      UtilsUI.setSelection(control.testExtensionControl, project);
+      UtilsUI.setSelection(control.testModuleControl, moduleName);
+      control.projectPathControl.setText(projectPath == null ? "" : projectPath);
+      control.loggingControl.setSelection(logging);
+      control.useRemoteLaunchControl.setSelection(useRemoteLaunch);
+    } catch (CoreException e) {
+      TestViewerPlugin.log().logError(UIMessages.LaunchConfigurationTab_failedRestoreSettings, e);
+    }
+  }
+
   @Override
   public void performApply(ILaunchConfigurationWorkingCopy configuration) {
     var usedConfiguration = UtilsUI.getSelection(control.usedLaunchConfigurationControl, ILaunchConfiguration.class);
@@ -88,6 +109,7 @@ public class LaunchConfigurationTab extends AbstractLaunchConfigurationTab {
     configuration.setAttribute(LaunchConfigurationAttributes.TEST_MODULE, module);
     configuration.setAttribute(LaunchConfigurationAttributes.PROJECT_PATH, control.projectPathControl.getText());
     configuration.setAttribute(LaunchConfigurationAttributes.LOGGING_CONSOLE, control.loggingControl.getSelection());
+    configuration.setAttribute(LaunchConfigurationAttributes.USE_REMOTE_LAUNCH, control.useRemoteLaunchControl.getSelection());
   }
 
   @Override
@@ -107,24 +129,6 @@ public class LaunchConfigurationTab extends AbstractLaunchConfigurationTab {
       success = false;
     }
     return success;
-  }
-
-  private void updateParametersFromConfig(ILaunchConfiguration configuration) {
-    try {
-      var usedConfiguration = LaunchHelper.getTargetConfiguration(configuration);
-      var project = LaunchHelper.getTestExtension(configuration);
-      var moduleName = LaunchConfigurationAttributes.getTestModuleName(configuration);
-      var projectPath = LaunchConfigurationAttributes.getProjectPath(configuration);
-      var logging = LaunchConfigurationAttributes.getLoggingToConsole(configuration);
-
-      UtilsUI.setSelection(control.usedLaunchConfigurationControl, usedConfiguration);
-      UtilsUI.setSelection(control.testExtensionControl, project);
-      UtilsUI.setSelection(control.testModuleControl, moduleName);
-      control.projectPathControl.setText(projectPath == null ? "" : projectPath);
-      control.loggingControl.setSelection(logging);
-    } catch (CoreException e) {
-      TestViewerPlugin.log().logError(UIMessages.LaunchConfigurationTab_failedRestoreSettings, e);
-    }
   }
 
   private void selectionChanged(SelectionChangedEvent event) {

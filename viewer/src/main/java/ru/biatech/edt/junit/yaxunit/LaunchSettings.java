@@ -109,7 +109,8 @@ public class LaunchSettings {
       logging.level = "debug"; //$NON-NLS-1$
     }
 
-    settings.closeAfterTests = !LaunchConfigurationAttributes.getKeepAlive(configuration);
+    var useRemoteLaunch = LaunchConfigurationAttributes.useRemoteLaunch(configuration);
+    settings.closeAfterTests = !useRemoteLaunch;
     settings.name = configuration.getName();
     settings.workPath = LaunchHelper.getWorkPath(settings.name).toString();
     settings.reportPath = settings.workPath;
@@ -117,7 +118,7 @@ public class LaunchSettings {
     settings.logging = logging;
     settings.projectPath = LaunchConfigurationAttributes.getProjectPath(configuration);
 
-    if (LaunchConfigurationAttributes.getKeepAlive(configuration)) {
+    if (useRemoteLaunch) {
       settings.rpc = new RpcSettings();
       RemoteLaunchManager.configureLaunch(settings.rpc);
     }

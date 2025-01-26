@@ -19,7 +19,6 @@ package ru.biatech.edt.junit.launcher.v8;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import ru.biatech.edt.junit.TestViewerPlugin;
 
 import java.util.List;
 
@@ -43,10 +42,11 @@ public final class LaunchConfigurationAttributes {
 
   public static final String TEST_FULL_NAME = PLUGIN_ID + ".launcher.TEST_FULL_NAME"; //$NON-NLS-1$
 
-  public static final String ATTR_TEST_RUNNER_KIND = PLUGIN_ID + ".launcher.TEST_KIND"; //$NON-NLS-1$
+  public static final String TEST_RUNNER_KIND = PLUGIN_ID + ".launcher.TEST_KIND"; //$NON-NLS-1$
 
-  public static final String ATTR_KEEP_RUNNING = PLUGIN_ID + ".launcher.KEEP_RUNNING"; //$NON-NLS-1$
-  public static final String ATTR_RPC_KEY = PLUGIN_ID + ".launcher.RPC_KEY"; //$NON-NLS-1$
+  public static final String USE_REMOTE_LAUNCH = PLUGIN_ID + ".launcher.USE_REMOTE_LAUNCH"; //$NON-NLS-1$
+
+  public static final String RPC_KEY = PLUGIN_ID + ".launcher.RPC_KEY"; //$NON-NLS-1$
 
   public static String getTargetConfigurationName(ILaunchConfiguration configuration) throws CoreException {
     return configuration.getAttribute(USED_LAUNCH_CONFIGURATION, (String) null);
@@ -91,7 +91,7 @@ public final class LaunchConfigurationAttributes {
   }
 
   public static String getTestKind(ILaunchConfiguration configuration) {
-    return getAttribute(configuration, ATTR_TEST_RUNNER_KIND);
+    return getAttribute(configuration, TEST_RUNNER_KIND);
   }
 
   public static String getAttribute(ILaunchConfiguration configuration, String attributeName) {
@@ -118,7 +118,7 @@ public final class LaunchConfigurationAttributes {
     return getAttribute(configuration, PROJECT);
   }
 
-  public static boolean getKeepAlive(ILaunchConfiguration configuration) {
-    return true;//getBooleanAttribute(configuration, LaunchConfigurationAttributes.ATTR_KEEP_RUNNING);
+  public static boolean useRemoteLaunch(ILaunchConfiguration configuration) {
+    return getBooleanAttribute(configuration, LaunchConfigurationAttributes.USE_REMOTE_LAUNCH);
   }
 }

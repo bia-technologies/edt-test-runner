@@ -48,7 +48,7 @@ public class Launcher implements IUnitLauncher {
   public void launch(ILaunchConfiguration configuration, String launchMode, ILaunch launch, IProgressMonitor monitor) throws CoreException {
     TestViewerPlugin.log().debug(Messages.Launcher_Launch, configuration);
 
-    if (LaunchConfigurationAttributes.getKeepAlive(configuration)) {
+    if (LaunchConfigurationAttributes.useRemoteLaunch(configuration)) {
       RemoteLaunchManager.start();
     }
 
@@ -79,9 +79,9 @@ public class Launcher implements IUnitLauncher {
     oneCConfiguration.setAttribute(ILaunchConfigurationAttributes.STARTUP_OPTION, startupParameters);
     oneCConfiguration.setAttribute(LaunchConfigurationAttributes.WORK_PATH, settings.getWorkPath());
     oneCConfiguration.setAttribute(LaunchConfigurationAttributes.PROJECT, settings.getExtensionName());
-    oneCConfiguration.setAttribute(LaunchConfigurationAttributes.ATTR_TEST_RUNNER_KIND, TestKindRegistry.YAXUNIT_TEST_KIND_ID);
+    oneCConfiguration.setAttribute(LaunchConfigurationAttributes.TEST_RUNNER_KIND, TestKindRegistry.YAXUNIT_TEST_KIND_ID);
     if (settings.rpc != null) {
-      oneCConfiguration.setAttribute(LaunchConfigurationAttributes.ATTR_RPC_KEY, settings.rpc.key);
+      oneCConfiguration.setAttribute(LaunchConfigurationAttributes.RPC_KEY, settings.rpc.key);
     }
   }
 
@@ -115,7 +115,7 @@ public class Launcher implements IUnitLauncher {
 
   @SneakyThrows
   public boolean remoteLaunchTest(ILaunchConfiguration configuration, LaunchSettings settings, ILaunch launch, IProgressMonitor monitor) {
-    if (!RemoteLaunchManager.isAvailable() && LaunchConfigurationAttributes.getKeepAlive(configuration)) {
+    if (!RemoteLaunchManager.isAvailable() && LaunchConfigurationAttributes.useRemoteLaunch(configuration)) {
       return false;
     }
 

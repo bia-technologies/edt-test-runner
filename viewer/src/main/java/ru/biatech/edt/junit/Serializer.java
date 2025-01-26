@@ -14,26 +14,26 @@
  * limitations under the License.
  *******************************************************************************/
 
-package ru.biatech.edt.junit.yaxunit.remote;
+package ru.biatech.edt.junit;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.SneakyThrows;
-import ru.biatech.edt.junit.yaxunit.remote.dto.Message;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import lombok.Getter;
+import lombok.experimental.UtilityClass;
 
+@UtilityClass
 public class Serializer {
-  private final ObjectMapper mapper = new ObjectMapper()
-      .configure(DeserializationFeature.FAIL_ON_MISSING_EXTERNAL_TYPE_ID_PROPERTY, false)
+
+  @Getter
+  private final ObjectMapper jsonMapper = new ObjectMapper()
+      .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
+      .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+
+  @Getter
+  ObjectMapper xmlMapper = new XmlMapper()
+      .setDefaultUseWrapper(false)
+      .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
       .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
-
-  @SneakyThrows
-  public Message<?> readMessage(String message) {
-    return mapper.readValue(message, Message.class);
-  }
-
-  @SneakyThrows
-  public String writeMessage(Message<?> message) {
-    return mapper.writeValueAsString(message);
-  }
 }

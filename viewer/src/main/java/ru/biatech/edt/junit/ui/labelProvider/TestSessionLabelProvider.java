@@ -19,7 +19,6 @@
 
 package ru.biatech.edt.junit.ui.labelProvider;
 
-import com.google.common.base.Strings;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
@@ -34,6 +33,7 @@ import ru.biatech.edt.junit.model.TestCaseElement;
 import ru.biatech.edt.junit.model.TestSuiteElement;
 import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
+import ru.biatech.edt.junit.ui.utils.StringUtilities;
 import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
 
 import java.text.MessageFormat;
@@ -107,7 +107,7 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
   }
 
   private StyledString addContext(StyledString styledString, String context) {
-    if (Strings.isNullOrEmpty(context)) {
+    if (StringUtilities.isNullOrEmpty(context)) {
       return styledString;
     }
 

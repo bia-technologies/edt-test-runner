@@ -20,7 +20,6 @@ import com._1c.g5.v8.dt.core.platform.IExtensionProject;
 import com._1c.g5.v8.dt.core.platform.IV8Project;
 import com._1c.g5.v8.dt.launching.core.ILaunchConfigurationTypes;
 import com._1c.g5.v8.dt.metadata.mdclass.CommonModule;
-import com.google.common.base.Strings;
 import lombok.experimental.UtilityClass;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Platform;
@@ -35,6 +34,7 @@ import ru.biatech.edt.junit.launcher.LaunchConfigurationTypes;
 import ru.biatech.edt.junit.services.TestsManager;
 import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.ui.dialogs.Dialogs;
+import ru.biatech.edt.junit.ui.utils.StringUtilities;
 import ru.biatech.edt.junit.v8utils.Projects;
 
 import java.io.IOException;
@@ -127,12 +127,17 @@ public class LaunchHelper {
   }
 
   public IExtensionProject getTestExtension(ILaunchConfiguration configuration) {
-    return (IExtensionProject) getProject(configuration);
+    var project = getProject(configuration);
+    if (project instanceof IExtensionProject) {
+      return (IExtensionProject) project;
+    } else {
+      return null;
+    }
   }
 
   public IV8Project getProject(ILaunchConfiguration configuration) {
     String extensionName;
-    if (configuration == null || Strings.isNullOrEmpty(extensionName = LaunchConfigurationAttributes.getTestExtensionName(configuration))) {
+    if (configuration == null || StringUtilities.isNullOrEmpty(extensionName = LaunchConfigurationAttributes.getTestExtensionName(configuration))) {
       return null;
     }
 

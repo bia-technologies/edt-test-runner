@@ -70,7 +70,7 @@ public class TestSuiteElement extends TestSuite<TestCaseElement> implements ITes
 
   @Override
   public Stream<ErrorInfo> getErrorsList() {
-    return Stream.empty();
+    return getError() == null ? Stream.empty() : Arrays.stream(getError());
   }
 
   @Override

@@ -19,7 +19,6 @@ package ru.biatech.edt.junit.ui.stacktrace;
 import com._1c.g5.v8.dt.stacktraces.model.IStacktraceElement;
 import com._1c.g5.v8.dt.stacktraces.model.IStacktraceFrame;
 import com._1c.g5.v8.dt.stacktraces.model.IStacktraceParser;
-import com.google.common.base.Strings;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Value;
@@ -27,6 +26,7 @@ import ru.biatech.edt.junit.model.ITestCaseElement;
 import ru.biatech.edt.junit.model.ITestElement;
 import ru.biatech.edt.junit.model.ITestSuiteElement;
 import ru.biatech.edt.junit.model.report.ErrorInfo;
+import ru.biatech.edt.junit.ui.utils.StringUtilities;
 import ru.biatech.edt.junit.v8utils.VendorServices;
 
 import java.util.ArrayList;
@@ -49,14 +49,14 @@ public class StackTraceTreeBuilder {
     testElement.getErrorsList().forEach(error -> {
       Tree parent = root;
 
-      if (!Strings.isNullOrEmpty(error.getMessage())) {
+      if (!StringUtilities.isNullOrEmpty(error.getMessage())) {
         var item = new TreeItem(error, null);
         root.children.add(item);
         parent = item;
       }
 
       var fullMethodName = testElement instanceof ITestCaseElement ? ((ITestCaseElement) testElement).getClassName() : ((ITestSuiteElement) testElement).getClassName();
-      if (!Strings.isNullOrEmpty(error.getTrace())) {
+      if (!StringUtilities.isNullOrEmpty(error.getTrace())) {
         var stacktrace = stacktraceParser.parse(error.getTrace(), fullMethodName, null);
         fillModel(parent.getChildren(), stacktrace.getChilden(), parent, error, fullMethodName);
       }

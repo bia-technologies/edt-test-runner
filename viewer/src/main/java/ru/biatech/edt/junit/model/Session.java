@@ -19,7 +19,6 @@
 package ru.biatech.edt.junit.model;
 
 import com._1c.g5.v8.dt.core.platform.IV8Project;
-import com.google.common.base.Strings;
 import lombok.Getter;
 import lombok.Setter;
 import org.eclipse.core.runtime.ListenerList;
@@ -30,6 +29,7 @@ import ru.biatech.edt.junit.launcher.v8.LaunchConfigurationAttributes;
 import ru.biatech.edt.junit.launcher.v8.LaunchHelper;
 import ru.biatech.edt.junit.model.report.ErrorInfo;
 import ru.biatech.edt.junit.model.report.Report;
+import ru.biatech.edt.junit.ui.utils.StringUtilities;
 import ru.biatech.edt.junit.v8utils.Projects;
 
 import java.io.File;
@@ -195,7 +195,7 @@ public class Session extends Report<TestSuiteElement> implements ITestRunSession
   public IV8Project getLaunchedProject() {
     if (launchedProject != null) {
       return launchedProject;
-    } else if (!Strings.isNullOrEmpty(projectName)) {
+    } else if (!StringUtilities.isNullOrEmpty(projectName)) {
       return launchedProject = Projects.getProject(projectName);
     } else {
       return null;

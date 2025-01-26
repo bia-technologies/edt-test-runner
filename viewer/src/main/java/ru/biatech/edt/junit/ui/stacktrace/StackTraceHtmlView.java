@@ -19,8 +19,8 @@ package ru.biatech.edt.junit.ui.stacktrace;
 import com._1c.g5.v8.dt.stacktraces.model.IStacktraceElement;
 import com._1c.g5.v8.dt.stacktraces.model.IStacktraceError;
 import com._1c.g5.v8.dt.stacktraces.model.IStacktraceFrame;
-import com.google.gson.GsonBuilder;
 import lombok.Data;
+import lombok.SneakyThrows;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.MenuManager;
@@ -30,6 +30,7 @@ import org.eclipse.swt.browser.BrowserFunction;
 import org.eclipse.swt.browser.ProgressListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import ru.biatech.edt.junit.Serializer;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.model.ITestElement;
 import ru.biatech.edt.junit.model.report.ErrorInfo;
@@ -207,13 +208,13 @@ public class StackTraceHtmlView implements StackTraceView {
     browser.addProgressListener(ProgressListener.completedAdapter(progressEvent -> registerEventHandler()));
   }
 
+  @SneakyThrows
   private void handleViewEvent(String eventData) {
     if (eventData == null || eventData.isBlank() || !eventData.startsWith("{")) {
       return;
     }
     TestViewerPlugin.log().debug("Handling browser event: " + eventData);
-    var parser = new GsonBuilder().create();
-    var event = parser.fromJson(eventData, EventData.class);
+    var event = Serializer.getJsonMapper().readValue(eventData, EventData.class);
 
     switch (event.getEvent()) {
       case CLICK_EVENT:

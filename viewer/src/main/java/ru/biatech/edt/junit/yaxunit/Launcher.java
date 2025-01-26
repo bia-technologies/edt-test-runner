@@ -18,8 +18,6 @@ package ru.biatech.edt.junit.yaxunit;
 
 import com._1c.g5.v8.dt.launching.core.ILaunchConfigurationAttributes;
 import com._1c.g5.v8.dt.metadata.mdclass.CommonModule;
-import com.google.common.base.Strings;
-import com.google.gson.GsonBuilder;
 import lombok.SneakyThrows;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -27,18 +25,18 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import ru.biatech.edt.junit.Serializer;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.kinds.IUnitLauncher;
 import ru.biatech.edt.junit.kinds.TestKindRegistry;
 import ru.biatech.edt.junit.launcher.v8.LaunchConfigurationAttributes;
 import ru.biatech.edt.junit.launcher.v8.LaunchHelper;
 import ru.biatech.edt.junit.model.SessionsManager;
+import ru.biatech.edt.junit.ui.utils.StringUtilities;
 import ru.biatech.edt.junit.v8utils.Modules;
 import ru.biatech.edt.junit.v8utils.Projects;
 import ru.biatech.edt.junit.yaxunit.remote.RemoteLaunchManager;
 
-import java.io.Writer;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 
@@ -88,11 +86,8 @@ public class Launcher implements IUnitLauncher {
   protected String createConfig(LaunchSettings settings) {
     var path = Path.of(settings.getWorkPath(), Constants.PARAMETERS_FILE_NAME);
 
-    try (Writer writer = Files.newBufferedWriter(path)) {
-      new GsonBuilder()
-          .excludeFieldsWithoutExposeAnnotation()
-          .create()
-          .toJson(settings, writer);
+    try {
+      Serializer.getJsonMapper().writeValue(path.toFile(), settings);
     } catch (Exception e) {
       TestViewerPlugin.log().logError(e);
     }
@@ -107,7 +102,7 @@ public class Launcher implements IUnitLauncher {
 
     for (String attribute : attributes) {
       String value = LaunchConfigurationAttributes.getAttribute(unitConfiguration, attribute);
-      if (!Strings.isNullOrEmpty(value)) {
+      if (!StringUtilities.isNullOrEmpty(value)) {
         oneCConfiguration.setAttribute(attribute, value);
       }
     }

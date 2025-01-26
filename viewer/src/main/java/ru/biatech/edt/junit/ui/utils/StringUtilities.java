@@ -16,7 +16,6 @@
 
 package ru.biatech.edt.junit.ui.utils;
 
-import com.google.common.base.Strings;
 import lombok.experimental.UtilityClass;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.model.ITestCaseElement;
@@ -51,6 +50,10 @@ public class StringUtilities {
     return "<Failed to get trace>";
   }
 
+  public boolean isNullOrEmpty(String string) {
+    return string == null || string.isEmpty();
+  }
+
   private void convertLineTerminators(String text, PrintWriter printWriter) {
     var stringReader = new StringReader(text);
     var bufferedReader = new BufferedReader(stringReader);
@@ -65,10 +68,10 @@ public class StringUtilities {
   }
 
   private void printTraceText(PrintWriter printWriter, ErrorInfo error) {
-    if (!Strings.isNullOrEmpty(error.getMessage())) {
+    if (!isNullOrEmpty(error.getMessage())) {
       convertLineTerminators(error.getMessage(), printWriter);
     }
-    if (!Strings.isNullOrEmpty(error.getTrace())) {
+    if (!isNullOrEmpty(error.getTrace())) {
       convertLineTerminators(error.getTrace(), printWriter);
     }
   }

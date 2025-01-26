@@ -16,7 +16,6 @@
  *******************************************************************************/
 package ru.biatech.edt.junit.ui.stacktrace.actions;
 
-import com.google.common.base.Strings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.dnd.DND;
@@ -60,10 +59,10 @@ public class CopyTraceAction extends SelectionListenerAction {
     }
 
     String source = null;
-    if (!Strings.isNullOrEmpty(trace)) {
+    if (!StringUtilities.isNullOrEmpty(trace)) {
       source = trace;
     }
-    if (Strings.isNullOrEmpty(source)) {
+    if (StringUtilities.isNullOrEmpty(source)) {
       return;
     }
 

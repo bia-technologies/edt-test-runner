@@ -26,7 +26,7 @@ import ru.biatech.edt.junit.yaxunit.remote.dto.Message;
 import java.net.InetSocketAddress;
 
 public class WebSocketServer extends org.java_websocket.server.WebSocketServer {
-  private final Serializer serializer = new Serializer();
+  private final MessageSerializer messageSerializer = new MessageSerializer();
   private final Handler handler;
   @Getter
   private volatile boolean started;
@@ -39,7 +39,7 @@ public class WebSocketServer extends org.java_websocket.server.WebSocketServer {
   }
 
   public void send(WebSocket socket, Message<?> message) {
-    var messageText = serializer.writeMessage(message);
+    var messageText = messageSerializer.writeMessage(message);
     log.debug("Send message to {0}\n{1}", socket.getRemoteSocketAddress().getAddress(),messageText);
     socket.send(messageText);
   }
@@ -63,7 +63,7 @@ public class WebSocketServer extends org.java_websocket.server.WebSocketServer {
   public void onMessage(WebSocket socket, String messageText) {
     log.debug("Message receive from {0}\n{1}", socket.getRemoteSocketAddress().getAddress(), messageText);
     try {
-      var message = serializer.readMessage(messageText);
+      var message = messageSerializer.readMessage(messageText);
       handler.onMessageReceive(socket, message);
       System.out.println(socket + ": " + message);
     } catch (Exception ex) {

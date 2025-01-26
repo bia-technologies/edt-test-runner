@@ -16,13 +16,13 @@
 
 package ru.biatech.edt.junit.yaxunit;
 
-import com.google.common.base.Strings;
-import com.google.gson.annotations.Expose;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Data;
 import lombok.Getter;
-import lombok.Setter;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import ru.biatech.edt.junit.launcher.v8.LaunchConfigurationAttributes;
 import ru.biatech.edt.junit.launcher.v8.LaunchHelper;
+import ru.biatech.edt.junit.ui.utils.StringUtilities;
 import ru.biatech.edt.junit.v8utils.Projects;
 import ru.biatech.edt.junit.yaxunit.remote.RemoteLaunchManager;
 
@@ -34,46 +34,22 @@ import java.util.stream.Collectors;
 
 @Getter
 public class LaunchSettings {
-  String name;
-  String workPath;
-  @Expose
   String projectPath;
-  @Expose
   String reportPath;
-  @Expose
   String reportFormat = Constants.REPORT_FORMAT;
-  @Expose
   boolean closeAfterTests = true;
-  @Expose
   Filter filter;
-  @Expose
   LoggingSettings logging;
-  @Expose
   RpcSettings rpc;
 
+  @JsonIgnore
+  String name;
+  @JsonIgnore
+  String workPath;
+  @JsonIgnore
   String extensionName;
+  @JsonIgnore
   Set<String> usedModules;
-
-  public static class Filter {
-    @Expose
-    List<String> extensions = new ArrayList<>();;
-    @Expose
-    List<String> modules = new ArrayList<>();
-    @Expose
-    List<String> tests = new ArrayList<>();
-
-    public void addModule(String moduleName) {
-      if (!Strings.isNullOrEmpty(moduleName)) {
-        modules.add(moduleName);
-      }
-    }
-
-    public void addExtension(String extensionName) {
-      if (!Strings.isNullOrEmpty(extensionName)) {
-        extensions.add(extensionName);
-      }
-    }
-  }
 
   public static LaunchSettings fromConfiguration(ILaunchConfiguration configuration) {
     var extension = LaunchHelper.getTestExtension(configuration);
@@ -92,7 +68,7 @@ public class LaunchSettings {
       settings.usedModules = tests.stream().map(t -> t.split("\\.")[0])
           .collect(Collectors.toUnmodifiableSet());
     }
-    
+
     if (tests != null && tests.size() == 1) {
       var chunks = tests.get(0).split("\\."); //$NON-NLS-1$
       if (chunks.length == 2 && chunks[1].equalsIgnoreCase(Constants.REGISTRATION_METHOD_NAME)) {
@@ -105,8 +81,8 @@ public class LaunchSettings {
 
     var logging = new LoggingSettings();
     if (LaunchConfigurationAttributes.getLoggingToConsole(configuration)) {
-      logging.console = true;
-      logging.level = "debug"; //$NON-NLS-1$
+      logging.setConsole(true);
+      logging.setLevel("debug"); //$NON-NLS-1$
     }
 
     var useRemoteLaunch = LaunchConfigurationAttributes.useRemoteLaunch(configuration);
@@ -126,22 +102,37 @@ public class LaunchSettings {
     return settings;
   }
 
-  @Setter
+  @Getter
+  public static class Filter {
+    List<String> extensions = new ArrayList<>();
+    ;
+    List<String> modules = new ArrayList<>();
+    List<String> tests = new ArrayList<>();
+
+    public void addModule(String moduleName) {
+      if (!StringUtilities.isNullOrEmpty(moduleName)) {
+        modules.add(moduleName);
+      }
+    }
+
+    public void addExtension(String extensionName) {
+      if (!StringUtilities.isNullOrEmpty(extensionName)) {
+        extensions.add(extensionName);
+      }
+    }
+  }
+
+  @Data
   public static class RpcSettings {
-    @Expose
     int port;
-    @Expose
     boolean enable;
-    @Expose
     String key;
-    @Expose
     String transport = "ws";
   }
 
+  @Data
   public static class LoggingSettings {
-    @Expose
     boolean console;
-    @Expose
     String level;
   }
 }

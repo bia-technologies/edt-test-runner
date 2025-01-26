@@ -30,7 +30,7 @@ import java.util.stream.Stream;
 public class TestCaseElement extends TestCase implements ITestCaseElement {
 
   private ITestSuiteElement parent;
-  private TestStatus status;
+  private TestStatus status = TestStatus.NOT_RUN;
 
   public TestCaseElement(TestCase testCase) {
     this.className = testCase.getClassName();

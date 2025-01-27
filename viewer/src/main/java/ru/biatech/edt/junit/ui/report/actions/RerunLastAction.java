@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 BIA-Technologies Limited Liability Company.
+ * Copyright (c) 2025 BIA-Technologies Limited Liability Company.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,26 @@
 
 package ru.biatech.edt.junit.ui.report.actions;
 
-import org.eclipse.jface.action.IAction;
-import ru.biatech.edt.junit.Preferences;
+import org.eclipse.jface.action.Action;
+import ru.biatech.edt.junit.launcher.v8.RerunHelper;
 import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
 
-public class ActivateOnErrorAction extends SettingsChangeAction {
-  public ActivateOnErrorAction(TestRunnerViewPart.ReportSettings settings) {
-    super(settings, UIMessages.TestRunnerViewPart_activate_on_failure_only, IAction.AS_CHECK_BOX);
-  }
+public class RerunLastAction extends Action {
+  private final TestRunnerViewPart testRunnerViewPart;
 
-  public void update() {
-    setChecked(settings.isShowOnErrorOnly());
+  public RerunLastAction(TestRunnerViewPart testRunnerViewPart) {
+    this.testRunnerViewPart = testRunnerViewPart;
+    setText(UIMessages.TestRunnerViewPart_rerunaction_label);
+    setToolTipText(UIMessages.TestRunnerViewPart_rerunaction_tooltip);
+
+    setEnabled(false);
+
+    ActionsSupport.setLocalImageDescriptors(this, "rerun.png"); //$NON-NLS-1$
   }
 
   @Override
   public void run() {
-    settings.setShowOnErrorOnly(isChecked());
-    Preferences.putShowOnErrorOnly(settings.isShowOnErrorOnly());
+    RerunHelper.rerun(testRunnerViewPart.getSession());
   }
 }

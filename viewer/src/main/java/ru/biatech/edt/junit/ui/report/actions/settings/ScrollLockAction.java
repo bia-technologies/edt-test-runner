@@ -1,6 +1,6 @@
 /*******************************************************************************
  * Copyright (c) 2000, 2010 IBM Corporation and others.
- * Copyright (c) 2022-2023 BIA-Technologies Limited Liability Company.
+ * Copyright (c) 2022-2025 BIA-Technologies Limited Liability Company.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,11 +14,13 @@
  *     IBM Corporation - initial API and implementation
  *     BIA-Technologies LLC - adaptation for EDT
  *******************************************************************************/
-package ru.biatech.edt.junit.ui.report.actions;
+package ru.biatech.edt.junit.ui.report.actions.settings;
 
 
 import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
+import ru.biatech.edt.junit.ui.report.actions.ActionsSupport;
+import ru.biatech.edt.junit.ui.report.actions.SettingsChangeAction;
 
 /**
  * Toggles console auto-scroll

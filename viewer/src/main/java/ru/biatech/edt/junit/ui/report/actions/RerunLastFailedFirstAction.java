@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 BIA-Technologies Limited Liability Company.
+ * Copyright (c) 2025 BIA-Technologies Limited Liability Company.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,27 +16,24 @@
 
 package ru.biatech.edt.junit.ui.report.actions;
 
-import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.Action;
+import ru.biatech.edt.junit.launcher.v8.RerunHelper;
 import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
 
-import static ru.biatech.edt.junit.ui.report.TestRunnerViewPart.LAYOUT_HIERARCHICAL;
+public class RerunLastFailedFirstAction extends Action {
+  private final TestRunnerViewPart testRunnerViewPart;
 
-public class ShowTestHierarchyAction extends SettingsChangeAction {
-  public ShowTestHierarchyAction(TestRunnerViewPart.ReportSettings settings) {
-    super(settings, UIMessages.TestRunnerViewPart_hierarchical_layout, IAction.AS_CHECK_BOX);
-
-    ActionsSupport.setLocalImageDescriptors(this, "hierarchicalLayout.png"); //$NON-NLS-1$
+  public RerunLastFailedFirstAction(TestRunnerViewPart testRunnerViewPart) {
+    this.testRunnerViewPart = testRunnerViewPart;
+    setText(UIMessages.TestRunnerViewPart_rerunfailuresaction_label);
+    setToolTipText(UIMessages.TestRunnerViewPart_rerunfailuresaction_tooltip);
+    ActionsSupport.setLocalImageDescriptors(this, "rerun-failed.png"); //$NON-NLS-1$
+    setEnabled(false);
   }
 
   @Override
   public void run() {
-    int mode = isChecked() ? LAYOUT_HIERARCHICAL : TestRunnerViewPart.LAYOUT_FLAT;
-    settings.setLayoutMode(mode);
-  }
-
-  @Override
-  public void update() {
-    setChecked(settings.getLayoutMode() == LAYOUT_HIERARCHICAL);
+    RerunHelper.rerunFailures(testRunnerViewPart.getSession());
   }
 }

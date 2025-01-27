@@ -331,6 +331,11 @@ public class Session extends Report<TestSuiteElement> implements ITestRunSession
   void init() {
     for (var suite : getTestsuite()) {
       suite.init();
+      errorCount += suite.getErrors();
+      failureCount += suite.getFailures();
+      totalCount += suite.getTests();
+      ignoredCount += suite.getSkipped();
     }
+    startedCount = totalCount - ignoredCount;
   }
 }

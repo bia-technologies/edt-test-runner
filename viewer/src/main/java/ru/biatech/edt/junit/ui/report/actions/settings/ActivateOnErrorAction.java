@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 BIA-Technologies Limited Liability Company.
+ * Copyright (c) 2023-2025 BIA-Technologies Limited Liability Company.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,26 @@
  * limitations under the License.
  *******************************************************************************/
 
-package ru.biatech.edt.junit.ui.report.actions;
+package ru.biatech.edt.junit.ui.report.actions.settings;
 
 import org.eclipse.jface.action.IAction;
+import ru.biatech.edt.junit.Preferences;
 import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
+import ru.biatech.edt.junit.ui.report.actions.SettingsChangeAction;
 
-public class ShowTimeAction extends SettingsChangeAction {
-  public ShowTimeAction(TestRunnerViewPart.ReportSettings settings) {
-    super(settings, UIMessages.TestRunnerViewPart_show_execution_time, IAction.AS_CHECK_BOX);
+public class ActivateOnErrorAction extends SettingsChangeAction {
+  public ActivateOnErrorAction(TestRunnerViewPart.ReportSettings settings) {
+    super(settings, UIMessages.TestRunnerViewPart_activate_on_failure_only, IAction.AS_CHECK_BOX);
+  }
+
+  public void update() {
+    setChecked(settings.isShowOnErrorOnly());
   }
 
   @Override
   public void run() {
-    settings.setShowExecutionTime(isChecked());
+    settings.setShowOnErrorOnly(isChecked());
+    Preferences.putShowOnErrorOnly(settings.isShowOnErrorOnly());
   }
 }

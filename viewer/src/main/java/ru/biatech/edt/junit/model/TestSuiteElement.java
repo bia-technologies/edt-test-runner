@@ -95,8 +95,23 @@ public class TestSuiteElement extends TestSuite<TestCaseElement> implements ITes
    * Заполняет необходимые поля. Вызывается после полного заполнения.
    */
   void init() {
+    failures = 0;
+    errors = 0;
+    skipped = 0;
+    tests = testcase.length;
     for (var test : getTestcase()) {
       test.init(this);
+      switch (test.getStatus()) {
+        case ERROR:
+          errors++;
+          break;
+        case FAILURE:
+          failures++;
+          break;
+        case SKIPPED:
+          skipped++;
+          break;
+      }
     }
 
     status = withErrors() ? TestStatus.ERROR : TestStatus.OK;

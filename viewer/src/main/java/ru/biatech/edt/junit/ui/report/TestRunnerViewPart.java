@@ -36,13 +36,8 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ILock;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
-import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
-import org.eclipse.jface.action.IToolBarManager;
-import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -87,17 +82,7 @@ import ru.biatech.edt.junit.model.Session;
 import ru.biatech.edt.junit.model.TestStatus;
 import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.ui.UIPreferencesConstants;
-import ru.biatech.edt.junit.ui.report.actions.ActivateOnErrorAction;
-import ru.biatech.edt.junit.ui.report.actions.FailuresOnlyFilterAction;
-import ru.biatech.edt.junit.ui.report.actions.IgnoredOnlyFilterAction;
-import ru.biatech.edt.junit.ui.report.actions.ScrollLockAction;
-import ru.biatech.edt.junit.ui.report.actions.ShowNextFailureAction;
-import ru.biatech.edt.junit.ui.report.actions.ShowPreviousFailureAction;
-import ru.biatech.edt.junit.ui.report.actions.ShowTestHierarchyAction;
-import ru.biatech.edt.junit.ui.report.actions.ShowTimeAction;
-import ru.biatech.edt.junit.ui.report.actions.ShowWebStackTraceAction;
-import ru.biatech.edt.junit.ui.report.actions.ToggleOrientationAction;
-import ru.biatech.edt.junit.ui.report.actions.ToggleSortingAction;
+import ru.biatech.edt.junit.ui.report.actions.ToolBarManager;
 import ru.biatech.edt.junit.ui.report.history.RunnerViewHistory;
 import ru.biatech.edt.junit.ui.stacktrace.FailureViewer;
 import ru.biatech.edt.junit.ui.stacktrace.actions.CopyTraceAction;
@@ -105,7 +90,6 @@ import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
 
 import java.text.MessageFormat;
 import java.text.NumberFormat;
-import java.util.List;
 
 /**
  * A ViewPart that shows the results of a test run.
@@ -149,23 +133,15 @@ public class TestRunnerViewPart extends ViewPart {
   /**
    * Actions
    */
-  private Action fNextAction;
-  private Action fPreviousAction;
+  @Getter
+  ToolBarManager toolBar = new ToolBarManager(this);
   private CopyTraceAction fCopyAction;
-  private FailuresOnlyFilterAction fFailuresOnlyFilterAction;
-  private IgnoredOnlyFilterAction fIgnoredOnlyFilterAction;
-  private ScrollLockAction fScrollLockAction;
-  private ToggleOrientationAction[] fToggleOrientationActions;
-  private ShowTestHierarchyAction fShowTestHierarchyAction;
-  private ShowTimeAction fShowTimeAction;
-  private ShowWebStackTraceAction showWebStackTraceAction;
-  private ActivateOnErrorAction fActivateOnErrorAction;
-  private ToggleSortingAction[] fToggleSortingActions;
   private IMenuListener fViewMenuListener;
   @Getter
   private Session session;
   private TestSessionListener sessionListener;
-  private RunnerViewHistory fViewHistory;
+  @Getter
+  private RunnerViewHistory viewHistoryManager;
   private SessionListener fTestRunSessionListener;
   private IMemento fMemento;
   private SashForm fSashForm;
@@ -254,9 +230,7 @@ public class TestRunnerViewPart extends ViewPart {
     getViewSite().getPage().removePartListener(fPartListener);
 
     imageProvider.dispose();
-    if (fViewMenuListener != null) {
-      getViewSite().getActionBars().getMenuManager().removeMenuListener(fViewMenuListener);
-    }
+    toolBar.dispose();
     if (failureViewer != null) {
       failureViewer.dispose();
     }
@@ -308,6 +282,7 @@ action enablement
     this.session = session;
     fTestViewer.registerActiveSession(session);
 
+    toolBar.onChangedSession();
     if (fSashForm.isDisposed()) {
       stopUpdateJobs();
       return deactivatedSession;
@@ -347,6 +322,7 @@ action enablement
 
   void handleTestSelected(ITestElement test) {
     showFailure(test);
+    toolBar.updateActions();
     fCopyAction.handleTestSelected(test);
   }
 
@@ -393,22 +369,16 @@ action enablement
     } else {
       updateViewIcon();
     }
-    updateNextPreviousActions();
 
+    toolBar.updateActions();
     fTestViewer.processChangesInUI();
-  }
-
-  private void updateNextPreviousActions() {
-    boolean hasErrorsOrFailures = !settings.isShowIgnoredOnly() && hasErrorsOrFailures();
-    fNextAction.setEnabled(hasErrorsOrFailures);
-    fPreviousAction.setEnabled(hasErrorsOrFailures);
   }
 
   private void selectFirstFailure() {
     fTestViewer.selectFirstFailure();
   }
 
-  private boolean hasErrorsOrFailures() {
+  public boolean hasErrorsOrFailures() {
     return getErrorsPlusFailures() > 0;
   }
 
@@ -626,8 +596,8 @@ action enablement
     gridLayout.marginHeight = 0;
     parent.setLayout(gridLayout);
 
-    fViewHistory = new RunnerViewHistory(this);
-    configureToolBar();
+    viewHistoryManager = new RunnerViewHistory(this);
+    toolBar.configureToolBar();
 
     fCounterComposite = createProgressCountPanel(parent);
     fCounterComposite.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
@@ -687,27 +657,27 @@ action enablement
     @SuppressWarnings("unused") PageSwitcher pageSwitcher = new PageSwitcher(this) {
       @Override
       public Object[] getPages() {
-        return fViewHistory.getHistoryEntries().toArray();
+        return viewHistoryManager.getHistoryEntries().toArray();
       }
 
       @Override
       public String getName(Object page) {
-        return fViewHistory.getText((Session) page);
+        return viewHistoryManager.getText((Session) page);
       }
 
       @Override
       public ImageDescriptor getImageDescriptor(Object page) {
-        return fViewHistory.getImageDescriptor(page);
+        return viewHistoryManager.getImageDescriptor(page);
       }
 
       @Override
       public void activatePage(Object page) {
-        fViewHistory.setActiveEntry((Session) page);
+        viewHistoryManager.setActiveEntry((Session) page);
       }
 
       @Override
       public int getCurrentPageIndex() {
-        return fViewHistory.getHistoryEntries().indexOf(fViewHistory.getCurrentEntry());
+        return viewHistoryManager.getHistoryEntries().indexOf(viewHistoryManager.getCurrentEntry());
       }
     };
   }
@@ -739,65 +709,6 @@ action enablement
         }
       }
     }
-  }
-
-  private void configureToolBar() {
-    IActionBars actionBars = getViewSite().getActionBars();
-    IToolBarManager toolBar = actionBars.getToolBarManager();
-    IMenuManager viewMenu = actionBars.getMenuManager();
-
-    fNextAction = new ShowNextFailureAction(this);
-    fNextAction.setEnabled(false);
-    actionBars.setGlobalActionHandler(ActionFactory.NEXT.getId(), fNextAction);
-
-    fPreviousAction = new ShowPreviousFailureAction(this);
-    fPreviousAction.setEnabled(false);
-    actionBars.setGlobalActionHandler(ActionFactory.PREVIOUS.getId(), fPreviousAction);
-
-    toolBar.add(fNextAction);
-    toolBar.add(fPreviousAction);
-    toolBar.add(fFailuresOnlyFilterAction = new FailuresOnlyFilterAction(settings));
-    toolBar.add(fIgnoredOnlyFilterAction = new IgnoredOnlyFilterAction(settings));
-    toolBar.add(fScrollLockAction = new ScrollLockAction(settings));
-    toolBar.add(new Separator());
-    toolBar.add(fViewHistory.createHistoryDropDownAction());
-
-
-    viewMenu.add(fShowTestHierarchyAction = new ShowTestHierarchyAction(settings));
-    viewMenu.add(fShowTimeAction = new ShowTimeAction(settings));
-    viewMenu.add(new Separator());
-
-    fToggleSortingActions = new ToggleSortingAction[]{
-        new ToggleSortingAction(settings, SortingCriterion.SORT_BY_EXECUTION_ORDER),
-        new ToggleSortingAction(settings, SortingCriterion.SORT_BY_EXECUTION_TIME),
-        new ToggleSortingAction(settings, SortingCriterion.SORT_BY_NAME)};
-    MenuManager fSortByMenu = new MenuManager(UIMessages.TestRunnerViewPart_sort_by_menu);
-    for (ToggleSortingAction fToggleSortingAction : fToggleSortingActions) {
-      fSortByMenu.add(fToggleSortingAction);
-    }
-    viewMenu.add(fSortByMenu);
-    viewMenu.add(new Separator());
-
-    fToggleOrientationActions = new ToggleOrientationAction[]{
-        new ToggleOrientationAction(settings, VIEW_ORIENTATION_VERTICAL),
-        new ToggleOrientationAction(settings, VIEW_ORIENTATION_HORIZONTAL),
-        new ToggleOrientationAction(settings, VIEW_ORIENTATION_AUTOMATIC)};
-
-    MenuManager layoutSubMenu = new MenuManager(UIMessages.TestRunnerViewPart_layout_menu);
-    for (ToggleOrientationAction toggleOrientationAction : fToggleOrientationActions) {
-      layoutSubMenu.add(toggleOrientationAction);
-    }
-    viewMenu.add(layoutSubMenu);
-    viewMenu.add(new Separator());
-
-    viewMenu.add(fFailuresOnlyFilterAction);
-    viewMenu.add(fIgnoredOnlyFilterAction);
-    viewMenu.add(fActivateOnErrorAction = new ActivateOnErrorAction(settings));
-    viewMenu.add(showWebStackTraceAction = new ShowWebStackTraceAction(settings));
-    fViewMenuListener = manager -> fActivateOnErrorAction.update();
-
-    viewMenu.addMenuListener(fViewMenuListener);
-    actionBars.updateActionBars();
   }
 
   private IStatusLineManager getStatusLine() {
@@ -868,13 +779,11 @@ action enablement
     }
     boolean horizontal = orientation == VIEW_ORIENTATION_HORIZONTAL;
     fSashForm.setOrientation(horizontal ? SWT.HORIZONTAL : SWT.VERTICAL);
-    for (ToggleOrientationAction toggleOrientationAction : fToggleOrientationActions) {
-      toggleOrientationAction.update();
-    }
     fCurrentOrientation = orientation;
     GridLayout layout = (GridLayout) fCounterComposite.getLayout();
     setCounterColumns(layout);
     fParent.layout();
+    toolBar.updateActions();
   }
 
   private void setCounterColumns(GridLayout layout) {
@@ -1140,42 +1049,24 @@ action enablement
      */
     private SortingCriterion sortingCriterion = SortingCriterion.SORT_BY_EXECUTION_ORDER;
 
-    public boolean isShowFailuresOnly() {
-      return fFailuresOnlyFilterAction != null && fFailuresOnlyFilterAction.isChecked();
-    }
-
     public void setShowFailuresOnly(boolean failuresOnly) {
       updateFilterAndLayout(failuresOnly, false /*ignoredOnly must be off*/, getLayoutMode());
     }
 
-    public boolean isShowIgnoredOnly() {
-      return fIgnoredOnlyFilterAction != null && fIgnoredOnlyFilterAction.isChecked();
-    }
+
 
     public void setShowIgnoredOnly(boolean ignoredOnly) {
-      updateFilterAndLayout(false, isShowIgnoredOnly(), getLayoutMode());
-    }
-
-    public boolean isScrollLock() {
-      return fScrollLockAction != null && fScrollLockAction.isChecked();
-    }
-
-    public boolean isShowExecutionTime() {
-      return fShowTimeAction != null && fShowTimeAction.isChecked();
-    }
-
-    public boolean isHtmlStackTrace() {
-      return showWebStackTraceAction != null && showWebStackTraceAction.isChecked();
+      updateFilterAndLayout(false, toolBar.isShowIgnoredOnly(), getLayoutMode());
     }
 
     public void setHtmlStackTrace(boolean value) {
-      showWebStackTraceAction.setChecked(value);
+      toolBar.getShowWebStackTraceAction().setChecked(value);
       failureViewer.setStacktraceViewer(value);
     }
 
     public void setShowExecutionTime(boolean showTime) {
       fTestViewer.setShowTime(showTime);
-      fShowTimeAction.setChecked(showTime);
+      toolBar.getShowTimeAction().setChecked(showTime);
     }
 
     public int getRatio() {
@@ -1190,7 +1081,7 @@ action enablement
     }
 
     public void setLayoutMode(int mode) {
-      updateFilterAndLayout(isShowFailuresOnly(), isShowIgnoredOnly(), mode);
+      updateFilterAndLayout(toolBar.isShowFailuresOnly(), toolBar.isShowIgnoredOnly(), mode);
     }
 
     public void setOrientation(int orientation) {
@@ -1213,16 +1104,16 @@ action enablement
         return;
       }
 
-      memento.putBoolean(TAG_SCROLL, isScrollLock());
+      memento.putBoolean(TAG_SCROLL, toolBar.isScrollLock());
       memento.putInteger(TAG_RATIO, getRatio());
       memento.putInteger(TAG_ORIENTATION, getOrientation());
 
-      memento.putBoolean(TAG_FAILURES_ONLY, isShowFailuresOnly());
-      memento.putBoolean(TAG_IGNORED_ONLY, isShowIgnoredOnly());
+      memento.putBoolean(TAG_FAILURES_ONLY, toolBar.isShowFailuresOnly());
+      memento.putBoolean(TAG_IGNORED_ONLY, toolBar.isShowIgnoredOnly());
       memento.putInteger(TAG_LAYOUT, getLayoutMode());
-      memento.putBoolean(TAG_SHOW_TIME, isShowExecutionTime());
+      memento.putBoolean(TAG_SHOW_TIME, toolBar.isShowExecutionTime());
       memento.putInteger(TAG_SORTING_CRITERION, getSortingCriterion().ordinal());
-      memento.putBoolean(TAG_WEB_STACKTRACE, isHtmlStackTrace());
+      memento.putBoolean(TAG_WEB_STACKTRACE, toolBar.isHtmlStackTrace());
     }
 
     private void restoreLayoutState(IMemento memento) {
@@ -1236,8 +1127,8 @@ action enablement
 
       var scrollLock = memento.getBoolean(TAG_SCROLL);
       if (scrollLock != null) {
-        fScrollLockAction.setChecked(scrollLock);
-        setAutoScroll(!isScrollLock());
+        toolBar.getScrollLockAction().setChecked(scrollLock);
+        setAutoScroll(!toolBar.isScrollLock());
       }
 
       var layout = memento.getInteger(TAG_LAYOUT);
@@ -1262,9 +1153,7 @@ action enablement
 
       setSortingCriterion(sortingCriterion);
 
-      for (var toggleSortingAction : fToggleSortingActions) {
-        toggleSortingAction.update();
-      }
+      toolBar.updateActions();
 
       updateFilterAndLayout(failuresOnly, ignoredOnly, layout);
       setShowExecutionTime(time);
@@ -1273,11 +1162,12 @@ action enablement
 
     private void updateFilterAndLayout(boolean failuresOnly, boolean ignoredOnly, int layoutMode) {
       this.layoutMode = layoutMode;
-      fShowTestHierarchyAction.update();
-      fFailuresOnlyFilterAction.setChecked(failuresOnly);
-      fIgnoredOnlyFilterAction.setChecked(ignoredOnly);
+
+      toolBar.getFailuresOnlyFilterAction().setChecked(failuresOnly);
+      toolBar.getIgnoredOnlyFilterAction().setChecked(ignoredOnly);
       fTestViewer.setShowFailuresOrIgnoredOnly(failuresOnly, ignoredOnly, layoutMode);
-      updateNextPreviousActions();
+
+      toolBar.updateActions();
     }
 
   }

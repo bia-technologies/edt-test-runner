@@ -110,7 +110,7 @@ public class Launcher implements IUnitLauncher {
 
   @SneakyThrows
   public boolean remoteLaunchTest(ILaunchConfiguration configuration, LaunchSettings settings, ILaunch launch, IProgressMonitor monitor) {
-    if (!RemoteLaunchManager.isAvailable() && LaunchConfigurationAttributes.useRemoteLaunch(configuration)) {
+    if (!RemoteLaunchManager.isAvailable() || LaunchConfigurationAttributes.useRemoteLaunch(configuration)) {
       return false;
     }
 

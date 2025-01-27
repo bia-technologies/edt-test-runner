@@ -145,9 +145,6 @@ public class TestViewer {
   public synchronized void setSortingCriterion(SortingCriterion sortingCriterion) {
     ViewerComparator viewerComparator;
     switch (sortingCriterion) {
-      case SORT_BY_EXECUTION_ORDER:
-        viewerComparator = null;
-        break;
       case SORT_BY_EXECUTION_TIME:
         viewerComparator = new TestExecutionTimeComparator();
         break;
@@ -376,7 +373,7 @@ public class TestViewer {
   }
 
   private void initContextMenu() {
-    MenuManager menuMgr = new MenuManager("#PopupMenu"); //$NON-NLS-1$
+    var menuMgr = new MenuManager("#PopupMenu"); //$NON-NLS-1$
     menuMgr.setRemoveAllWhenShown(true);
     menuMgr.addMenuListener(this::handleMenuAboutToShow);
     fTestRunnerPart.getSite().registerContextMenu(menuMgr, fSelectionProvider);
@@ -386,7 +383,7 @@ public class TestViewer {
   }
 
   private void handleMenuAboutToShow(IMenuManager manager) {
-    IStructuredSelection selection = (IStructuredSelection) fSelectionProvider.getSelection();
+    var selection = (IStructuredSelection) fSelectionProvider.getSelection();
     if (!selection.isEmpty()) {
       var testElement = (ITestElement) selection.getFirstElement();
 
@@ -425,7 +422,7 @@ public class TestViewer {
   }
 
   private void addRerunActions(IMenuManager manager, ITestCaseElement testCaseElement) {
-    String className = testCaseElement.getClassName();
+    var className = testCaseElement.getClassName();
     if (fTestRunnerPart.lastLaunchIsKeptAlive()) {
       manager.add(new RerunAction(UIMessages.RerunAction_label_rerun, fTestRunnerPart, className, ILaunchManager.RUN_MODE));
     } else {
@@ -614,16 +611,16 @@ public class TestViewer {
     }
 
     synchronized (this) {
-      for (ITestSuiteElement suite : fAutoExpand) {
+      for (var suite : fAutoExpand) {
         fTreeViewer.setExpandedState(suite, true);
       }
       clearAutoExpand();
     }
 
-    ITestCaseElement current = fAutoScrollTarget;
+    var current = fAutoScrollTarget;
     fAutoScrollTarget = null;
 
-    TestSuiteElement parent = current == null ? null : (TestSuiteElement) fTreeContentProvider.getParent(current);
+    var parent = current == null ? null : (TestSuiteElement) fTreeContentProvider.getParent(current);
     if (fAutoClose.isEmpty() || !fAutoClose.getLast().equals(parent)) {
       // we're in a new branch, so let's close old OK branches:
       for (var iter = fAutoClose.listIterator(fAutoClose.size()); iter.hasPrevious(); ) {
@@ -751,8 +748,8 @@ public class TestViewer {
   private static final class TestNameComparator extends ViewerComparator {
     @Override
     public int compare(Viewer viewer, Object testElement1, Object testElement2) {
-      String testName1 = ((ITestElement) testElement1).getName();
-      String testName2 = ((ITestElement) testElement2).getName();
+      var testName1 = ((ITestElement) testElement1).getName();
+      var testName2 = ((ITestElement) testElement2).getName();
       return testName1.compareToIgnoreCase(testName2);
     }
   }
@@ -760,8 +757,8 @@ public class TestViewer {
   private static final class TestExecutionTimeComparator extends ViewerComparator {
     @Override
     public int compare(Viewer viewer, Object testElement1, Object testElement2) {
-      double elapsedTime1 = ((ITestElement) testElement1).getElapsedTimeInSeconds();
-      double elapsedTime2 = ((ITestElement) testElement2).getElapsedTimeInSeconds();
+      var elapsedTime1 = ((ITestElement) testElement1).getElapsedTimeInSeconds();
+      var elapsedTime2 = ((ITestElement) testElement2).getElapsedTimeInSeconds();
       return Double.compare(elapsedTime2, elapsedTime1);
     }
   }
@@ -810,26 +807,26 @@ public class TestViewer {
     }
   }
 
-  private final class FailuresOnlyFilter extends ViewerFilter {
+  private static final class FailuresOnlyFilter extends ViewerFilter {
     @Override
     public boolean select(Viewer viewer, Object parentElement, Object element) {
       return select(((ITestElement) element));
     }
 
     public boolean select(ITestElement testElement) {
-      TestStatus status = testElement.getStatus();
-      return status.isErrorOrFailure() || (!session.isRunning() && status == TestStatus.RUNNING);  // rerunning
+      var status = testElement.getResultStatus(true);
+      return status == TestResult.ERROR || status == TestResult.FAILURE;  // rerunning
     }
   }
 
-  private final class IgnoredOnlyFilter extends ViewerFilter {
+  private static final class IgnoredOnlyFilter extends ViewerFilter {
     @Override
     public boolean select(Viewer viewer, Object parentElement, Object element) {
       return select(((ITestElement) element));
     }
 
     public boolean select(ITestElement testElement) {
-      return hasIgnoredInTestResult(testElement) || (!session.isRunning() && testElement.getStatus() == TestStatus.RUNNING); // rerunning
+      return hasIgnoredInTestResult(testElement);
     }
 
     /**
@@ -855,5 +852,4 @@ public class TestViewer {
       return testElement.getResultStatus(false) == TestResult.SKIPPED;
     }
   }
-
 }

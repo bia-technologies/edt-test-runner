@@ -261,7 +261,6 @@ public final class SessionsManager {
 
   private static final class SessionListener implements ISessionListener {
     private Session activeSession;
-    private ITestSessionListener sessionListener;
 
     @Override
     public void sessionAdded(Session session) {
@@ -270,77 +269,11 @@ public final class SessionsManager {
         return;
 
       activeSession = session;
-
-      sessionListener = new ITestSessionListener() {
-        @Override
-        public void testAdded(ITestElement testElement) {
-        }
-
-        @Override
-        public void sessionStarted() {
-          TestViewerPlugin.core().getNewTestRunListeners().forEach(it -> it.sessionStarted(activeSession));
-        }
-
-        @Override
-        public void sessionTerminated() {
-          TestViewerPlugin.core().getNewTestRunListeners().forEach(it -> it.sessionTerminated(activeSession));
-          sessionRemoved(activeSession);
-        }
-
-        @Override
-        public void sessionStopped(long elapsedTime) {
-          TestViewerPlugin.core().getNewTestRunListeners().forEach(it -> it.sessionFinished(activeSession));
-          sessionRemoved(activeSession);
-        }
-
-        @Override
-        public void sessionEnded(long elapsedTime) {
-          TestViewerPlugin.core().getNewTestRunListeners().forEach(it -> it.sessionFinished(activeSession));
-          sessionRemoved(activeSession);
-        }
-
-        @Override
-        public void runningBegins() {
-          // ignore
-        }
-
-        @Override
-        public void testStarted(ITestCaseElement testCaseElement) {
-          // not fire
-//          TestViewerPlugin.core().getNewTestRunListeners().forEach(it->it.testCaseStarted(testCaseElement));
-        }
-
-        @Override
-        public void testFailed(ITestElement testElement, TestStatus status, String trace, String expected, String actual) {
-          // not fire
-//          TestViewerPlugin.core().getNewTestRunListeners().forEach(it->it.testCaseFinished(testElement));
-        }
-
-        @Override
-        public void testEnded(ITestCaseElement testCaseElement) {
-          // not fire
-//          TestViewerPlugin.core().getNewTestRunListeners().forEach(it->it.testCaseFinished(testCaseElement));
-        }
-
-        @Override
-        public void testRerun(ITestCaseElement testCaseElement, TestStatus status, String trace, String expectedResult, String actualResult) {
-          // not fire
-//          TestViewerPlugin.core().getNewTestRunListeners().forEach(it->it.testCaseRerun(testCaseElement));
-        }
-
-        @Override
-        public boolean acceptsSwapToDisk() {
-          return true;
-        }
-      };
-      activeSession.addTestSessionListener(sessionListener);
     }
 
     @Override
     public void sessionRemoved(Session session) {
       if (activeSession == session) {
-        activeSession.removeTestSessionListener(sessionListener);
-        sessionListener = null;
         activeSession = null;
       }
     }

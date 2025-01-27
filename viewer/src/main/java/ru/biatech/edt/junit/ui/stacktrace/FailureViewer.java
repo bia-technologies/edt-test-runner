@@ -88,7 +88,7 @@ public class FailureViewer {
 
     createLabel();
     registerActions();
-    setStacktraceViewer(viewPart.getToolBar().isHtmlStackTrace());
+    setStacktraceViewer(viewPart.getSettings().isHtmlStackTrace());
   }
 
   private void registerActions() {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023-2025 BIA-Technologies Limited Liability Company.
+ * Copyright (c) 2025 BIA-Technologies Limited Liability Company.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,8 @@
  * limitations under the License.
  *******************************************************************************/
 
-package ru.biatech.edt.junit.ui.report.actions.settings;
+package ru.biatech.edt.junit.ui.report.actions;
 
-import org.eclipse.jface.action.IAction;
-import ru.biatech.edt.junit.ui.UIMessages;
-import ru.biatech.edt.junit.ui.report.ReportSettings;
-import ru.biatech.edt.junit.ui.report.actions.SettingsChangeAction;
-
-public class ShowTimeAction extends SettingsChangeAction {
-  public ShowTimeAction(ReportSettings settings) {
-    super(settings, UIMessages.TestRunnerViewPart_show_execution_time, IAction.AS_CHECK_BOX);
-  }
-
-  @Override
-  public void run() {
-    settings.setShowExecutionTime(isChecked());
-  }
-
-  @Override
-  public void update() {
-    setChecked(settings.isShowExecutionTime());
-  }
+public interface UpdateAble {
+  void update();
 }

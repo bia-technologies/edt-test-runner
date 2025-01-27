@@ -18,13 +18,14 @@ package ru.biatech.edt.junit.ui.report.actions.settings;
 
 import org.eclipse.jface.action.IAction;
 import ru.biatech.edt.junit.ui.UIMessages;
+import ru.biatech.edt.junit.ui.report.ReportSettings;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
 import ru.biatech.edt.junit.ui.report.actions.SettingsChangeAction;
 
 public class ToggleSortingAction extends SettingsChangeAction {
   private final TestRunnerViewPart.SortingCriterion actionSortingCriterion;
 
-  public ToggleSortingAction(TestRunnerViewPart.ReportSettings settings, TestRunnerViewPart.SortingCriterion sortingCriterion) {
+  public ToggleSortingAction(ReportSettings settings, TestRunnerViewPart.SortingCriterion sortingCriterion) {
     super(settings, "", IAction.AS_RADIO_BUTTON); //$NON-NLS-1$
     switch (sortingCriterion) {
       case SORT_BY_NAME:

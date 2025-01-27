@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 BIA-Technologies Limited Liability Company.
+ * Copyright (c) 2025 BIA-Technologies Limited Liability Company.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,20 @@
  * limitations under the License.
  *******************************************************************************/
 
-package ru.biatech.edt.junit.ui.report.actions;
+package ru.biatech.edt.junit.ui.report;
 
-import org.eclipse.jface.action.Action;
-import ru.biatech.edt.junit.ui.report.ReportSettings;
+public interface SettingsEventListener {
+  void ontHtmlStackTraceChanged(boolean value);
 
-public abstract class SettingsChangeAction extends Action implements UpdateAble {
-  protected final ReportSettings settings;
+  void onOrientationChanged(int value);
 
-  protected SettingsChangeAction(ReportSettings settings, String text, int style) {
-    super(text, style);
-    this.settings = settings;
-    update();
-  }
+  void onSortingCriterionChanged(TestRunnerViewPart.SortingCriterion value);
 
-  protected SettingsChangeAction(ReportSettings settings, String text) {
-    super(text);
-    this.settings = settings;
-    update();
-  }
+  void onLayoutModeChanged(int value);
 
-  public abstract void update();
+  void onShowExecutionTimeChanged(boolean value);
+
+  void onShowIgnoredOnlyChanged(boolean value);
+
+  void onShowFailuresOnly(boolean value);
 }

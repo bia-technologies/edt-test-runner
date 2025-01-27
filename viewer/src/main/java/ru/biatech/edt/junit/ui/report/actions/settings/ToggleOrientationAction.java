@@ -18,6 +18,7 @@ package ru.biatech.edt.junit.ui.report.actions.settings;
 
 import org.eclipse.jface.action.IAction;
 import ru.biatech.edt.junit.ui.UIMessages;
+import ru.biatech.edt.junit.ui.report.ReportSettings;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
 import ru.biatech.edt.junit.ui.report.actions.ActionsSupport;
 import ru.biatech.edt.junit.ui.report.actions.SettingsChangeAction;
@@ -25,7 +26,7 @@ import ru.biatech.edt.junit.ui.report.actions.SettingsChangeAction;
 public class ToggleOrientationAction extends SettingsChangeAction {
   private final int actionOrientation;
 
-  public ToggleOrientationAction(TestRunnerViewPart.ReportSettings settings, int orientation) {
+  public ToggleOrientationAction(ReportSettings settings, int orientation) {
     super(settings, "", IAction.AS_RADIO_BUTTON); //$NON-NLS-1$
     switch (orientation) {
       case TestRunnerViewPart.VIEW_ORIENTATION_HORIZONTAL:

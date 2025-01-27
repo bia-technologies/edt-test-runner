@@ -18,6 +18,7 @@ package ru.biatech.edt.junit.ui.report.actions.settings;
 
 import org.eclipse.jface.action.IAction;
 import ru.biatech.edt.junit.ui.UIMessages;
+import ru.biatech.edt.junit.ui.report.ReportSettings;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
 import ru.biatech.edt.junit.ui.report.actions.ActionsSupport;
 import ru.biatech.edt.junit.ui.report.actions.SettingsChangeAction;
@@ -25,7 +26,7 @@ import ru.biatech.edt.junit.ui.report.actions.SettingsChangeAction;
 import static ru.biatech.edt.junit.ui.report.TestRunnerViewPart.LAYOUT_HIERARCHICAL;
 
 public class ShowTestHierarchyAction extends SettingsChangeAction {
-  public ShowTestHierarchyAction(TestRunnerViewPart.ReportSettings settings) {
+  public ShowTestHierarchyAction(ReportSettings settings) {
     super(settings, UIMessages.TestRunnerViewPart_hierarchical_layout, IAction.AS_CHECK_BOX);
 
     ActionsSupport.setLocalImageDescriptors(this, "hierarchicalLayout.png"); //$NON-NLS-1$

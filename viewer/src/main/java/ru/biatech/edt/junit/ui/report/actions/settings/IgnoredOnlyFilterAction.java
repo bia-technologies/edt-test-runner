@@ -18,12 +18,12 @@ package ru.biatech.edt.junit.ui.report.actions.settings;
 
 import org.eclipse.jface.action.IAction;
 import ru.biatech.edt.junit.ui.UIMessages;
-import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
+import ru.biatech.edt.junit.ui.report.ReportSettings;
 import ru.biatech.edt.junit.ui.report.actions.SettingsChangeAction;
 import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
 
 public class IgnoredOnlyFilterAction extends SettingsChangeAction {
-  public IgnoredOnlyFilterAction(TestRunnerViewPart.ReportSettings settings) {
+  public IgnoredOnlyFilterAction(ReportSettings settings) {
     super(settings, UIMessages.TestRunnerViewPart_show_ignored_only, IAction.AS_CHECK_BOX);
     setToolTipText(UIMessages.TestRunnerViewPart_show_ignored_only);
     setImageDescriptor(ImageProvider.getImageDescriptor(ImageProvider.TEST_IGNORED_ICON));
@@ -32,5 +32,10 @@ public class IgnoredOnlyFilterAction extends SettingsChangeAction {
   @Override
   public void run() {
     settings.setShowIgnoredOnly(isChecked());
+  }
+
+  @Override
+  public void update() {
+    setChecked(settings.isIgnoredOnly());
   }
 }

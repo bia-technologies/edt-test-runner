@@ -18,11 +18,11 @@ package ru.biatech.edt.junit.ui.report.actions.settings;
 
 import org.eclipse.jface.action.IAction;
 import ru.biatech.edt.junit.ui.UIMessages;
-import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
+import ru.biatech.edt.junit.ui.report.ReportSettings;
 import ru.biatech.edt.junit.ui.report.actions.SettingsChangeAction;
 
 public class ShowWebStackTraceAction extends SettingsChangeAction {
-  public ShowWebStackTraceAction(TestRunnerViewPart.ReportSettings settings) {
+  public ShowWebStackTraceAction(ReportSettings settings) {
     super(settings, UIMessages.ShowWebStackTraceAction_name, IAction.AS_CHECK_BOX);
   }
 
@@ -31,4 +31,8 @@ public class ShowWebStackTraceAction extends SettingsChangeAction {
     settings.setHtmlStackTrace(isChecked());
   }
 
+  @Override
+  public void update() {
+    setChecked(settings.isHtmlStackTrace());
+  }
 }

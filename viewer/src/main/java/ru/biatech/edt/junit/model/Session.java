@@ -21,7 +21,6 @@ package ru.biatech.edt.junit.model;
 import com._1c.g5.v8.dt.core.platform.IV8Project;
 import lombok.Getter;
 import lombok.Setter;
-import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.debug.core.ILaunch;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.kinds.ITestKind;
@@ -49,14 +48,11 @@ import java.util.stream.Stream;
 @Getter
 public class Session extends Report<TestSuiteElement> implements ITestRunSession {
 
-  private static final String EMPTY_STRING = ""; //$NON-NLS-1$
   /**
    * Ссылка на 1С проект, or <code>null</code>.
    */
   private IV8Project launchedProject;
   private String projectName;
-
-  private final ListenerList<ITestSessionListener> sessionListeners = new ListenerList<>();
 
   /**
    * Number of tests started during this test run.
@@ -205,14 +201,6 @@ public class Session extends Report<TestSuiteElement> implements ITestRunSession
     } else {
       return null;
     }
-  }
-  public synchronized void addTestSessionListener(ITestSessionListener listener) {
-//		swapIn();
-    sessionListeners.add(listener);
-  }
-
-  public void removeTestSessionListener(ITestSessionListener listener) {
-    sessionListeners.remove(listener);
   }
 
   public synchronized void swapOut() { // TODO Не ясно, нужно или нет

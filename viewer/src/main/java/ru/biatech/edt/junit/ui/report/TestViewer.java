@@ -129,7 +129,6 @@ public class TestViewer {
 
   public synchronized void registerActiveSession(Session session) {
     this.session = session;
-    registerAutoScrollTarget(null);
     registerViewersRefresh();
   }
 
@@ -342,30 +341,6 @@ public class TestViewer {
     fTreeNeedsRefresh = true;
     fTableNeedsRefresh = true;
     clearUpdateAndExpansion();
-  }
-
-  /**
-   * @param testElement the added test
-   */
-  synchronized void registerTestAdded(ITestElement testElement) {
-    //TODO: performance: would only need to refresh parent of added element
-    fTreeNeedsRefresh = true;
-    fTableNeedsRefresh = true;
-  }
-
-  synchronized void registerViewerUpdate(final ITestElement testElement) {
-    fNeedUpdate.add(testElement);
-  }
-
-  void registerAutoScrollTarget(ITestCaseElement testCaseElement) {
-    fAutoScrollTarget = testCaseElement;
-  }
-
-  synchronized void registerFailedForAutoScroll(ITestElement testElement) {
-    TestSuiteElement parent = (TestSuiteElement) fTreeContentProvider.getParent(testElement);
-    if (parent != null) {
-      fAutoExpand.add(parent);
-    }
   }
 
   void expandFirstLevel() {

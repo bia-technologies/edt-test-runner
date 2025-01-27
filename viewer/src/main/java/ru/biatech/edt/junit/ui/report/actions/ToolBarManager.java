@@ -160,7 +160,7 @@ public class ToolBarManager {
   }
 
   public void updateActions() {
-    boolean hasErrorsOrFailures = !isShowIgnoredOnly() && view.hasErrorsOrFailures();
+    boolean hasErrorsOrFailures = view.hasErrorsOrFailures();
     nextItemAction.setEnabled(hasErrorsOrFailures);
     previousItemAction.setEnabled(hasErrorsOrFailures);
 
@@ -173,26 +173,6 @@ public class ToolBarManager {
     var sessionRunnable = session != null && session.getLaunch() != null;
     rerunSessionAction.setEnabled(sessionRunnable);
     rerunFailedTestsAction.setEnabled(sessionRunnable && view.hasErrorsOrFailures());
-  }
-
-  public boolean isShowFailuresOnly() {
-    return failuresOnlyFilterAction.isChecked();
-  }
-
-  public boolean isShowIgnoredOnly() {
-    return ignoredOnlyFilterAction.isChecked();
-  }
-
-  public boolean isScrollLock() {
-    return scrollLockAction != null && scrollLockAction.isChecked();
-  }
-
-  public boolean isShowExecutionTime() {
-    return showTimeAction != null && showTimeAction.isChecked();
-  }
-
-  public boolean isHtmlStackTrace() {
-    return showWebStackTraceAction != null && showWebStackTraceAction.isChecked();
   }
 
   public void dispose() {

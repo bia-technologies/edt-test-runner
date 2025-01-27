@@ -86,6 +86,6 @@ public class CopyTraceAction extends SelectionListenerAction {
   public void handleTestSelected(ITestElement test) {
     testElement = test;
     errorInfo = null;
-    setEnabled(testElement.getErrorsList().findAny().isPresent());
+    setEnabled(testElement!=null&&testElement.getErrorsList().findAny().isPresent());
   }
 }

@@ -40,6 +40,8 @@ public interface ITestElement {
 
   TestStatus getStatus();
 
+  String getClassName();
+
   /**
    * Returns the result of the test element.
    * <ul>

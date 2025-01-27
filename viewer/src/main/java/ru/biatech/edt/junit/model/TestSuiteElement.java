@@ -60,11 +60,6 @@ public class TestSuiteElement extends TestSuite<TestCaseElement> implements ITes
   }
 
   @Override
-  public String getSuiteTypeName() {
-    return getClassName() != null ? getClassName() : getName();
-  }
-
-  @Override
   public String getDisplayName() {
     return getName() != null ? getName() : getClassName();
   }

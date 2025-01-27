@@ -415,8 +415,8 @@ public class TestViewer {
     if (!selection.isEmpty()) {
       var testElement = (ITestElement) selection.getFirstElement();
 
-      if (testElement instanceof TestSuiteElement) {
-        TestSuiteElement testSuiteElement = (TestSuiteElement) testElement;
+      if (testElement instanceof ITestSuiteElement) {
+        var testSuiteElement = (ITestSuiteElement) testElement;
         manager.add(getOpenTestAction(testSuiteElement));
         manager.add(new Separator());
         if (!fTestRunnerPart.lastLaunchIsKeptAlive()) {
@@ -449,7 +449,7 @@ public class TestViewer {
     manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS + "-end")); //$NON-NLS-1$
   }
 
-  private void addRerunActions(IMenuManager manager, TestCaseElement testCaseElement) {
+  private void addRerunActions(IMenuManager manager, ITestCaseElement testCaseElement) {
     String className = testCaseElement.getClassName();
     if (fTestRunnerPart.lastLaunchIsKeptAlive()) {
       manager.add(new RerunAction(UIMessages.RerunAction_label_rerun, fTestRunnerPart, className, ILaunchManager.RUN_MODE));
@@ -459,7 +459,7 @@ public class TestViewer {
     }
   }
 
-  private void addRerunActions(IMenuManager manager, TestSuiteElement testSuiteElement) {
+  private void addRerunActions(IMenuManager manager, ITestSuiteElement testSuiteElement) {
     // TODO Разобраться в меню. Метод закоменчен, но команды имеются
 //		String qualifiedName= null;
 //		String testMethodName= null; // test method name is null when re-running a regular test class
@@ -499,27 +499,20 @@ public class TestViewer {
 //		}
   }
 
-  private OpenTestAction getOpenTestAction(TestCaseElement testCase) {
+  private OpenTestAction getOpenTestAction(ITestCaseElement testCase) {
     return new OpenTestAction(fTestRunnerPart, testCase);
   }
 
-  private OpenTestAction getOpenTestAction(TestSuiteElement testSuite) {
-    String testName = testSuite.getName();
+  private OpenTestAction getOpenTestAction(ITestSuiteElement testSuite) {
     ITestElement[] children = testSuite.getChildren();
 
-    if (testName.startsWith("[") && testName.endsWith("]") && children.length > 0 && children[0] instanceof TestCaseElement) { //$NON-NLS-1$ //$NON-NLS-2$
+    if( children.length > 0) {
       // a group of parameterized tests
-      return new OpenTestAction(fTestRunnerPart, (TestCaseElement) children[0]);
-    }
-
-    int index = testName.indexOf('(');
-    // test factory method
-    if (index > 0) {
-      return new OpenTestAction(fTestRunnerPart, testName.substring(0, index));
+      return new OpenTestAction(fTestRunnerPart, children[0]);
     }
 
     // regular test class
-    return new OpenTestAction(fTestRunnerPart, testName);
+    return new OpenTestAction(fTestRunnerPart, testSuite);
   }
 
   private void handleSelected() {

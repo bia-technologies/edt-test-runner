@@ -165,6 +165,11 @@ public class Session extends Report<TestSuiteElement> implements ITestRunSession
   }
 
   @Override
+  public String getClassName() {
+    return null;
+  }
+
+  @Override
   public TestResult getResultStatus(boolean includeChildren) {
     return getStatus().convertToResult();
   }

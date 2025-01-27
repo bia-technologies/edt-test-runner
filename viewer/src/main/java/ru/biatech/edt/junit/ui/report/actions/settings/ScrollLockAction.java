@@ -18,7 +18,7 @@ package ru.biatech.edt.junit.ui.report.actions.settings;
 
 
 import ru.biatech.edt.junit.ui.UIMessages;
-import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
+import ru.biatech.edt.junit.ui.report.ReportSettings;
 import ru.biatech.edt.junit.ui.report.actions.ActionsSupport;
 import ru.biatech.edt.junit.ui.report.actions.SettingsChangeAction;
 
@@ -27,7 +27,7 @@ import ru.biatech.edt.junit.ui.report.actions.SettingsChangeAction;
  */
 public class ScrollLockAction extends SettingsChangeAction {
 
-  public ScrollLockAction(TestRunnerViewPart.ReportSettings settings) {
+  public ScrollLockAction(ReportSettings settings) {
     super(settings, UIMessages.ScrollLockAction_action_label);
     setToolTipText(UIMessages.ScrollLockAction_action_tooltip);
 
@@ -44,6 +44,6 @@ public class ScrollLockAction extends SettingsChangeAction {
 
   @Override
   public void update() {
-    setChecked(settings.isAutoScroll());
+    setChecked(!settings.isAutoScroll());
   }
 }

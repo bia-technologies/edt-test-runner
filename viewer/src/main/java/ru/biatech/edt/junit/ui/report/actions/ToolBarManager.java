@@ -37,6 +37,8 @@ import ru.biatech.edt.junit.ui.report.actions.settings.ShowWebStackTraceAction;
 import ru.biatech.edt.junit.ui.report.actions.settings.ToggleOrientationAction;
 import ru.biatech.edt.junit.ui.report.actions.settings.ToggleSortingAction;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Getter
@@ -47,6 +49,7 @@ public class ToolBarManager {
 
   private final TestRunnerViewPart view;
 
+  private List<UpdateAble> updateAble;
   private Action nextItemAction;
   private Action previousItemAction;
   private FailuresOnlyFilterAction failuresOnlyFilterAction;
@@ -142,16 +145,26 @@ public class ToolBarManager {
 
     viewMenu.addMenuListener(viewMenuListener);
     actionBars.updateActionBars();
+
+    updateAble = new ArrayList<>(Arrays.asList(
+        failuresOnlyFilterAction,
+        ignoredOnlyFilterAction,
+        scrollLockAction,
+        showTestHierarchyAction,
+        showTimeAction,
+        showWebStackTraceAction,
+        activateOnErrorAction
+    ));
+    updateAble.addAll(toggleOrientationActions);
+    updateAble.addAll(toggleSortingActions);
   }
 
   public void updateActions() {
     boolean hasErrorsOrFailures = !isShowIgnoredOnly() && view.hasErrorsOrFailures();
     nextItemAction.setEnabled(hasErrorsOrFailures);
     previousItemAction.setEnabled(hasErrorsOrFailures);
-    showTestHierarchyAction.update();
 
-    toggleOrientationActions.forEach(ToggleOrientationAction::update);
-    toggleSortingActions.forEach(ToggleSortingAction::update);
+    updateAble.forEach(UpdateAble::update);
   }
 
   public void onChangedSession() {

@@ -504,19 +504,16 @@ public class TestViewer {
   }
 
   private OpenTestAction getOpenTestAction(ITestSuiteElement testSuite) {
-    ITestElement[] children = testSuite.getChildren();
-
-    if( children.length > 0) {
-      // a group of parameterized tests
+    var children = testSuite.getChildren();
+    if (children.length > 0) {
       return new OpenTestAction(fTestRunnerPart, children[0]);
     }
 
-    // regular test class
     return new OpenTestAction(fTestRunnerPart, testSuite);
   }
 
   private void handleSelected() {
-    IStructuredSelection selection = (IStructuredSelection) fSelectionProvider.getSelection();
+    var selection = (IStructuredSelection) fSelectionProvider.getSelection();
     ITestElement testElement = null;
     if (selection.size() == 1) {
       testElement = (ITestElement) selection.getFirstElement();
@@ -525,7 +522,7 @@ public class TestViewer {
   }
 
   private Comparator<ITestElement> getComparator() {
-    SortingCriterion sortingCriterion = fTestRunnerPart.settings.getSortingCriterion();
+    var sortingCriterion = fTestRunnerPart.settings.getSortingCriterion();
     Comparator<ITestElement> comparator;
     switch (sortingCriterion) {
       case SORT_BY_EXECUTION_TIME:

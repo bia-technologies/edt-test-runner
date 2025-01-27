@@ -110,11 +110,11 @@ public class TestsManager {
    * @return ссылка на метода
    */
   public MethodReference getMethodReference(IV8Project project, String fullMethodName) {
-    if (project == null) {
+    var chunks = fullMethodName.split(METHOD_NAME_SEPARATOR_PATTERN);
+    if (project == null || chunks.length == 0) {
       return null;
     }
 
-    var chunks = fullMethodName.split(METHOD_NAME_SEPARATOR_PATTERN);
     var moduleName = chunks.length <= 2 ? chunks[0] : chunks[0] + METHOD_NAME_SEPARATOR + chunks[1];
     var methodName = chunks.length != 1 ? chunks[chunks.length - 1] : null;
 

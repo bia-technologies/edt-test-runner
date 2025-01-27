@@ -1053,10 +1053,8 @@ action enablement
       updateFilterAndLayout(failuresOnly, false /*ignoredOnly must be off*/, getLayoutMode());
     }
 
-
-
     public void setShowIgnoredOnly(boolean ignoredOnly) {
-      updateFilterAndLayout(false, toolBar.isShowIgnoredOnly(), getLayoutMode());
+      updateFilterAndLayout(false, ignoredOnly, getLayoutMode());
     }
 
     public void setHtmlStackTrace(boolean value) {

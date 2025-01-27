@@ -69,8 +69,7 @@ public class CopyTraceAction extends SelectionListenerAction {
     try {
       ClipboardHelper.pasteToClipboard(source);
     } catch (SWTError e) {
-      if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD)
-        throw e;
+      if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD) throw e;
       if (MessageDialog.openQuestion(TestViewerPlugin.ui().getShell(), UIMessages.CopyTraceAction_problem, UIMessages.CopyTraceAction_clipboard_busy)) {
         run();
       }
@@ -86,6 +85,6 @@ public class CopyTraceAction extends SelectionListenerAction {
   public void handleTestSelected(ITestElement test) {
     testElement = test;
     errorInfo = null;
-    setEnabled(testElement.getErrorsList().findAny().isPresent());
+    setEnabled(testElement != null && testElement.getErrorsList().findAny().isPresent());
   }
 }

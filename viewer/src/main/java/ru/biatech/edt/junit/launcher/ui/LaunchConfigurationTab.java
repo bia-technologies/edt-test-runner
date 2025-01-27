@@ -32,6 +32,8 @@ import ru.biatech.edt.junit.launcher.v8.LaunchConfigurationAttributes;
 import ru.biatech.edt.junit.launcher.v8.LaunchHelper;
 import ru.biatech.edt.junit.ui.UIMessages;
 
+import java.util.Collections;
+
 public class LaunchConfigurationTab extends AbstractLaunchConfigurationTab {
 
   private LaunchControl control;
@@ -58,8 +60,7 @@ public class LaunchConfigurationTab extends AbstractLaunchConfigurationTab {
   public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
     var configurations = LaunchHelper.getOnecLaunchConfigurations();
     var onecConfiguration = configurations.findFirst();
-    onecConfiguration.ifPresent(launchConfiguration ->
-                                        configuration.setAttribute(LaunchConfigurationAttributes.USED_LAUNCH_CONFIGURATION, launchConfiguration.getName()));
+    onecConfiguration.ifPresent(lc -> configuration.setAttribute(LaunchConfigurationAttributes.USED_LAUNCH_CONFIGURATION, lc.getName()));
 
     var extensions = LaunchHelper.getTestExtensions();
     if (extensions.size() == 1)
@@ -72,7 +73,7 @@ public class LaunchConfigurationTab extends AbstractLaunchConfigurationTab {
 
     control.testExtensionControl.addSelectionChangedListener(event -> {
       var project = UtilsUI.getSelection(control.testExtensionControl, IExtensionProject.class);
-      UtilsUI.setValueSource(control.testModuleControl, project == null ? null : LaunchHelper.getTestModules(project));
+      UtilsUI.setValueSource(control.testModuleControl, project == null ? Collections.emptyList() : LaunchHelper.getTestModules(project));
     });
 
     updateParametersFromConfig(configuration);

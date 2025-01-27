@@ -110,11 +110,13 @@ public class TestsManager {
    * @return ссылка на метода
    */
   public MethodReference getMethodReference(IV8Project project, String fullMethodName) {
-    if (project == null) {
+    var chunks = fullMethodName.split(METHOD_NAME_SEPARATOR_PATTERN);
+    if (project == null || chunks.length == 0) {
       return null;
     }
-    var moduleName = getTestModuleName(fullMethodName);
-    var methodName = getTestMethodName(fullMethodName);
+
+    var moduleName = chunks.length <= 2 ? chunks[0] : chunks[0] + METHOD_NAME_SEPARATOR + chunks[1];
+    var methodName = chunks.length != 1 ? chunks[chunks.length - 1] : null;
 
     return Modules.findCommonModule(project, moduleName)
         .map(owner -> new MethodReference(owner.getModule(), methodName))
@@ -138,7 +140,7 @@ public class TestsManager {
   }
 
   /**
-   * Извлекает имя объекта методанных из полного имени метода
+   * Извлекает имя объекта метаданных из полного имени метода
    *
    * @param fullMethodName полное имя метода. Шаблон: ИмяОбъектаМетаданны.ИмяМетода.
    *                       Например: ОбщийМодуль.Метод, Справочник.ИмяСправочника.ИмяМетода

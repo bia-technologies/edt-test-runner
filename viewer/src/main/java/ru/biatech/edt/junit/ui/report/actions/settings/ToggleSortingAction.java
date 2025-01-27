@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 BIA-Technologies Limited Liability Company.
+ * Copyright (c) 2023-2025 BIA-Technologies Limited Liability Company.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,12 @@
  * limitations under the License.
  *******************************************************************************/
 
-package ru.biatech.edt.junit.ui.report.actions;
+package ru.biatech.edt.junit.ui.report.actions.settings;
 
 import org.eclipse.jface.action.IAction;
 import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
+import ru.biatech.edt.junit.ui.report.actions.SettingsChangeAction;
 
 public class ToggleSortingAction extends SettingsChangeAction {
   private final TestRunnerViewPart.SortingCriterion actionSortingCriterion;

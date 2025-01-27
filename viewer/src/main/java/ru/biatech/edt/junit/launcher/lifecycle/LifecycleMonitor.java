@@ -95,7 +95,7 @@ public class LifecycleMonitor {
   }
 
   private void riseEvent(int eventType, LifecycleItem item) {
-    TestViewerPlugin.log().debug("Launch event: {0} for {1}", LifecycleEvent.getPresent(eventType), item.getName());
+    debug("Launch event: {0} for {1}", LifecycleEvent.getPresent(eventType), item.getName());
     if (LifecycleEvent.isStop(eventType)) {
       try {
         item.getTestLaunch().terminate();

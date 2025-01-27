@@ -19,5 +19,21 @@
    <feature id="ru.biatech.edt.xtest.feature">
       <category name="ru.biatech.edt.xtest.category"/>
    </feature>
+   <bundle id="Java-WebSocket">
+      <category name="ru.biatech.edt.xtest.category.addons"/>
+   </bundle>
+   <bundle id="com.fasterxml.jackson.dataformat.jackson-dataformat-xml">
+      <category name="ru.biatech.edt.xtest.category.addons"/>
+   </bundle>
+   <bundle id="com.fasterxml.jackson.module.jackson-module-jaxb-annotations">
+      <category name="ru.biatech.edt.xtest.category.addons"/>
+   </bundle>
+   <bundle id="stax2-api">
+      <category name="ru.biatech.edt.xtest.category.addons"/>
+   </bundle>
+   <bundle id="com.fasterxml.woodstox.woodstox-core">
+      <category name="ru.biatech.edt.xtest.category.addons"/>
+   </bundle>
    <category-def name="ru.biatech.edt.xtest.category" label="Тестирование 1С"/>
+   <category-def name="ru.biatech.edt.xtest.category.addons" label="Дополнительные модули"/>
 </site>

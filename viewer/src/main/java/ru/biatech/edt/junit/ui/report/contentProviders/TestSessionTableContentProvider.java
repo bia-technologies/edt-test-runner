@@ -18,11 +18,10 @@
 package ru.biatech.edt.junit.ui.report.contentProviders;
 
 import org.eclipse.jface.viewers.IStructuredContentProvider;
-import org.eclipse.jface.viewers.Viewer;
+import ru.biatech.edt.junit.model.ITestCaseElement;
 import ru.biatech.edt.junit.model.ITestElement;
-import ru.biatech.edt.junit.model.TestCaseElement;
-import ru.biatech.edt.junit.model.TestRoot;
-import ru.biatech.edt.junit.model.TestSuiteElement;
+import ru.biatech.edt.junit.model.ITestElementContainer;
+import ru.biatech.edt.junit.model.Session;
 
 import java.util.ArrayList;
 
@@ -32,30 +31,23 @@ import java.util.ArrayList;
 public class TestSessionTableContentProvider implements IStructuredContentProvider {
 
   @Override
-  public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-  }
-
-  @Override
   public Object[] getElements(Object inputElement) {
     ArrayList<ITestElement> all = new ArrayList<>();
-    addAll(all, (TestRoot) inputElement);
+    addAll(all, (Session) inputElement);
     return all.toArray();
   }
 
-  private void addAll(ArrayList<ITestElement> all, TestSuiteElement suite) {
-    ITestElement[] children = suite.getChildren();
-    for (ITestElement element : children) {
-      if (element instanceof TestSuiteElement) {
-        if (((TestSuiteElement) element).getSuiteStatus().isErrorOrFailure())
+  private void addAll(ArrayList<ITestElement> all, ITestElementContainer suite) {
+    var children = suite.getChildren();
+    for (var element : children) {
+      if (element instanceof ITestElementContainer) {
+        if (element.getStatus().isErrorOrFailure()) {
           all.add(element); // add failed suite to flat list too
-        addAll(all, (TestSuiteElement) element);
-      } else if (element instanceof TestCaseElement) {
+        }
+        addAll(all, (ITestElementContainer) element);
+      } else if (element instanceof ITestCaseElement) {
         all.add(element);
       }
     }
-  }
-
-  @Override
-  public void dispose() {
   }
 }

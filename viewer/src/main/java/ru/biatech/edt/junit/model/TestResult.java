@@ -44,7 +44,7 @@ public enum TestResult {
   /**
    * state that describes that the test result is 'Ignored'
    */
-  IGNORED("Ignored"); //$NON-NLS-1$
+  SKIPPED("Ignored"); //$NON-NLS-1$
 
   private final String name;
 

@@ -24,20 +24,9 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 
 public interface IUnitLauncher {
 
-  IUnitLauncher NULL = new IUnitLauncher() {
-
-    @Override
-    public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor) throws CoreException {
-      // do nothing
-    }
-
-    @Override
-    public void configure(ILaunchConfigurationWorkingCopy configuration, ILaunchConfiguration basicConfiguration) {
-      // do nothing
-    }
+  IUnitLauncher NULL = (configuration, mode, launch, monitor) -> {
+    // do nothing
   };
 
   void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor) throws CoreException;
-
-  void configure(ILaunchConfigurationWorkingCopy configuration, ILaunchConfiguration basicConfiguration);
 }

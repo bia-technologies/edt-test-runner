@@ -29,9 +29,24 @@
       <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/bin" />
     </content>
-    <orderEntry type="inheritedJdk" />
+    <orderEntry type="jdk" jdkName="11" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" scope="PROVIDED" name="plugins" level="project" />
     <orderEntry type="library" name="projectlombok.lombok" level="project" />
+    <orderEntry type="library" name="java.websocket.Java.WebSocket" level="project" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="file://$MODULE_DIR$/../../../../open-source/yaxunit-dependencies-p2-repository/target/repository/plugins" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="file://$MODULE_DIR$/../../../../open-source/yaxunit-dependencies-p2-repository/target/repository/plugins" />
+        </SOURCES>
+        <jarDirectory url="file://$MODULE_DIR$/../../../../open-source/yaxunit-dependencies-p2-repository/target/repository/plugins" recursive="false" />
+        <jarDirectory url="file://$MODULE_DIR$/../../../../open-source/yaxunit-dependencies-p2-repository/target/repository/plugins" recursive="false" type="SOURCES" />
+      </library>
+    </orderEntry>
+    <orderEntry type="library" name="fasterxml.jackson.dataformat.xml" level="project" />
   </component>
 </module>

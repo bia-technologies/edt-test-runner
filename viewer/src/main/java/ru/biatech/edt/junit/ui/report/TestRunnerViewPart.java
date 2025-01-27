@@ -30,7 +30,6 @@ package ru.biatech.edt.junit.ui.report;
 import com._1c.g5.v8.dt.core.platform.IV8Project;
 import lombok.Getter;
 import lombok.Setter;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
@@ -48,11 +47,6 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ViewForm;
-import org.eclipse.swt.dnd.DND;
-import org.eclipse.swt.dnd.DropTarget;
-import org.eclipse.swt.dnd.DropTargetAdapter;
-import org.eclipse.swt.dnd.DropTargetEvent;
-import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.graphics.Image;
@@ -75,25 +69,21 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.PageSwitcher;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.IWorkbenchSiteProgressService;
 import org.eclipse.ui.progress.UIJob;
-import org.eclipse.ui.statushandlers.StatusManager;
 import ru.biatech.edt.junit.BasicElementLabels;
 import ru.biatech.edt.junit.Preferences;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.kinds.ITestKind;
-import ru.biatech.edt.junit.model.ITestCaseElement;
 import ru.biatech.edt.junit.model.ISessionListener;
+import ru.biatech.edt.junit.model.ITestCaseElement;
+import ru.biatech.edt.junit.model.ITestElement;
 import ru.biatech.edt.junit.model.ITestSessionListener;
 import ru.biatech.edt.junit.model.Session;
-import ru.biatech.edt.junit.model.SessionsManager;
-import ru.biatech.edt.junit.model.TestCaseElement;
-import ru.biatech.edt.junit.model.TestElement;
 import ru.biatech.edt.junit.model.TestStatus;
 import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.ui.UIPreferencesConstants;
@@ -113,7 +103,6 @@ import ru.biatech.edt.junit.ui.stacktrace.FailureViewer;
 import ru.biatech.edt.junit.ui.stacktrace.actions.CopyTraceAction;
 import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
 
-import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
 import java.util.List;
@@ -173,6 +162,7 @@ public class TestRunnerViewPart extends ViewPart {
   private ActivateOnErrorAction fActivateOnErrorAction;
   private ToggleSortingAction[] fToggleSortingActions;
   private IMenuListener fViewMenuListener;
+  @Getter
   private Session session;
   private TestSessionListener sessionListener;
   private RunnerViewHistory fViewHistory;
@@ -209,17 +199,6 @@ public class TestRunnerViewPart extends ViewPart {
 
   @Getter
   final ReportSettings settings;
-
-  private static void importTestRunSession(final String url) {
-    try {
-      PlatformUI.getWorkbench().getProgressService().busyCursorWhile(monitor -> SessionsManager.importSession(url, null, monitor));
-    } catch (InterruptedException e) {
-      // cancelled
-    } catch (InvocationTargetException e) {
-      CoreException ce = (CoreException) e.getCause();
-      StatusManager.getManager().handle(ce.getStatus(), StatusManager.SHOW | StatusManager.LOG);
-    }
-  }
 
   public TestRunnerViewPart() {
     imageProvider = new ImageProvider();
@@ -296,10 +275,6 @@ public class TestRunnerViewPart extends ViewPart {
     return fParent.getShell();
   }
 
-  public Session getSession() {
-    return session;
-  }
-
   /**
    * @param session new active test run session
    * @return deactivated session, or <code>null</code> iff no session got deactivated
@@ -370,7 +345,7 @@ action enablement
     return session.getAllFailedTestElements();
   }
 
-  void handleTestSelected(TestElement test) {
+  void handleTestSelected(ITestElement test) {
     showFailure(test);
     fCopyAction.handleTestSelected(test);
   }
@@ -666,7 +641,6 @@ action enablement
     actionBars.setGlobalActionHandler(ActionFactory.COPY.getId(), fCopyAction);
 
     initPageSwitcher();
-    addDropAdapter(parent);
 
     fOriginalViewImage = getTitleImage();
 
@@ -683,7 +657,7 @@ action enablement
     TestViewerPlugin.core().getSessionsManager().addTestRunSessionListener(fTestRunSessionListener);
 
     // always show youngest test run in view. simulate "sessionAdded" event to do that
-    List<Session> sessions = TestViewerPlugin.core().getSessionsManager().getSessions();
+    var sessions = TestViewerPlugin.core().getSessionsManager().getSessions();
     if (!sessions.isEmpty()) {
       fTestRunSessionListener.sessionAdded(sessions.get(0));
     }
@@ -707,39 +681,6 @@ action enablement
       return super.getTitleImage();
     }
     return fViewImage;
-  }
-
-  private void addDropAdapter(Composite parent) {
-    DropTarget dropTarget = new DropTarget(parent, DND.DROP_MOVE | DND.DROP_COPY | DND.DROP_LINK | DND.DROP_DEFAULT);
-    dropTarget.setTransfer(TextTransfer.getInstance());
-    class DropAdapter extends DropTargetAdapter {
-      @Override
-      public void dragEnter(DropTargetEvent event) {
-        event.detail = DND.DROP_COPY;
-        event.feedback = DND.FEEDBACK_NONE;
-      }
-
-      @Override
-      public void dragOver(DropTargetEvent event) {
-        event.detail = DND.DROP_COPY;
-        event.feedback = DND.FEEDBACK_NONE;
-      }
-
-      @Override
-      public void dragOperationChanged(DropTargetEvent event) {
-        event.detail = DND.DROP_COPY;
-        event.feedback = DND.FEEDBACK_NONE;
-      }
-
-      @Override
-      public void drop(final DropTargetEvent event) {
-        if (TextTransfer.getInstance().isSupportedType(event.currentDataType)) {
-          String url = (String) event.data;
-          importTestRunSession(url);
-        }
-      }
-    }
-    dropTarget.addDropListener(new DropAdapter());
   }
 
   private void initPageSwitcher() {
@@ -896,7 +837,7 @@ action enablement
     return composite;
   }
 
-  private void showFailure(final TestElement test) {
+  private void showFailure(final ITestElement test) {
     postSyncRunnable(() -> {
       if (!isDisposed()) failureViewer.viewFailure(test);
     });
@@ -1060,18 +1001,18 @@ action enablement
     }
 
     @Override
-    public void testStarted(TestCaseElement testCaseElement) {
+    public void testStarted(ITestCaseElement testCaseElement) {
       fTestViewer.registerAutoScrollTarget(testCaseElement);
       fTestViewer.registerViewerUpdate(testCaseElement);
 
       String className = BasicElementLabels.getElementName(testCaseElement.getClassName());
-      String method = BasicElementLabels.getElementName(testCaseElement.getTestMethodName());
+      String method = BasicElementLabels.getElementName(testCaseElement.getMethodName());
       String status = MessageFormat.format(UIMessages.TestRunnerViewPart_message_started, className, method);
       registerInfoMessage(status);
     }
 
     @Override
-    public void testFailed(TestElement testElement, TestStatus status, String trace, String expected, String actual) {
+    public void testFailed(ITestElement testElement, TestStatus status, String trace, String expected, String actual) {
       if (settings.isAutoScroll()) {
         fTestViewer.registerFailedForAutoScroll(testElement);
       }
@@ -1093,19 +1034,19 @@ action enablement
     }
 
     @Override
-    public void testEnded(TestCaseElement testCaseElement) {
+    public void testEnded(ITestCaseElement testCaseElement) {
       fTestViewer.registerViewerUpdate(testCaseElement);
     }
 
     @Override
-    public void testRerun(TestCaseElement testCaseElement, TestStatus status, String trace, String expectedResult, String actualResult) {
+    public void testRerun(ITestCaseElement testCaseElement, TestStatus status, String trace, String expectedResult, String actualResult) {
       fTestViewer.registerViewerUpdate(testCaseElement); //TODO: autoExpand?
       postSyncProcessChanges();
       showFailure(testCaseElement);
     }
 
     @Override
-    public void testAdded(TestElement testElement) {
+    public void testAdded(ITestElement testElement) {
       fTestViewer.registerTestAdded(testElement);
     }
 

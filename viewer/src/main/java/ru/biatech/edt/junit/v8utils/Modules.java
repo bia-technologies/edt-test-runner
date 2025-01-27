@@ -33,8 +33,11 @@ import com._1c.g5.v8.dt.metadata.mdclass.MdClassPackage;
 import com._1c.g5.v8.dt.metadata.mdclass.MdObject;
 import com._1c.g5.v8.dt.metadata.mdclass.Report;
 import lombok.experimental.UtilityClass;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.emf.ecore.EClass;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -133,5 +136,41 @@ public class Modules {
     var newCommonModule = MdClassFactory.eINSTANCE.createCommonModule();
     newCommonModule.setUuid(UUID.randomUUID());
     return newCommonModule;
+  }
+
+  /**
+   * Возвращает содержимое общего модуля в виде строки
+   *
+   * @param module общий модуль
+   * @return содержимое модуля
+   * @throws CoreException при ошибке доступа к ресурсу модуля
+   * @throws IOException   при ошибке чтения содержимого
+   */
+  public String getModuleContent(CommonModule module) throws CoreException, IOException {
+    return getModuleContent(module.getModule());
+  }
+
+  /**
+   * Возвращает содержимое общего модуля в виде строки
+   *
+   * @param module модуль
+   * @return содержимое модуля
+   * @throws CoreException при ошибке доступа к ресурсу модуля
+   * @throws IOException   при ошибке чтения содержимого
+   */
+  public String getModuleContent(Module module) throws CoreException, IOException {
+    if (module == null) {
+      throw new IllegalArgumentException("module cannot be null");
+    }
+
+    var resource = Resources.getModuleResource(module);
+    byte[] buffer = new byte[8192];
+
+    try (var inputStream = resource.getContents(); var result = new ByteArrayOutputStream()) {
+      for (int length; (length = inputStream.read(buffer)) != -1; ) {
+        result.write(buffer, 0, length);
+      }
+      return result.toString(resource.getCharset());
+    }
   }
 }

@@ -18,8 +18,8 @@ package ru.biatech.edt.junit.v8utils;
 
 import com._1c.g5.v8.dt.bsl.model.Method;
 import com._1c.g5.v8.dt.bsl.model.Module;
-import com.google.common.base.Strings;
 import lombok.Getter;
+import ru.biatech.edt.junit.ui.utils.StringUtilities;
 
 /**
  * Ссылка на метод, включает в себя ссылку на модуль.
@@ -45,7 +45,7 @@ public class MethodReference {
   public Method getMethod() {
     if (method != null) {
       return method;
-    } else if (!Strings.isNullOrEmpty(methodName)) {
+    } else if (!StringUtilities.isNullOrEmpty(methodName)) {
       return method = Methods.findMethod(module, methodName);
     } else {
       return null;

@@ -14,7 +14,7 @@
  * limitations under the License.
  *******************************************************************************/
 
-package ru.biatech.edt.junit.utils;
+package ru.biatech.edt.junit.ui.utils;
 
 import lombok.Getter;
 import lombok.experimental.UtilityClass;

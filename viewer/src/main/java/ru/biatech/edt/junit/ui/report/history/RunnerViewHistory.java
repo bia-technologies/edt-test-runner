@@ -122,7 +122,7 @@ public class RunnerViewHistory extends ViewHistory<Session> {
       return imageProvider.getSuiteRunningIconDescriptor();
     }
 
-    var result = session.getTestResult(true);
+    var result = session.getResultStatus(true);
 
     switch (result) {
       case OK:

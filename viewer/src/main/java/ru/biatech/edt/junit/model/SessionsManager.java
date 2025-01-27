@@ -18,12 +18,14 @@
 
 package ru.biatech.edt.junit.model;
 
+import lombok.Getter;
 import lombok.NonNull;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.ILaunch;
+import ru.biatech.edt.junit.BasicElementLabels;
 import ru.biatech.edt.junit.Core;
 import ru.biatech.edt.junit.Preferences;
 import ru.biatech.edt.junit.TestViewerPlugin;
@@ -31,60 +33,70 @@ import ru.biatech.edt.junit.launcher.lifecycle.LifecycleEvent;
 import ru.biatech.edt.junit.launcher.lifecycle.LifecycleItem;
 import ru.biatech.edt.junit.launcher.lifecycle.LifecycleListener;
 import ru.biatech.edt.junit.launcher.lifecycle.LifecycleMonitor;
-import ru.biatech.edt.junit.launcher.v8.LaunchConfigurationAttributes;
 import ru.biatech.edt.junit.launcher.v8.LaunchHelper;
-import ru.biatech.edt.junit.model.serialize.Serializer;
+import ru.biatech.edt.junit.model.report.ReportLoader;
 import ru.biatech.edt.junit.ui.UIMessages;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+
+import static ru.biatech.edt.junit.TestViewerPlugin.log;
 
 /**
  * Central registry for JUnit test runs.
  */
 public final class SessionsManager {
 
+  @Getter
+  private static SessionsManager instance;
+
+  public SessionsManager() {
+    instance = this;
+  }
   private final ListenerList<ISessionListener> sessionListeners = new ListenerList<>();
   /**
    * Active test run sessions, youngest first.
    */
   private final LinkedList<Session> sessions = new LinkedList<>();
   private LifecycleListener lifecycleListener;
+  private Session activeSession;
 
-  public static void loadTestReport(LifecycleItem item) {
-    TestViewerPlugin.log().debug(UIMessages.JUnitModel_LoadReport);
+  public void importSession(LifecycleItem item) {
+    log().debug(UIMessages.JUnitModel_LoadReport);
 
     try {
       var launch = item.getMainLaunch();
 
       var configuration = launch.getLaunchConfiguration();
-      var project = LaunchConfigurationAttributes.getProject(configuration);
-
       var reportPath = LaunchHelper.getReportPath(configuration);
-      TestViewerPlugin.log().debug(UIMessages.JUnitModel_ReportFile, reportPath.toAbsolutePath());
+
+      log().debug(UIMessages.JUnitModel_ReportFile, reportPath.toAbsolutePath());
 
       if (!Files.exists(reportPath)) {
-        TestViewerPlugin.log().logError(UIMessages.JUnitModel_ReportFileNotFound);
+        log().logError(UIMessages.JUnitModel_ReportFileNotFound);
         return;
       }
 
-      var session = SessionsManager.importSession(reportPath.toFile(), project);
-      if (session == null) {
-        TestViewerPlugin.log().logError("Session is null after import.");
-        return;
+      log().debug("Импорт отчета о тестировании: " + reportPath.toAbsolutePath());
+      Session session;
+      if (activeSession != null && activeSession.isRunning()) {
+        importActiveSession(reportPath.toFile());
+      } else {
+        session = importSession(reportPath.toFile());
+        if (session == null) {
+          log().logError("Session is null after import.");
+          return;
+        }
+        session.setLaunch(item.getTestLaunch());
       }
-      session.setLaunch(item.getTestLaunch());
-
-      TestViewerPlugin.ui().asyncShowTestRunnerViewPart();
-
       Files.deleteIfExists(reportPath);
     } catch (CoreException | IOException e) {
-      TestViewerPlugin.log().logError(UIMessages.JUnitModel_UnknownErrorOnReportLoad, e);
+      log().logError(UIMessages.JUnitModel_UnknownErrorOnReportLoad, e);
     }
   }
 
@@ -95,37 +107,57 @@ public final class SessionsManager {
    * @return the imported test run session
    * @throws CoreException if the import failed
    */
-  public static Session importSession(File file, String defaultProjectName) throws CoreException {
-    return Serializer.importTestRunSession(file, defaultProjectName);
+  public Session importSession(File file) throws CoreException {
+    Session session;
+    try {
+      log().debug("Загрузку отчета в новую сессию");
+      session = ReportLoader.load(file, Session.class);
+      if (session == null) {
+        log().logError(UIMessages.JUnitModel_ReportIsEmpty);
+        return null;
+      }
+    } catch (Exception e) {
+      var message = MessageFormat.format(UIMessages.JUnitModel_could_not_read, BasicElementLabels.getPathLabel(file));
+      throw new CoreException(log().createErrorStatus(message, e));
+    }
+    appendSession(session);
+    return session;
   }
 
-  /**
-   * Imports a test run session from the given URL.
-   *
-   * @param url     an URL to a test run session transcript
-   * @param monitor a progress monitor for cancellation
-   * @throws InvocationTargetException wrapping a CoreException if the import failed
-   * @throws InterruptedException      if the import was cancelled
-   * @since 3.6
-   */
-  public static void importSession(String url, String defaultProjectName, IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-    Serializer.importTestRunSession(url, defaultProjectName, monitor);
+  public void importActiveSession(File file) {
+    log().debug("Загрузку отчета в активную сессию");
+    ReportLoader.loadInto(file, activeSession);
+    appendSession(activeSession);
+    activeSession = null;
+  }
+
+  public void importSession(TestSuiteElement[] data, ILaunch launch) {
+    var session = new Session();
+    session.setLaunch(launch);
+    session.setTestsuite(data);
+    appendSession(session);
+  }
+
+  private void appendSession(Session session) {
+    session.init();
+    instance.addSession(session);
+
+    // TODO: Генерировать событие и отображать панель оттуда
+    TestViewerPlugin.ui().asyncShowTestRunnerViewPart();
   }
 
   public void startSession(LifecycleItem item) {
-    var session = new Session(item.getName(), LaunchHelper.getProject(item.getTestLaunch().getLaunchConfiguration()));
-    session.setLaunch(item.getTestLaunch());
+    activeSession = new Session();
+    activeSession.setLaunch(item.getTestLaunch());
+    log().debug("Start session: {0}", activeSession);
   }
 
-  /**
-   * Starts the model (called by the {@link Core} on startup).
-   */
   public void start() {
     LifecycleMonitor.addListener(lifecycleListener = (eventType, item) -> {
       if (LifecycleEvent.START == eventType) {
         startSession(item);
       } else if (LifecycleEvent.isFinished(eventType)) {
-        SessionsManager.loadTestReport(item);
+        importSession(item);
       }
     });
     addTestRunSessionListener(new SessionListener());
@@ -241,7 +273,7 @@ public final class SessionsManager {
 
       sessionListener = new ITestSessionListener() {
         @Override
-        public void testAdded(TestElement testElement) {
+        public void testAdded(ITestElement testElement) {
         }
 
         @Override
@@ -273,25 +305,25 @@ public final class SessionsManager {
         }
 
         @Override
-        public void testStarted(TestCaseElement testCaseElement) {
+        public void testStarted(ITestCaseElement testCaseElement) {
           // not fire
 //          TestViewerPlugin.core().getNewTestRunListeners().forEach(it->it.testCaseStarted(testCaseElement));
         }
 
         @Override
-        public void testFailed(TestElement testElement, TestStatus status, String trace, String expected, String actual) {
+        public void testFailed(ITestElement testElement, TestStatus status, String trace, String expected, String actual) {
           // not fire
 //          TestViewerPlugin.core().getNewTestRunListeners().forEach(it->it.testCaseFinished(testElement));
         }
 
         @Override
-        public void testEnded(TestCaseElement testCaseElement) {
+        public void testEnded(ITestCaseElement testCaseElement) {
           // not fire
 //          TestViewerPlugin.core().getNewTestRunListeners().forEach(it->it.testCaseFinished(testCaseElement));
         }
 
         @Override
-        public void testRerun(TestCaseElement testCaseElement, TestStatus status, String trace, String expectedResult, String actualResult) {
+        public void testRerun(ITestCaseElement testCaseElement, TestStatus status, String trace, String expectedResult, String actualResult) {
           // not fire
 //          TestViewerPlugin.core().getNewTestRunListeners().forEach(it->it.testCaseRerun(testCaseElement));
         }
@@ -314,5 +346,7 @@ public final class SessionsManager {
     }
   }
 
-
+  /**
+   * Starts the model (called by the {@link Core} on startup).
+   */
 }

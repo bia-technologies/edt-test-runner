@@ -59,7 +59,7 @@
     <current-release-directory>${releases-directory}/${qualifiedVersion}</current-release-directory>
     <!-- The label for the Composite sites -->
     <site.label>${env.site_label_suffix}EDT Test Runner Repository</site.label>
-    <lombok.version>1.18.16</lombok.version>
+    <lombok.version>1.18.36</lombok.version>
   </properties>
 
   <dependencies>

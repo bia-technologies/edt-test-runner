@@ -14,13 +14,13 @@
  * limitations under the License.
  *******************************************************************************/
 
-package ru.biatech.edt.junit.utils;
+package ru.biatech.edt.junit.ui.utils;
 
-import com.google.common.base.Strings;
 import lombok.experimental.UtilityClass;
-import ru.biatech.edt.junit.model.ITraceable;
-import ru.biatech.edt.junit.model.TestCaseElement;
-import ru.biatech.edt.junit.model.TestErrorInfo;
+import ru.biatech.edt.junit.TestViewerPlugin;
+import ru.biatech.edt.junit.model.ITestCaseElement;
+import ru.biatech.edt.junit.model.ITestElement;
+import ru.biatech.edt.junit.model.report.ErrorInfo;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -40,41 +40,44 @@ public class StringUtilities {
    * @param testElement объект содержащий стек
    * @return текстовое представление стека ошибок
    */
-  public String getTrace(ITraceable testElement) {
+  public String getTrace(ITestElement testElement) {
 
     try (var stringWriter = new StringWriter(); var printWriter = new PrintWriter(stringWriter)) {
-      if (testElement instanceof TestErrorInfo) {
-        printTraceText(printWriter, (TestErrorInfo) testElement);
-      } else if (testElement instanceof TestCaseElement) {
-        printTraceText(printWriter, (TestCaseElement) testElement);
-      }
+      printTraceText(printWriter, (ITestCaseElement) testElement);
       return stringWriter.toString();
     } catch (IOException ignored) {
     }
     return "<Failed to get trace>";
   }
 
-  private void convertLineTerminators(String text, PrintWriter printWriter) throws IOException {
+  public boolean isNullOrEmpty(String string) {
+    return string == null || string.isEmpty();
+  }
+
+  private void convertLineTerminators(String text, PrintWriter printWriter) {
     var stringReader = new StringReader(text);
     var bufferedReader = new BufferedReader(stringReader);
     String line;
+    try {
     while ((line = bufferedReader.readLine()) != null) {
       printWriter.println(line);
     }
+    } catch (Exception e) {
+      TestViewerPlugin.log().logError(e);
+    }
   }
 
-  private void printTraceText(PrintWriter printWriter, TestErrorInfo error) throws IOException {
-    if (!Strings.isNullOrEmpty(error.getMessage())) {
+  private void printTraceText(PrintWriter printWriter, ErrorInfo error) {
+    if (!isNullOrEmpty(error.getMessage())) {
       convertLineTerminators(error.getMessage(), printWriter);
     }
-    if (error.hasTrace()) {
+    if (!isNullOrEmpty(error.getTrace())) {
       convertLineTerminators(error.getTrace(), printWriter);
     }
   }
 
-  private void printTraceText(PrintWriter printWriter, TestCaseElement testElement) throws IOException {
-    for (var error : testElement.getErrorsList()) {
-      printTraceText(printWriter, error);
-    }
+  private void printTraceText(PrintWriter printWriter, ITestCaseElement testElement) throws IOException {
+    testElement.getErrorsList()
+        .forEach(e -> printTraceText(printWriter, e));
   }
 }

@@ -34,6 +34,7 @@ import ru.biatech.edt.junit.launcher.LaunchConfigurationTypes;
 import ru.biatech.edt.junit.services.TestsManager;
 import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.ui.dialogs.Dialogs;
+import ru.biatech.edt.junit.ui.utils.StringUtilities;
 import ru.biatech.edt.junit.v8utils.Projects;
 
 import java.io.IOException;
@@ -126,7 +127,21 @@ public class LaunchHelper {
   }
 
   public IExtensionProject getTestExtension(ILaunchConfiguration configuration) {
-    return (IExtensionProject) Projects.getProject(LaunchConfigurationAttributes.getTestExtensionName(configuration));
+    var project = getProject(configuration);
+    if (project instanceof IExtensionProject) {
+      return (IExtensionProject) project;
+    } else {
+      return null;
+    }
+  }
+
+  public IV8Project getProject(ILaunchConfiguration configuration) {
+    String extensionName;
+    if (configuration == null || StringUtilities.isNullOrEmpty(extensionName = LaunchConfigurationAttributes.getTestExtensionName(configuration))) {
+      return null;
+    }
+
+    return Projects.getProject(extensionName);
   }
 
   public Stream<CommonModule> getTestModulesStream(IExtensionProject extensionProject) {
@@ -191,7 +206,7 @@ public class LaunchHelper {
 
   public ITestKind getTestRunnerKind(ILaunchConfiguration launchConfiguration) {
     try {
-      String loaderId = launchConfiguration.getAttribute(LaunchConfigurationAttributes.ATTR_TEST_RUNNER_KIND, (String) null);
+      String loaderId = launchConfiguration.getAttribute(LaunchConfigurationAttributes.TEST_RUNNER_KIND, (String) null);
       if (loaderId != null) {
         return TestKindRegistry.getDefault().getKind(loaderId);
       }
@@ -203,17 +218,5 @@ public class LaunchHelper {
   public Path getReportPath(ILaunchConfiguration configuration) {
     var workPath = LaunchConfigurationAttributes.getWorkPath(configuration);
     return Path.of(workPath, REPORT_FILE_NAME);
-  }
-
-  public IV8Project getProject(ILaunchConfiguration configuration) {
-    // TODO
-//		try {
-//			String projectName= configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, (String) null);
-//			if (projectName != null && projectName.length() > 0) {
-//				return JavaCore.create(ResourcesPlugin.getWorkspace().getRoot().getProject(projectName));
-//			}
-//		} catch (CoreException e) {
-//		}
-    return null;
   }
 }

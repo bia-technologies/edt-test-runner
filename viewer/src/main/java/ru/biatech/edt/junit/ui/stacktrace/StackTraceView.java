@@ -18,8 +18,8 @@ package ru.biatech.edt.junit.ui.stacktrace;
 
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.swt.widgets.Control;
-import ru.biatech.edt.junit.model.TestElement;
-import ru.biatech.edt.junit.model.TestErrorInfo;
+import ru.biatech.edt.junit.model.ITestElement;
+import ru.biatech.edt.junit.model.report.ErrorInfo;
 import ru.biatech.edt.junit.ui.stacktrace.events.Listener;
 
 /**
@@ -31,7 +31,7 @@ public interface StackTraceView {
    * Выводит опиание ошибки теста
    * @param testElement описание теста
    */
-  void viewFailure(TestElement testElement);
+  void viewFailure(ITestElement testElement);
 
   /**
    * Очищает элемент
@@ -48,7 +48,7 @@ public interface StackTraceView {
    * Возвращяет описание ошибки по выбранному элементу
    * @return описание ошибки
    */
-  TestErrorInfo getSelectedError();
+  ErrorInfo getSelectedError();
 
   /**
    * Уничтожение элмента

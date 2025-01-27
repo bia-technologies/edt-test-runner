@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 BIA-Technologies Limited Liability Company.
+ * Copyright (c) 2025 BIA-Technologies Limited Liability Company.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,34 +14,13 @@
  * limitations under the License.
  *******************************************************************************/
 
-package ru.biatech.edt.junit.model;
+package ru.biatech.edt.junit.yaxunit.remote;
 
-import com.google.common.base.Strings;
-import lombok.Value;
+import org.java_websocket.WebSocket;
+import ru.biatech.edt.junit.yaxunit.remote.dto.Message;
 
-/**
- * Содержит информацию об ошибке
- */
-@Value
-public class TestErrorInfo implements ITraceable {
-  ITestElement parent;
-  TestStatus status;
-  String message;
-  String trace;
-  String type;
-  String actual;
-  String expected;
+public interface Handler {
+  void onMessageReceive(WebSocket socket, Message<?> message);
 
-  public String getTestName() {
-    return parent.getTestName();
-  }
-
-  @Override
-  public boolean hasTrace() {
-    return !Strings.isNullOrEmpty(trace);
-  }
-
-  public boolean isComparisonFailure() {
-    return getExpected() != null && getActual() != null;
-  }
+  void onClientDisconnect(WebSocket socket);
 }

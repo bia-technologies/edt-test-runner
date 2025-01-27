@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 BIA-Technologies Limited Liability Company.
+ * Copyright (c) 2025 BIA-Technologies Limited Liability Company.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,20 @@
  * limitations under the License.
  *******************************************************************************/
 
-package ru.biatech.edt.junit.model;
+package ru.biatech.edt.junit.yaxunit.remote.dto;
 
-/**
- * Интерфейс маркер для объекта содержащего стек ошибок
- */
-public interface ITraceable {
-  /**
-   * Возвращает имя владельца ошибки
-   * @return имя владельца ошибки
-   */
-  String getTestName();
+import lombok.Data;
 
-  /**
-   * Возврашает признак наличия стека ошибок
-   * @return признак наличия стека ошибок
-   */
-  boolean hasTrace();
+import java.nio.file.Path;
+
+public class ReportFileMessage extends Message<ReportFileMessage.Params> {
+
+  public ReportFileMessage() {
+    super(REPORT_FILE_TYPE);
+  }
+
+  @Data
+  public static class Params {
+    Path reportFile;
+  }
 }

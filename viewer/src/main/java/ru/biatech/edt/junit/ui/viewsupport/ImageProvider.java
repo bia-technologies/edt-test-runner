@@ -48,7 +48,6 @@ public class ImageProvider {
   public static final String TEST_FAIL_ICON = "test-state/testFailed.png"; //$NON-NLS-1$
   public static final String TEST_IGNORED_ICON = "test-state/testIgnored.png"; //$NON-NLS-1$
   public static final String TEST_SKIPPED_ICON = "test-state/testSkipped.png"; //$NON-NLS-1$
-  public static final String TEST_ASSUMPTION_FAILURE_ICON = "test-state/testSkipped.png"; //$NON-NLS-1$
 
   // COMMON
   public static final String FAILURES_ICON = "obj16/failures.png"; //$NON-NLS-1$
@@ -104,7 +103,7 @@ public class ImageProvider {
   @Getter(lazy = true)
   private final Image testFailIcon = createManagedImage(TEST_FAIL_ICON);
   @Getter(lazy = true)
-  private final Image testAssumptionFailureIcon = createManagedImage(TEST_ASSUMPTION_FAILURE_ICON);
+  private final Image testSkippedIcon = createManagedImage(TEST_SKIPPED_ICON);
   @Getter(lazy = true)
   private final Image testIgnoredIcon = createManagedImage(TEST_IGNORED_ICON);
   @Getter(lazy = true)

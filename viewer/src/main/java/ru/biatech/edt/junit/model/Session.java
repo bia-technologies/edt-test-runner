@@ -132,6 +132,7 @@ public class Session extends Report<TestSuiteElement> implements ITestRunSession
   public Session() {
     testRunnerKind = ITestKind.NULL; //TODO
     startTime = System.currentTimeMillis();
+    testsuite = new TestSuiteElement[0];
     reset();
   }
 
@@ -153,6 +154,10 @@ public class Session extends Report<TestSuiteElement> implements ITestRunSession
 
   @Override
   public TestStatus getStatus() {
+    if (getTestsuite().length == 0) {
+      return TestStatus.NOT_RUN;
+    }
+
     var status = TestStatus.OK;
     for (var item : getTestsuite()) {
       status = TestStatus.combineStatus(status, item.getStatus());
@@ -322,6 +327,8 @@ public class Session extends Report<TestSuiteElement> implements ITestRunSession
    * Заполняет необходимые поля. Вызывается после полного заполнения.
    */
   void init() {
+    reset();
+
     for (var suite : getTestsuite()) {
       suite.init();
       errorCount += suite.getErrors();

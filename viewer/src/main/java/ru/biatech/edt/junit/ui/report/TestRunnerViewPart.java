@@ -340,9 +340,13 @@ action enablement
   }
 
   private void updateViewIcon() {
-    if (session == null || session.getStartedCount() == 0) {
+    if (session == null) {
       fViewImage = fOriginalViewImage;
-    } else if (hasErrorsOrFailures()) {
+    } else if (session.getTestsuite().length == 0) {
+      fViewImage = imageProvider.getInactiveLogo();
+    } else if (session.getErrorCount() != 0) {
+      fViewImage = imageProvider.getTestRunErrorIcon();
+    } else if (session.getFailureCount() != 0) {
       fViewImage = imageProvider.getTestRunFailIcon();
     } else {
       fViewImage = imageProvider.getTestRunOKIcon();

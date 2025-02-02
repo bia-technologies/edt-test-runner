@@ -4,19 +4,24 @@ import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 import ru.biatech.edt.junit.Serializer;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 @UtilityClass
 public class ReportLoader {
 
   @SneakyThrows
-  public <T> T load(File path, Class<T> reportClass) {
-    return Serializer.getXmlMapper().readValue(path, reportClass);
+  public <T> T load(Path path, Class<T> reportClass) {
+    try (var stream = Files.newInputStream(path)) {
+      return Serializer.getXmlMapper().readValue(stream, reportClass);
+    }
   }
 
   @SneakyThrows
-  public <T> void loadInto(File path, T object) {
-    Serializer.getXmlMapper().readerForUpdating(object).readValue(path);
+  public <T> void loadInto(Path path, T object) {
+    try (var stream = Files.newInputStream(path)) {
+      Serializer.getXmlMapper().readerForUpdating(object).readValue(stream);
+    }
   }
 
 }

@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: ru.biatech.edt.junit;singleton:=true
 Automatic-Module-Name: ru.biatech.edt.junit
-Bundle-Version: 24.3.0.qualifier
+Bundle-Version: 25.1.0.qualifier
 Bundle-Activator: ru.biatech.edt.junit.TestViewerPlugin
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: %providerName
@@ -38,8 +38,11 @@ Require-Bundle: org.apache.felix.scr,
  com._1c.g5.v8.bm.integration;bundle-version="11.0.0",
  com._1c.g5.v8.bm.core;bundle-version="8.0.0",
  com._1c.g5.wiring,
- org.apache.commons.lang3,
- com.google.gson
+ Java-WebSocket;bundle-version="1.5.0",
+ com.fasterxml.jackson.core.jackson-annotations;bundle-version="2.10.3",
+ com.fasterxml.jackson.core.jackson-databind;bundle-version="2.10.3",
+ com.fasterxml.jackson.core.jackson-core;bundle-version="2.10.3",
+ com.fasterxml.jackson.dataformat.jackson-dataformat-xml;bundle-version="2.10.3"
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Import-Package: com._1c.g5.ides.ui.texteditor.xtext.embedded,
  lombok;resolution:=optional,

@@ -19,8 +19,8 @@ package ru.biatech.edt.junit.ui.report.contentProviders;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
-import ru.biatech.edt.junit.model.TestElement;
-import ru.biatech.edt.junit.model.TestRoot;
+import ru.biatech.edt.junit.model.ITestElement;
+import ru.biatech.edt.junit.model.ITestElementContainer;
 import ru.biatech.edt.junit.model.TestSuiteElement;
 
 /**
@@ -44,12 +44,12 @@ public class TestSessionTreeContentProvider implements ITreeContentProvider {
 
   @Override
   public Object[] getElements(Object inputElement) {
-    return ((TestRoot) inputElement).getChildren();
+    return ((ITestElementContainer) inputElement).getChildren();
   }
 
   @Override
   public Object getParent(Object element) {
-    return ((TestElement) element).getParent();
+    return ((ITestElement) element).getParent();
   }
 
   @Override

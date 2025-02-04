@@ -19,6 +19,9 @@
 package ru.biatech.edt.junit.model;
 
 
+import ru.biatech.edt.junit.model.report.ErrorInfo;
+
+import java.util.stream.Stream;
 /**
  * Common protocol for test elements.
  * This set consists of {@link ITestCaseElement} , {@link ITestSuiteElement} and {@link ITestRunSession}
@@ -33,19 +36,11 @@ package ru.biatech.edt.junit.model;
  */
 public interface ITestElement {
 
-  /**
-   * Returns the progress state of this test element.
-   * <ul>
-   * <li>{@link ProgressState#NOT_STARTED}: the test has not yet started</li>
-   * <li>{@link ProgressState#RUNNING}: the test is currently running</li>
-   * <li>{@link ProgressState#STOPPED}: the test has stopped before being completed</li>
-   * <li>{@link ProgressState#COMPLETED}: the test (and all its children) has completed</li>
-   * </ul>
-   *
-   * @return returns one of {@link ProgressState#NOT_STARTED}, {@link ProgressState#RUNNING},
-   * {@link ProgressState#STOPPED} or {@link ProgressState#COMPLETED}.
-   */
-  ProgressState getProgressState();
+  ITestSuiteElement getParent();
+
+  TestStatus getStatus();
+
+  String getClassName();
 
   /**
    * Returns the result of the test element.
@@ -54,30 +49,16 @@ public interface ITestElement {
    * <li>{@link TestResult#OK}: the test has succeeded</li>
    * <li>{@link TestResult#ERROR}: the test has returned an error</li>
    * <li>{@link TestResult#FAILURE}: the test has returned an failure</li>
-   * <li>{@link TestResult#IGNORED}: the test has been ignored (skipped)</li>
+   * <li>{@link TestResult#SKIPPED}: the test has been ignored (skipped)</li>
    * </ul>
    *
    * @param includeChildren if <code>true</code>, the returned result is the combined
    *                        result of the test and its children (if it has any). If <code>false</code>,
    *                        only the test's result is returned.
    * @return returns one of {@link TestResult#UNDEFINED}, {@link TestResult#OK}, {@link TestResult#ERROR},
-   * {@link TestResult#FAILURE} or {@link TestResult#IGNORED}. Clients should also prepare for other, new values.
+   * {@link TestResult#FAILURE} or {@link TestResult#SKIPPED}. Clients should also prepare for other, new values.
    */
-  TestResult getTestResult(boolean includeChildren);
-
-  /**
-   * Returns the parent test element container or <code>null</code> if the test element is the test run session.
-   *
-   * @return the parent test suite
-   */
-  ITestElementContainer getParentContainer();
-
-  /**
-   * Returns the test run session.
-   *
-   * @return the parent test run session.
-   */
-  ITestRunSession getTestRunSession();
+  TestResult getResultStatus(boolean includeChildren);
 
   /**
    * Returns the estimated total time elapsed in seconds while executing this test element. The
@@ -98,6 +79,7 @@ public interface ITestElement {
    * Return test element name
    * @return test element name
    */
-  String getTestName();
+  String getName();
 
+  Stream<ErrorInfo> getErrorsList();
 }

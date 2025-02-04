@@ -51,9 +51,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.PlatformUI;
 import ru.biatech.edt.junit.TestViewerPlugin;
-import ru.biatech.edt.junit.model.TestErrorInfo;
+import ru.biatech.edt.junit.model.report.Failure;
+import ru.biatech.edt.junit.ui.UIMessages;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -70,7 +70,6 @@ public class CompareResultDialog extends TrayDialog {
     @Override
     protected void createControls(Composite composite) {
       super.createControls(composite);
-      PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, ru.biatech.edt.junit.ui.IJUnitHelpContextIds.RESULT_COMPARE_DIALOG);
     }
 
     @Override
@@ -174,7 +173,7 @@ public class CompareResultDialog extends TrayDialog {
 
   private CompareViewerPane fCompareViewerPane;
 
-  public CompareResultDialog(Shell parentShell, TestErrorInfo element) {
+  public CompareResultDialog(Shell parentShell, Failure element) {
     super(parentShell);
     setShellStyle((getShellStyle() & ~SWT.APPLICATION_MODAL) | SWT.TOOL);
     setFailedTest(element);
@@ -185,8 +184,8 @@ public class CompareResultDialog extends TrayDialog {
     return true;
   }
 
-  private void setFailedTest(TestErrorInfo failedTest) {
-    fTestName = failedTest.getTestName();
+  private void setFailedTest(Failure failedTest) {
+    fTestName = failedTest.getMessage();
     fExpected = failedTest.getExpected();
     fActual = failedTest.getActual();
     computePrefixSuffix();
@@ -219,13 +218,12 @@ public class CompareResultDialog extends TrayDialog {
   @Override
   protected void configureShell(Shell newShell) {
     super.configureShell(newShell);
-    newShell.setText(ru.biatech.edt.junit.ui.JUnitMessages.CompareResultDialog_title);
-    PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, ru.biatech.edt.junit.ui.IJUnitHelpContextIds.RESULT_COMPARE_DIALOG);
+    newShell.setText(UIMessages.CompareResultDialog_title);
   }
 
   @Override
   protected void createButtonsForButtonBar(Composite parent) {
-    createButton(parent, IDialogConstants.OK_ID, ru.biatech.edt.junit.ui.JUnitMessages.CompareResultDialog_labelOK, true);
+    createButton(parent, IDialogConstants.OK_ID, UIMessages.CompareResultDialog_labelOK, true);
   }
 
   @Override
@@ -251,9 +249,9 @@ public class CompareResultDialog extends TrayDialog {
 
   private Control createPreviewer(Composite parent) {
     final CompareConfiguration compareConfiguration = new CompareConfiguration();
-    compareConfiguration.setLeftLabel(ru.biatech.edt.junit.ui.JUnitMessages.CompareResultDialog_expectedLabel);
+    compareConfiguration.setLeftLabel(UIMessages.CompareResultDialog_expectedLabel);
     compareConfiguration.setLeftEditable(false);
-    compareConfiguration.setRightLabel(ru.biatech.edt.junit.ui.JUnitMessages.CompareResultDialog_actualLabel);
+    compareConfiguration.setRightLabel(UIMessages.CompareResultDialog_actualLabel);
     compareConfiguration.setRightEditable(false);
     compareConfiguration.setProperty(CompareConfiguration.IGNORE_WHITESPACE, Boolean.FALSE);
     compareConfiguration.setProperty(PREFIX_SUFFIX_PROPERTY, fPrefixSuffix);
@@ -273,7 +271,7 @@ public class CompareResultDialog extends TrayDialog {
     }
   }
 
-  public void setInput(TestErrorInfo failedTest) {
+  public void setInput(Failure failedTest) {
     setFailedTest(failedTest);
     setCompareViewerInput();
   }

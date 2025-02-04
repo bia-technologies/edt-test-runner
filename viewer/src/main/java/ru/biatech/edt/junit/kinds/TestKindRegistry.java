@@ -26,7 +26,7 @@ import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.emf.ecore.EObject;
-import ru.biatech.edt.junit.JUnitCore;
+import ru.biatech.edt.junit.Constants;
 import ru.biatech.edt.junit.v8utils.Projects;
 
 import java.util.ArrayList;
@@ -46,7 +46,7 @@ public class TestKindRegistry {
   public static TestKindRegistry getDefault() {
     if (fgRegistry != null) return fgRegistry;
 
-    fgRegistry = new TestKindRegistry(Platform.getExtensionRegistry().getExtensionPoint(JUnitCore.ID_EXTENSION_POINT_TEST_KINDS));
+    fgRegistry = new TestKindRegistry(Platform.getExtensionRegistry().getExtensionPoint(Constants.ID_EXTENSION_POINT_TEST_KINDS));
     return fgRegistry;
   }
 

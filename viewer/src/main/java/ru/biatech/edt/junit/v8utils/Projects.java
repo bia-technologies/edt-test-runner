@@ -22,6 +22,7 @@ import com._1c.g5.v8.dt.core.platform.IExtensionProject;
 import com._1c.g5.v8.dt.core.platform.IV8Project;
 import lombok.experimental.UtilityClass;
 import org.eclipse.emf.ecore.EObject;
+import ru.biatech.edt.junit.ui.utils.StringUtilities;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -40,7 +41,7 @@ public class Projects {
    * @return проект
    */
   public IV8Project getProject(String name) {
-    if (name == null || name.isEmpty()) {
+    if (StringUtilities.isNullOrEmpty(name)) {
       return null;
     }
 

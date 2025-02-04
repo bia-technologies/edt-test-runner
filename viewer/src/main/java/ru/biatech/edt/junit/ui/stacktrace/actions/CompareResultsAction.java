@@ -19,8 +19,9 @@ package ru.biatech.edt.junit.ui.stacktrace.actions;
 
 import org.eclipse.jface.action.Action;
 import ru.biatech.edt.junit.TestViewerPlugin;
-import ru.biatech.edt.junit.model.TestErrorInfo;
-import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.model.report.ErrorInfo;
+import ru.biatech.edt.junit.model.report.Failure;
+import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.ui.dialogs.CompareResultDialog;
 import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
 
@@ -30,13 +31,13 @@ import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
 public class CompareResultsAction extends Action {
 
   private CompareResultDialog fOpenDialog;
-  private TestErrorInfo testElement;
+  private Failure failure;
 
   public CompareResultsAction() {
-    super(JUnitMessages.CompareResultsAction_label);
+    super(UIMessages.CompareResultsAction_label);
     setEnabled(false);
-    setDescription(JUnitMessages.CompareResultsAction_description);
-    setToolTipText(JUnitMessages.CompareResultsAction_tooltip);
+    setDescription(UIMessages.CompareResultsAction_description);
+    setToolTipText(UIMessages.CompareResultsAction_tooltip);
 
     setImageDescriptor(ImageProvider.getImageDescriptor(ImageProvider.ACTION_COMPARE));
     setDisabledImageDescriptor(ImageProvider.getImageDescriptor(ImageProvider.ACTION_COMPARE_DISABLED));
@@ -48,11 +49,11 @@ public class CompareResultsAction extends Action {
   @Override
   public void run() {
     if (fOpenDialog != null) {
-      fOpenDialog.setInput(testElement);
+      fOpenDialog.setInput(failure);
       fOpenDialog.getShell().setActive();
 
     } else {
-      fOpenDialog = new CompareResultDialog(TestViewerPlugin.ui().getShell(), testElement);
+      fOpenDialog = new CompareResultDialog(TestViewerPlugin.ui().getShell(), failure);
       fOpenDialog.create();
       fOpenDialog.getShell().addDisposeListener(e -> fOpenDialog = null);
       fOpenDialog.setBlockOnOpen(false);
@@ -60,12 +61,14 @@ public class CompareResultsAction extends Action {
     }
   }
 
-  public void handleTestSelected(TestErrorInfo test) {
-    testElement = test;
-    boolean enableCompare = test != null && test.isComparisonFailure();
+  public void handleTestSelected(ErrorInfo error) {
+    failure = error instanceof Failure ? (Failure) error : null;
+    boolean enableCompare = failure != null && failure.isComparisonFailure();
     setEnabled(enableCompare);
     if (enableCompare && fOpenDialog != null) {
-      fOpenDialog.setInput(test);
+      fOpenDialog.setInput(failure);
     }
   }
+
+
 }

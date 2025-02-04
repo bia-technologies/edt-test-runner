@@ -26,7 +26,7 @@ public class Logger {
   private static final boolean debug = Boolean.parseBoolean(System.getProperty("ru.biatech.edt.junit.debug", "false"));
 
   private String getPluginID() {
-    return TestViewerPlugin.PLUGIN_ID;
+    return Constants.PLUGIN_ID;
   }
 
   public void log(IStatus status) {
@@ -61,6 +61,10 @@ public class Logger {
     if (debug) {
       log(new Status(IStatus.OK, getPluginID(), 0, message, null));
     }
+  }
+
+  public void info(String message) {
+    log(new Status(IStatus.INFO, getPluginID(), 0, message, null));
   }
 
   public void debug(String template, Object... objects) {

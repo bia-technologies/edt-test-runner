@@ -16,7 +16,6 @@
 
 package ru.biatech.edt.junit.launcher.lifecycle;
 
-import com.google.common.base.Strings;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 import org.eclipse.debug.core.DebugEvent;
@@ -29,7 +28,8 @@ import org.eclipse.debug.core.model.IProcess;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.launcher.v8.LaunchConfigurationAttributes;
 import ru.biatech.edt.junit.launcher.v8.LaunchHelper;
-import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.UIMessages;
+import ru.biatech.edt.junit.ui.utils.StringUtilities;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -95,7 +95,7 @@ public class LifecycleMonitor {
   }
 
   private void riseEvent(int eventType, LifecycleItem item) {
-    TestViewerPlugin.log().debug("Launch event: {0} for {1}", LifecycleEvent.getPresent(eventType), item.getName());
+    debug("Launch event: {0} for {1}", LifecycleEvent.getPresent(eventType), item.getName());
     if (LifecycleEvent.isStop(eventType)) {
       try {
         item.getTestLaunch().terminate();
@@ -177,7 +177,7 @@ public class LifecycleMonitor {
         var item = new LifecycleItem(launch, configuration.getName());
         monitoringItems.put(launch, item);
         onItemStart(item);
-      } else if (LaunchHelper.isOnecConfiguration(configuration) && !Strings.isNullOrEmpty(LaunchConfigurationAttributes.getTestKind(configuration))) {
+      } else if (LaunchHelper.isOnecConfiguration(configuration) && !StringUtilities.isNullOrEmpty(LaunchConfigurationAttributes.getTestKind(configuration))) {
         var name = configuration.getName();
         for (var item : monitoringItems.values()) {
           if (name.contains(item.getName()) && item.getMainLaunch() == null) {
@@ -227,12 +227,11 @@ public class LifecycleMonitor {
         exitCode = process.getExitValue();
       } catch (DebugException e) { /* do nothing*/ }
       if (exitCode != 0) {
-        TestViewerPlugin.log().warning(JUnitMessages.JUnitLaunchListener_ProcessError, item.getName(), process.getLabel(), exitCode);
+        TestViewerPlugin.log().warning(UIMessages.JUnitLaunchListener_ProcessError, item.getName(), process.getLabel(), exitCode);
         onItemStop(item, LifecycleEvent.FINISHED_WITH_ERROR);
       } else {
         onItemStop(item, LifecycleEvent.FINISHED);
       }
     }
   }
-
 }

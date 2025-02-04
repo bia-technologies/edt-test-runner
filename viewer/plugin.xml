@@ -49,10 +49,6 @@
         </launchConfigurationTabGroup>
     </extension>
 
-    <extension
-            point="org.eclipse.core.runtime.preferences">
-        <initializer class="ru.biatech.edt.junit.JunitPreferenceInitializer"/>
-    </extension>
 
     <!-- JUnit Container -->
 
@@ -79,25 +75,6 @@
         </view>
     </extension>
     <extension
-            point="org.eclipse.ui.preferencePages">
-        <page
-                name="%PreferencePage.label"
-                category="com._1c.g5.v8.dt.ui.V8"
-                class="ru.biatech.edt.junit.ui.JUnitPreferencePage"
-                id="ru.biatech.edt.junit.preferences">
-            <keywordReference id="ru.biatech.edt.junit.JUnit"/>
-        </page>
-    </extension>
-    <extension
-            point="org.eclipse.ui.keywords">
-        <keyword
-                id="ru.biatech.edt.junit.JUnit"
-                label="%preferenceKeywords.general"/>
-        <keyword
-                id="ru.biatech.edt.junit.wizards.java"
-                label="%preferenceKeywords.wizards.java"/>
-    </extension>
-    <extension
             point="org.eclipse.ui.actionSetPartAssociations">
         <actionSetPartAssociation
                 targetID="com._1c.g5.v8.dt.debug.ui.actionSet">
@@ -108,17 +85,6 @@
     </extension>
 
     <!-- JUnit Container -->
-    <extension
-            point="org.eclipse.ui.themes">
-        <fontDefinition
-                categoryId="org.eclipse.jdt.ui.presentation"
-                id="ru.biatech.edt.junit.failurePaneFont"
-                label="%FailureTraceFont.label">
-            <description>
-                %FailureTraceFont.description
-            </description>
-        </fontDefinition>
-    </extension>
     <extension
             id="testMethodMarker"
             name="Test method"

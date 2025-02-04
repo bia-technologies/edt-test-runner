@@ -18,7 +18,7 @@ package ru.biatech.edt.junit;
 
 import org.eclipse.osgi.util.TextProcessor;
 
-import java.io.File;
+import java.nio.file.Path;
 
 
 /**
@@ -49,8 +49,8 @@ public class BasicElementLabels {
    * @param file the file
    * @return the label of the file path to be used in the UI.
    */
-  public static String getPathLabel(File file) {
-    return markLTR(file.getAbsolutePath(), "/\\:.");  //$NON-NLS-1$
+  public static String getPathLabel(Path file) {
+    return markLTR(file.toAbsolutePath().toString(), "/\\:.");  //$NON-NLS-1$
   }
 
   /**
@@ -61,7 +61,7 @@ public class BasicElementLabels {
    * @param name the Java element name.
    * @return the label for the Java element
    */
-  public static String getJavaElementName(String name) {
+  public static String getElementName(String name) {
     return markLTR(name, "<>()?,{}.:"); //$NON-NLS-1$
   }
 }

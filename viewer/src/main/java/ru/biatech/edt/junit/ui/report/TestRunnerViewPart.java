@@ -29,33 +29,11 @@ package ru.biatech.edt.junit.ui.report;
 
 import com._1c.g5.v8.dt.core.platform.IV8Project;
 import lombok.Getter;
-import lombok.Setter;
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.IHandler;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.ILock;
-import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IMenuListener;
-import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
-import org.eclipse.jface.action.IToolBarManager;
-import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ViewForm;
-import org.eclipse.swt.dnd.DND;
-import org.eclipse.swt.dnd.DropTarget;
-import org.eclipse.swt.dnd.DropTargetAdapter;
-import org.eclipse.swt.dnd.DropTargetEvent;
-import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.graphics.Image;
@@ -78,70 +56,41 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
-import org.eclipse.ui.handlers.IHandlerActivation;
-import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.PageSwitcher;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.IWorkbenchSiteProgressService;
-import org.eclipse.ui.progress.UIJob;
-import org.eclipse.ui.statushandlers.StatusManager;
 import ru.biatech.edt.junit.BasicElementLabels;
-import ru.biatech.edt.junit.JUnitPreferencesConstants;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.kinds.ITestKind;
+import ru.biatech.edt.junit.model.ISessionListener;
 import ru.biatech.edt.junit.model.ITestCaseElement;
-import ru.biatech.edt.junit.model.ITestRunSessionListener;
-import ru.biatech.edt.junit.model.ITestSessionListener;
-import ru.biatech.edt.junit.model.JUnitModel;
-import ru.biatech.edt.junit.model.TestCaseElement;
-import ru.biatech.edt.junit.model.TestElement;
-import ru.biatech.edt.junit.model.TestRunSession;
-import ru.biatech.edt.junit.model.TestStatus;
-import ru.biatech.edt.junit.ui.IJUnitHelpContextIds;
-import ru.biatech.edt.junit.ui.JUnitMessages;
-import ru.biatech.edt.junit.ui.JUnitUIPreferencesConstants;
-import ru.biatech.edt.junit.ui.report.actions.ActivateOnErrorAction;
-import ru.biatech.edt.junit.ui.report.actions.FailuresOnlyFilterAction;
-import ru.biatech.edt.junit.ui.report.actions.IgnoredOnlyFilterAction;
-import ru.biatech.edt.junit.ui.report.actions.RerunLastAction;
-import ru.biatech.edt.junit.ui.report.actions.RerunLastFailedFirstAction;
-import ru.biatech.edt.junit.ui.report.actions.ScrollLockAction;
-import ru.biatech.edt.junit.ui.report.actions.ShowNextFailureAction;
-import ru.biatech.edt.junit.ui.report.actions.ShowPreviousFailureAction;
-import ru.biatech.edt.junit.ui.report.actions.ShowTestHierarchyAction;
-import ru.biatech.edt.junit.ui.report.actions.ShowTimeAction;
-import ru.biatech.edt.junit.ui.report.actions.ShowWebStackTraceAction;
-import ru.biatech.edt.junit.ui.report.actions.ToggleOrientationAction;
-import ru.biatech.edt.junit.ui.report.actions.ToggleSortingAction;
+import ru.biatech.edt.junit.model.ITestElement;
+import ru.biatech.edt.junit.model.Session;
+import ru.biatech.edt.junit.ui.UIMessages;
+import ru.biatech.edt.junit.ui.UIPreferencesConstants;
+import ru.biatech.edt.junit.ui.report.actions.ToolBarManager;
 import ru.biatech.edt.junit.ui.report.history.RunnerViewHistory;
 import ru.biatech.edt.junit.ui.stacktrace.FailureViewer;
 import ru.biatech.edt.junit.ui.stacktrace.actions.CopyTraceAction;
 import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
 
-import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
-import java.text.NumberFormat;
-import java.util.List;
 
 /**
  * A ViewPart that shows the results of a test run.
  */
-public class TestRunnerViewPart extends ViewPart {
+public class TestRunnerViewPart extends ViewPart implements SettingsEventListener {
 
   public static final String NAME = "ru.biatech.edt.junit.ResultView"; //$NON-NLS-1$
   public static final int LAYOUT_FLAT = 0;
   public static final int LAYOUT_HIERARCHICAL = 1;
   public static final Object FAMILY_JUNIT_RUN = new Object();
-  private static final int REFRESH_INTERVAL = 200;
   //orientations
   public static final int VIEW_ORIENTATION_VERTICAL = 0;
   public static final int VIEW_ORIENTATION_HORIZONTAL = 1;
   public static final int VIEW_ORIENTATION_AUTOMATIC = 2;
-  public static final String RERUN_LAST_COMMAND = "ru.biatech.edt.junit.junitShortcut.rerunLast"; //$NON-NLS-1$
-  public static final String RERUN_FAILED_FIRST_COMMAND = "ru.biatech.edt.junit.junitShortcut.rerunFailedFirst"; //$NON-NLS-1$
 
   /**
    * @since 3.5
@@ -170,41 +119,20 @@ public class TestRunnerViewPart extends ViewPart {
   /**
    * Actions
    */
-  private Action fNextAction;
-  private Action fPreviousAction;
+  @Getter
+  ToolBarManager toolBar = new ToolBarManager(this);
   private CopyTraceAction fCopyAction;
-  private Action fRerunLastTestAction;
-  private IHandlerActivation fRerunLastActivation;
-  private Action fRerunFailedFirstAction;
-  private IHandlerActivation fRerunFailedFirstActivation;
-  private FailuresOnlyFilterAction fFailuresOnlyFilterAction;
-  private IgnoredOnlyFilterAction fIgnoredOnlyFilterAction;
-  private ScrollLockAction fScrollLockAction;
-  private ToggleOrientationAction[] fToggleOrientationActions;
-  private ShowTestHierarchyAction fShowTestHierarchyAction;
-  private ShowTimeAction fShowTimeAction;
-  private ShowWebStackTraceAction showWebStackTraceAction;
-  private ActivateOnErrorAction fActivateOnErrorAction;
-  private ToggleSortingAction[] fToggleSortingActions;
-  private IMenuListener fViewMenuListener;
-  private TestRunSession fTestRunSession;
-  private TestSessionListener fTestSessionListener;
-  private RunnerViewHistory fViewHistory;
-  private TestRunSessionListener fTestRunSessionListener;
-  private IMemento fMemento;
+  @Getter
+  private Session session;
+  @Getter
+  private RunnerViewHistory viewHistoryManager;
+  private SessionListener fTestRunSessionListener;
+  @Getter
+  final ReportSettings settings;
   private SashForm fSashForm;
   private Composite fCounterComposite;
   private Composite fParent;
-  /**
-   * A Job that periodically updates view description, counters, and progress bar.
-   */
-  private UpdateUIJob fUpdateJob;
-  /**
-   * A Job that runs as long as a test run is running.
-   * It is used to show busyness for running jobs in the view (title in italics).
-   */
-  private JUnitIsRunningJob fJUnitIsRunningJob;
-  private ILock fJUnitIsRunningLock;
+
   private final IPartListener2 fPartListener = new IPartListener2() {
     @Override
     public void partVisible(IWorkbenchPartReference ref) {
@@ -221,33 +149,17 @@ public class TestRunnerViewPart extends ViewPart {
     }
   };
 
-  @Getter
-  final ReportSettings settings;
 
-  private static boolean getShowOnErrorOnly() {
-    return Platform.getPreferencesService().getBoolean(TestViewerPlugin.getPluginId(), JUnitPreferencesConstants.SHOW_ON_ERROR_ONLY, false, null);
-  }
-
-  private static void importTestRunSession(final String url) {
-    try {
-      PlatformUI.getWorkbench().getProgressService().busyCursorWhile(monitor -> JUnitModel.importTestRunSession(url, null, monitor));
-    } catch (InterruptedException e) {
-      // cancelled
-    } catch (InvocationTargetException e) {
-      CoreException ce = (CoreException) e.getCause();
-      StatusManager.getManager().handle(ce.getStatus(), StatusManager.SHOW | StatusManager.LOG);
-    }
-  }
 
   public TestRunnerViewPart() {
     imageProvider = new ImageProvider();
-    settings = new ReportSettings();
+    settings = new ReportSettings(this);
   }
 
   @Override
   public void init(IViewSite site, IMemento memento) throws PartInitException {
     super.init(site, memento);
-    fMemento = memento;
+    settings.setMemento(memento);
     IWorkbenchSiteProgressService progressService = getProgressService();
     if (progressService != null) {
       progressService.showBusyForFamily(TestRunnerViewPart.FAMILY_JUNIT_RUN);
@@ -270,7 +182,7 @@ public class TestRunnerViewPart extends ViewPart {
    * @return the display name of the current test run sessions kind, or <code>null</code>
    */
   public String getTestKindDisplayName() {
-    ITestKind kind = fTestRunSession.getTestRunnerKind();
+    ITestKind kind = session.getTestRunnerKind();
     if (!kind.isNull()) {
       return kind.getDisplayName();
     }
@@ -285,20 +197,15 @@ public class TestRunnerViewPart extends ViewPart {
   public synchronized void dispose() {
     fIsDisposed = true;
     if (fTestRunSessionListener != null) {
-      TestViewerPlugin.core().getModel().removeTestRunSessionListener(fTestRunSessionListener);
+      TestViewerPlugin.core().getSessionsManager().removeTestRunSessionListener(fTestRunSessionListener);
     }
 
-    IHandlerService handlerService = getSite().getWorkbenchWindow().getService(IHandlerService.class);
-    handlerService.deactivateHandler(fRerunLastActivation);
-    handlerService.deactivateHandler(fRerunFailedFirstActivation);
-    setActiveTestRunSession(null);
+    setActiveSession(null);
 
     getViewSite().getPage().removePartListener(fPartListener);
 
     imageProvider.dispose();
-    if (fViewMenuListener != null) {
-      getViewSite().getActionBars().getMenuManager().removeMenuListener(fViewMenuListener);
-    }
+    toolBar.dispose();
     if (failureViewer != null) {
       failureViewer.dispose();
     }
@@ -306,26 +213,22 @@ public class TestRunnerViewPart extends ViewPart {
   }
 
   public IV8Project getLaunchedProject() {
-    return fTestRunSession == null ? null : fTestRunSession.getLaunchedProject();
+    return session == null ? null : session.getLaunchedProject();
   }
 
   public boolean lastLaunchIsKeptAlive() {
-    return fTestRunSession != null && fTestRunSession.isKeptAlive();
+    return session != null && session.isKeptAlive();
   }
 
   public Shell getShell() {
     return fParent.getShell();
   }
 
-  public TestRunSession getTestRunSession() {
-    return fTestRunSession;
-  }
-
   /**
-   * @param testRunSession new active test run session
+   * @param session new active test run session
    * @return deactivated session, or <code>null</code> iff no session got deactivated
    */
-  public TestRunSession setActiveTestRunSession(TestRunSession testRunSession) {
+  public Session setActiveSession(Session session) {
 /*
 - State:
 fTestRunSession
@@ -343,36 +246,32 @@ fFailureTrace
 
 action enablement
  */
-    if (fTestRunSession == testRunSession) {
+    if (this.session == session) {
       return null;
     }
 
-    deregisterTestSessionListener(true);
+    Session deactivatedSession = this.session;
 
-    TestRunSession deactivatedSession = fTestRunSession;
+    this.session = session;
+    fTestViewer.registerActiveSession(session);
 
-    fTestRunSession = testRunSession;
-    fTestViewer.registerActiveSession(testRunSession);
-
+    toolBar.onChangedSession();
     if (fSashForm.isDisposed()) {
-      stopUpdateJobs();
+      postSyncProcessChanges();
       return deactivatedSession;
     }
 
-    if (testRunSession == null) {
+    if (session == null) {
       setTitleToolTip(null);
       resetViewIcon();
       clearStatus();
       failureViewer.clear();
 
       registerInfoMessage(" "); //$NON-NLS-1$
-      stopUpdateJobs();
-
-      fRerunFailedFirstAction.setEnabled(false);
-      fRerunLastTestAction.setEnabled(false);
+      postSyncProcessChanges();
 
     } else {
-      if (!fTestRunSession.isStarting() && !settings.isShowOnErrorOnly()) {
+      if (!this.session.isStarting() && !settings.isShowOnErrorOnly()) {
         showTestResultsView();
       }
 
@@ -380,56 +279,25 @@ action enablement
 
       clearStatus();
       failureViewer.clear();
-      registerInfoMessage(BasicElementLabels.getJavaElementName(fTestRunSession.getTestRunPresent()));
+      registerInfoMessage(BasicElementLabels.getElementName(this.session.getTestRunPresent()));
 
-      updateRerunFailedFirstAction();
-      fRerunLastTestAction.setEnabled(fTestRunSession.getLaunch() != null);
-
-      stopUpdateJobs();
+      postSyncProcessChanges();
 
       fTestViewer.expandFirstLevel();
       settings.setSortingCriterion(settings.getSortingCriterion());
+      selectFirstFailure();
     }
     return deactivatedSession;
   }
 
   public ITestCaseElement[] getAllFailures() {
-    return fTestRunSession.getAllFailedTestElements();
+    return session.getAllFailedTestElements();
   }
 
-  void handleTestSelected(TestElement test) {
+  void handleTestSelected(ITestElement test) {
     showFailure(test);
+    toolBar.updateActions();
     fCopyAction.handleTestSelected(test);
-  }
-
-  private void startUpdateJobs() {
-    postSyncProcessChanges();
-
-    if (fUpdateJob != null) {
-      return;
-    }
-    fJUnitIsRunningJob = new JUnitIsRunningJob(JUnitMessages.TestRunnerViewPart_wrapperJobName);
-    fJUnitIsRunningLock = Job.getJobManager().newLock();
-    // acquire lock while a test run is running
-    // the lock is released when the test run terminates
-    // the wrapper job will wait on this lock.
-    fJUnitIsRunningLock.acquire();
-    getProgressService().schedule(fJUnitIsRunningJob);
-
-    fUpdateJob = new UpdateUIJob(JUnitMessages.TestRunnerViewPart_jobName);
-    fUpdateJob.schedule(REFRESH_INTERVAL);
-  }
-
-  private void stopUpdateJobs() {
-    if (fUpdateJob != null) {
-      fUpdateJob.stop();
-      fUpdateJob = null;
-    }
-    if (fJUnitIsRunningJob != null && fJUnitIsRunningLock != null) {
-      fJUnitIsRunningLock.release();
-      fJUnitIsRunningJob = null;
-    }
-    postSyncProcessChanges();
   }
 
   private void processChangesInUI() {
@@ -445,53 +313,24 @@ action enablement
     } else {
       updateViewIcon();
     }
-    updateNextPreviousActions();
 
+    toolBar.updateActions();
     fTestViewer.processChangesInUI();
-  }
-
-  private void updateNextPreviousActions() {
-    boolean hasErrorsOrFailures = !settings.isShowIgnoredOnly() && hasErrorsOrFailures();
-    fNextAction.setEnabled(hasErrorsOrFailures);
-    fPreviousAction.setEnabled(hasErrorsOrFailures);
   }
 
   private void selectFirstFailure() {
     fTestViewer.selectFirstFailure();
   }
 
-  private boolean hasErrorsOrFailures() {
+  public boolean hasErrorsOrFailures() {
     return getErrorsPlusFailures() > 0;
   }
 
   private int getErrorsPlusFailures() {
-    if (fTestRunSession == null) {
+    if (session == null) {
       return 0;
     } else {
-      return fTestRunSession.getErrorCount() + fTestRunSession.getFailureCount();
-    }
-  }
-
-  private String elapsedTimeAsString(long runTime) {
-    return NumberFormat.getInstance().format((double) runTime / 1000);
-  }
-
-  private void handleStopped() {
-    postSyncRunnable(() -> {
-      if (isDisposed()) {
-        return;
-      }
-      resetViewIcon();
-      updateRerunFailedFirstAction();
-    });
-    stopUpdateJobs();
-    logMessageIfNoTests();
-  }
-
-  private void logMessageIfNoTests() {
-    if (fTestRunSession != null && fTestRunSession.getTotalCount() == 0) {
-      String msg = MessageFormat.format(JUnitMessages.TestRunnerViewPart_error_notests_kind, fTestRunSession.getTestRunnerKind().getDisplayName());
-      Platform.getLog(getClass()).error(msg);
+      return session.getErrorCount() + session.getFailureCount();
     }
   }
 
@@ -501,9 +340,13 @@ action enablement
   }
 
   private void updateViewIcon() {
-    if (fTestRunSession == null || fTestRunSession.getStartedCount() == 0) {
+    if (session == null) {
       fViewImage = fOriginalViewImage;
-    } else if (hasErrorsOrFailures()) {
+    } else if (session.getTestsuite().length == 0) {
+      fViewImage = imageProvider.getInactiveLogo();
+    } else if (session.getErrorCount() != 0) {
+      fViewImage = imageProvider.getTestRunErrorIcon();
+    } else if (session.getFailureCount() != 0) {
       fViewImage = imageProvider.getTestRunFailIcon();
     } else {
       fViewImage = imageProvider.getTestRunOKIcon();
@@ -512,33 +355,21 @@ action enablement
   }
 
   private void updateViewTitleProgress() {
-    if (fTestRunSession != null) {
+    if (session != null) {
       updateViewIcon();
     } else {
       resetViewIcon();
     }
   }
 
-  private void deregisterTestSessionListener(boolean force) {
-    if (fTestRunSession != null && fTestSessionListener != null && (force || !fTestRunSession.isKeptAlive())) {
-      fTestRunSession.removeTestSessionListener(fTestSessionListener);
-      fTestSessionListener = null;
-    }
-  }
-
-  private void updateRerunFailedFirstAction() {
-    boolean state = hasErrorsOrFailures() && fTestRunSession.getLaunch() != null;
-    fRerunFailedFirstAction.setEnabled(state);
-  }
-
   private void setTitleToolTip() {
-    String testKindDisplayStr = getTestKindDisplayName();
+    var testKindDisplayStr = getTestKindDisplayName();
+    var label = BasicElementLabels.getElementName(session.getName());
 
-    String testRunLabel = BasicElementLabels.getJavaElementName(fTestRunSession.getTestRunName());
     if (testKindDisplayStr != null) {
-      setTitleToolTip(MessageFormat.format(JUnitMessages.TestRunnerViewPart_titleToolTip, testRunLabel, testKindDisplayStr));
+      setTitleToolTip(MessageFormat.format(UIMessages.TestRunnerViewPart_titleToolTip, label, testKindDisplayStr));
     } else {
-      setTitleToolTip(testRunLabel);
+      setTitleToolTip(label);
     }
   }
 
@@ -562,15 +393,15 @@ action enablement
     boolean hasErrorsOrFailures;
     boolean stopped;
 
-    if (fTestRunSession != null) {
-      startedCount = fTestRunSession.getStartedCount();
-      ignoredCount = fTestRunSession.getIgnoredCount();
-      totalCount = fTestRunSession.getTotalCount();
-      errorCount = fTestRunSession.getErrorCount();
-      failureCount = fTestRunSession.getFailureCount();
-      assumptionFailureCount = fTestRunSession.getAssumptionFailureCount();
+    if (session != null) {
+      startedCount = session.getStartedCount();
+      ignoredCount = session.getIgnoredCount();
+      totalCount = session.getTotalCount();
+      errorCount = session.getErrorCount();
+      failureCount = session.getFailureCount();
+      assumptionFailureCount = session.getAssumptionFailureCount();
       hasErrorsOrFailures = errorCount + failureCount > 0;
-      stopped = fTestRunSession.isStopped();
+      stopped = session.isStopped();
     } else {
       startedCount = 0;
       ignoredCount = 0;
@@ -595,15 +426,6 @@ action enablement
     }
 
     fProgressBar.reset(hasErrorsOrFailures, stopped, ticksDone, totalCount);
-  }
-
-  private void postShowTestResultsView() {
-    postSyncRunnable(() -> {
-      if (isDisposed()) {
-        return;
-      }
-      showTestResultsView();
-    });
   }
 
   private void showTestResultsView() {
@@ -684,8 +506,8 @@ action enablement
     gridLayout.marginHeight = 0;
     parent.setLayout(gridLayout);
 
-    fViewHistory = new RunnerViewHistory(this);
-    configureToolBar();
+    viewHistoryManager = new RunnerViewHistory(this);
+    toolBar.configureToolBar();
 
     fCounterComposite = createProgressCountPanel(parent);
     fCounterComposite.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
@@ -699,32 +521,36 @@ action enablement
     actionBars.setGlobalActionHandler(ActionFactory.COPY.getId(), fCopyAction);
 
     initPageSwitcher();
-    addDropAdapter(parent);
 
     fOriginalViewImage = getTitleImage();
-    PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IJUnitHelpContextIds.RESULTS_VIEW);
 
     getViewSite().getPage().addPartListener(fPartListener);
 
     settings.setLayoutMode(LAYOUT_HIERARCHICAL);
     settings.setShowExecutionTime(true);
-    if (fMemento != null) {
-      settings.restoreLayoutState(fMemento);
-    }
-    fMemento = null;
+    settings.restoreLayoutState();
+    toolBar.updateActions();
 
-    fTestRunSessionListener = new TestRunSessionListener();
-    TestViewerPlugin.core().getModel().addTestRunSessionListener(fTestRunSessionListener);
+    // Apply ratio settings
+    var value = settings.getRatio();
+    fSashForm.setWeights(value, 1000 - value);
+
+    fTestRunSessionListener = new SessionListener();
+    TestViewerPlugin.core().getSessionsManager().addTestRunSessionListener(fTestRunSessionListener);
 
     // always show youngest test run in view. simulate "sessionAdded" event to do that
-    List<TestRunSession> testRunSessions = TestViewerPlugin.core().getModel().getTestRunSessions();
-    if (!testRunSessions.isEmpty()) {
-      fTestRunSessionListener.sessionAdded(testRunSessions.get(0));
+    var sessions = TestViewerPlugin.core().getSessionsManager().getSessions();
+    if (!sessions.isEmpty()) {
+      fTestRunSessionListener.sessionAdded(sessions.get(0));
     }
   }
 
   @Override
   public void saveState(IMemento memento) {
+    if (fSashForm != null) {
+      int[] weights = fSashForm.getWeights();
+      settings.setRatio((weights[0] * 1000) / (weights[0] + weights[1]));
+    }
     settings.saveState(memento);
   }
 
@@ -743,64 +569,31 @@ action enablement
     return fViewImage;
   }
 
-  private void addDropAdapter(Composite parent) {
-    DropTarget dropTarget = new DropTarget(parent, DND.DROP_MOVE | DND.DROP_COPY | DND.DROP_LINK | DND.DROP_DEFAULT);
-    dropTarget.setTransfer(TextTransfer.getInstance());
-    class DropAdapter extends DropTargetAdapter {
-      @Override
-      public void dragEnter(DropTargetEvent event) {
-        event.detail = DND.DROP_COPY;
-        event.feedback = DND.FEEDBACK_NONE;
-      }
-
-      @Override
-      public void dragOver(DropTargetEvent event) {
-        event.detail = DND.DROP_COPY;
-        event.feedback = DND.FEEDBACK_NONE;
-      }
-
-      @Override
-      public void dragOperationChanged(DropTargetEvent event) {
-        event.detail = DND.DROP_COPY;
-        event.feedback = DND.FEEDBACK_NONE;
-      }
-
-      @Override
-      public void drop(final DropTargetEvent event) {
-        if (TextTransfer.getInstance().isSupportedType(event.currentDataType)) {
-          String url = (String) event.data;
-          importTestRunSession(url);
-        }
-      }
-    }
-    dropTarget.addDropListener(new DropAdapter());
-  }
-
   private void initPageSwitcher() {
     @SuppressWarnings("unused") PageSwitcher pageSwitcher = new PageSwitcher(this) {
       @Override
       public Object[] getPages() {
-        return fViewHistory.getHistoryEntries().toArray();
+        return viewHistoryManager.getHistoryEntries().toArray();
       }
 
       @Override
       public String getName(Object page) {
-        return fViewHistory.getText((TestRunSession) page);
+        return viewHistoryManager.getText((Session) page);
       }
 
       @Override
       public ImageDescriptor getImageDescriptor(Object page) {
-        return fViewHistory.getImageDescriptor(page);
+        return viewHistoryManager.getImageDescriptor(page);
       }
 
       @Override
       public void activatePage(Object page) {
-        fViewHistory.setActiveEntry((TestRunSession) page);
+        viewHistoryManager.setActiveEntry((Session) page);
       }
 
       @Override
       public int getCurrentPageIndex() {
-        return fViewHistory.getHistoryEntries().indexOf(fViewHistory.getCurrentEntry());
+        return viewHistoryManager.getHistoryEntries().indexOf(viewHistoryManager.getCurrentEntry());
       }
     };
   }
@@ -832,98 +625,6 @@ action enablement
         }
       }
     }
-  }
-
-  private void configureToolBar() {
-    IActionBars actionBars = getViewSite().getActionBars();
-    IToolBarManager toolBar = actionBars.getToolBarManager();
-    IMenuManager viewMenu = actionBars.getMenuManager();
-
-    fNextAction = new ShowNextFailureAction(this);
-    fNextAction.setEnabled(false);
-    actionBars.setGlobalActionHandler(ActionFactory.NEXT.getId(), fNextAction);
-
-    fPreviousAction = new ShowPreviousFailureAction(this);
-    fPreviousAction.setEnabled(false);
-    actionBars.setGlobalActionHandler(ActionFactory.PREVIOUS.getId(), fPreviousAction);
-
-    fRerunLastTestAction = new RerunLastAction(this);
-    IHandlerService handlerService = getSite().getWorkbenchWindow().getService(IHandlerService.class);
-    IHandler handler = new AbstractHandler() {
-      @Override
-      public Object execute(ExecutionEvent event) {
-        fRerunLastTestAction.run();
-        return null;
-      }
-
-      @Override
-      public boolean isEnabled() {
-        return fRerunLastTestAction.isEnabled();
-      }
-    };
-    fRerunLastActivation = handlerService.activateHandler(RERUN_LAST_COMMAND, handler);
-
-    fRerunFailedFirstAction = new RerunLastFailedFirstAction(this);
-    handler = new AbstractHandler() {
-      @Override
-      public Object execute(ExecutionEvent event) {
-        fRerunFailedFirstAction.run();
-        return null;
-      }
-
-      @Override
-      public boolean isEnabled() {
-        return fRerunFailedFirstAction.isEnabled();
-      }
-    };
-    fRerunFailedFirstActivation = handlerService.activateHandler(RERUN_FAILED_FIRST_COMMAND, handler);
-
-    toolBar.add(fNextAction);
-    toolBar.add(fPreviousAction);
-    toolBar.add(fFailuresOnlyFilterAction = new FailuresOnlyFilterAction(settings));
-    toolBar.add(fIgnoredOnlyFilterAction = new IgnoredOnlyFilterAction(settings));
-    toolBar.add(fScrollLockAction = new ScrollLockAction(settings));
-    toolBar.add(new Separator());
-    toolBar.add(fRerunLastTestAction);
-    toolBar.add(fRerunFailedFirstAction);
-    toolBar.add(fViewHistory.createHistoryDropDownAction());
-
-
-    viewMenu.add(fShowTestHierarchyAction = new ShowTestHierarchyAction(settings));
-    viewMenu.add(fShowTimeAction = new ShowTimeAction(settings));
-    viewMenu.add(new Separator());
-
-    fToggleSortingActions = new ToggleSortingAction[]{
-        new ToggleSortingAction(settings, SortingCriterion.SORT_BY_EXECUTION_ORDER),
-        new ToggleSortingAction(settings, SortingCriterion.SORT_BY_EXECUTION_TIME),
-        new ToggleSortingAction(settings, SortingCriterion.SORT_BY_NAME)};
-    MenuManager fSortByMenu = new MenuManager(JUnitMessages.TestRunnerViewPart_sort_by_menu);
-    for (ToggleSortingAction fToggleSortingAction : fToggleSortingActions) {
-      fSortByMenu.add(fToggleSortingAction);
-    }
-    viewMenu.add(fSortByMenu);
-    viewMenu.add(new Separator());
-
-    fToggleOrientationActions = new ToggleOrientationAction[]{
-        new ToggleOrientationAction(settings, VIEW_ORIENTATION_VERTICAL),
-        new ToggleOrientationAction(settings, VIEW_ORIENTATION_HORIZONTAL),
-        new ToggleOrientationAction(settings, VIEW_ORIENTATION_AUTOMATIC)};
-
-    MenuManager layoutSubMenu = new MenuManager(JUnitMessages.TestRunnerViewPart_layout_menu);
-    for (ToggleOrientationAction toggleOrientationAction : fToggleOrientationActions) {
-      layoutSubMenu.add(toggleOrientationAction);
-    }
-    viewMenu.add(layoutSubMenu);
-    viewMenu.add(new Separator());
-
-    viewMenu.add(fFailuresOnlyFilterAction);
-    viewMenu.add(fIgnoredOnlyFilterAction);
-    viewMenu.add(fActivateOnErrorAction = new ActivateOnErrorAction(settings));
-    viewMenu.add(showWebStackTraceAction = new ShowWebStackTraceAction(settings));
-    fViewMenuListener = manager -> fActivateOnErrorAction.update();
-
-    viewMenu.addMenuListener(fViewMenuListener);
-    actionBars.updateActionBars();
   }
 
   private IStatusLineManager getStatusLine() {
@@ -963,7 +664,7 @@ action enablement
     return composite;
   }
 
-  private void showFailure(final TestElement test) {
+  private void showFailure(final ITestElement test) {
     postSyncRunnable(() -> {
       if (!isDisposed()) failureViewer.viewFailure(test);
     });
@@ -981,26 +682,17 @@ action enablement
     postSyncRunnable(this::processChangesInUI);
   }
 
-  private void warnOfContentChange() {
-    IWorkbenchSiteProgressService service = getProgressService();
-    if (service != null) {
-      service.warnOfContentChange();
-    }
-  }
-
   private void setOrientation(int orientation) {
     if ((fSashForm == null) || fSashForm.isDisposed()) {
       return;
     }
     boolean horizontal = orientation == VIEW_ORIENTATION_HORIZONTAL;
     fSashForm.setOrientation(horizontal ? SWT.HORIZONTAL : SWT.VERTICAL);
-    for (ToggleOrientationAction toggleOrientationAction : fToggleOrientationActions) {
-      toggleOrientationAction.update();
-    }
     fCurrentOrientation = orientation;
     GridLayout layout = (GridLayout) fCounterComposite.getLayout();
     setCounterColumns(layout);
     fParent.layout();
+    toolBar.updateActions();
   }
 
   private void setCounterColumns(GridLayout layout) {
@@ -1011,29 +703,66 @@ action enablement
     }
   }
 
+  @Override
+  public void ontHtmlStackTraceChanged(boolean value) {
+    failureViewer.setStacktraceViewer(value);
+  }
+
+  @Override
+  public void onOrientationChanged(int value) {
+    computeOrientation();
+  }
+
+  @Override
+  public void onSortingCriterionChanged(SortingCriterion value) {
+    if (session != null) {
+      fTestViewer.setSortingCriterion(value);
+    }
+  }
+
+  @Override
+  public void onLayoutModeChanged(int value) {
+    fTestViewer.setShowFailuresOrIgnoredOnly(settings.isFailuresOnly(), settings.isIgnoredOnly(), value);
+  }
+
+  @Override
+  public void onShowExecutionTimeChanged(boolean value) {
+    fTestViewer.setShowTime(value);
+  }
+
+  @Override
+  public void onShowIgnoredOnlyChanged(boolean value) {
+    fTestViewer.setShowFailuresOrIgnoredOnly(settings.isFailuresOnly(), value, settings.getLayoutMode());
+  }
+
+  @Override
+  public void onShowFailuresOnly(boolean value) {
+    fTestViewer.setShowFailuresOrIgnoredOnly(value, settings.isIgnoredOnly(), settings.getLayoutMode());
+  }
+
   public enum SortingCriterion {
     SORT_BY_NAME,
     SORT_BY_EXECUTION_ORDER,
     SORT_BY_EXECUTION_TIME
   }
 
-  private class TestRunSessionListener implements ITestRunSessionListener {
+  private class SessionListener implements ISessionListener {
     @Override
-    public void sessionAdded(final TestRunSession testRunSession) {
+    public void sessionAdded(final Session session) {
       getDisplay().asyncExec(() -> {
-        if (JUnitUIPreferencesConstants.getShowInAllViews() || getSite().getWorkbenchWindow() == TestViewerPlugin.ui().getActiveWorkbenchWindow()) {
+        if (UIPreferencesConstants.getShowInAllViews() || getSite().getWorkbenchWindow() == TestViewerPlugin.ui().getActiveWorkbenchWindow()) {
           if (fInfoMessage == null) {
-            String testRunLabel = BasicElementLabels.getJavaElementName(testRunSession.getTestRunName());
+            String testRunLabel = BasicElementLabels.getElementName(session.getName());
             String msg;
-            if (testRunSession.getLaunch() != null) {
-              msg = MessageFormat.format(JUnitMessages.TestRunnerViewPart_Launching, testRunLabel);
+            if (session.getLaunch() != null) {
+              msg = MessageFormat.format(UIMessages.TestRunnerViewPart_Launching, testRunLabel);
             } else {
               msg = testRunLabel;
             }
             registerInfoMessage(msg);
           }
 
-          TestRunSession deactivatedSession = setActiveTestRunSession(testRunSession);
+          Session deactivatedSession = setActiveSession(session);
           if (deactivatedSession != null) {
             deactivatedSession.swapOut();
           }
@@ -1042,15 +771,15 @@ action enablement
     }
 
     @Override
-    public void sessionRemoved(final TestRunSession testRunSession) {
+    public void sessionRemoved(final Session session) {
       getDisplay().asyncExec(() -> {
-        if (testRunSession.equals(fTestRunSession)) {
-          List<TestRunSession> testRunSessions = TestViewerPlugin.core().getModel().getTestRunSessions();
-          TestRunSession deactivatedSession;
-          if (!testRunSessions.isEmpty()) {
-            deactivatedSession = setActiveTestRunSession(testRunSessions.get(0));
+        if (session.equals(TestRunnerViewPart.this.session)) {
+          var sessions = TestViewerPlugin.core().getSessionsManager().getSessions();
+          Session deactivatedSession;
+          if (!sessions.isEmpty()) {
+            deactivatedSession = setActiveSession(sessions.get(0));
           } else {
-            deactivatedSession = setActiveTestRunSession(null);
+            deactivatedSession = setActiveSession(null);
           }
           if (deactivatedSession != null) {
             deactivatedSession.swapOut();
@@ -1060,354 +789,4 @@ action enablement
     }
   }
 
-  private class TestSessionListener implements ITestSessionListener {
-
-    @Override
-    public void sessionStarted() {
-      fTestViewer.registerViewersRefresh();
-      settings.setShowOnErrorOnly(getShowOnErrorOnly());
-
-      startUpdateJobs();
-
-      fRerunLastTestAction.setEnabled(true);
-
-      // While tests are running, always use the execution order
-      getDisplay().asyncExec(() -> fTestViewer.setSortingCriterion(SortingCriterion.SORT_BY_EXECUTION_ORDER));
-    }
-
-    @Override
-    public void sessionEnded(long elapsedTime) {
-      deregisterTestSessionListener(false);
-
-      fTestViewer.registerAutoScrollTarget(null);
-
-      String msg = MessageFormat.format(JUnitMessages.TestRunnerViewPart_message_finish, elapsedTimeAsString(elapsedTime));
-      registerInfoMessage(msg);
-
-      postSyncRunnable(() -> {
-        if (isDisposed()) {
-          return;
-        }
-        updateRerunFailedFirstAction();
-        processChangesInUI();
-        if (hasErrorsOrFailures()) {
-          selectFirstFailure();
-        }
-        warnOfContentChange();
-      });
-      stopUpdateJobs();
-      logMessageIfNoTests();
-
-      // When test session ended, apply user sorting criterion
-      getDisplay().asyncExec(() -> settings.setSortingCriterion(settings.getSortingCriterion()));
-    }
-
-    @Override
-    public void sessionStopped(final long elapsedTime) {
-      deregisterTestSessionListener(false);
-
-      fTestViewer.registerAutoScrollTarget(null);
-
-      registerInfoMessage(JUnitMessages.TestRunnerViewPart_message_stopped);
-      handleStopped();
-    }
-
-    @Override
-    public void sessionTerminated() {
-      deregisterTestSessionListener(true);
-
-      fTestViewer.registerAutoScrollTarget(null);
-
-      registerInfoMessage(JUnitMessages.TestRunnerViewPart_message_terminated);
-      handleStopped();
-    }
-
-    @Override
-    public void runningBegins() {
-      if (!settings.isShowOnErrorOnly()) {
-        postShowTestResultsView();
-      }
-    }
-
-    @Override
-    public void testStarted(TestCaseElement testCaseElement) {
-      fTestViewer.registerAutoScrollTarget(testCaseElement);
-      fTestViewer.registerViewerUpdate(testCaseElement);
-
-      String className = BasicElementLabels.getJavaElementName(testCaseElement.getClassName());
-      String method = BasicElementLabels.getJavaElementName(testCaseElement.getTestMethodName());
-      String status = MessageFormat.format(JUnitMessages.TestRunnerViewPart_message_started, className, method);
-      registerInfoMessage(status);
-    }
-
-    @Override
-    public void testFailed(TestElement testElement, TestStatus status, String trace, String expected, String actual) {
-      if (settings.isAutoScroll()) {
-        fTestViewer.registerFailedForAutoScroll(testElement);
-      }
-      fTestViewer.registerViewerUpdate(testElement);
-
-      // show the view on the first error only
-      if (settings.isShowOnErrorOnly() && (getErrorsPlusFailures() == 1)) {
-        postShowTestResultsView();
-      }
-
-      //TODO:
-      // [Bug 35590] JUnit window doesn't report errors from junit.extensions.TestSetup [JUnit]
-      // when a failure occurs in test setup then no test is running
-      // to update the views we artificially signal the end of a test run
-//		    if (!fTestIsRunning) {
-//				fTestIsRunning= false;
-//				testEnded(testCaseElement);
-//			}
-    }
-
-    @Override
-    public void testEnded(TestCaseElement testCaseElement) {
-      fTestViewer.registerViewerUpdate(testCaseElement);
-    }
-
-    @Override
-    public void testRerun(TestCaseElement testCaseElement, TestStatus status, String trace, String expectedResult, String actualResult) {
-      fTestViewer.registerViewerUpdate(testCaseElement); //TODO: autoExpand?
-      postSyncProcessChanges();
-      showFailure(testCaseElement);
-    }
-
-    @Override
-    public void testAdded(TestElement testElement) {
-      fTestViewer.registerTestAdded(testElement);
-    }
-
-    @Override
-    public boolean acceptsSwapToDisk() {
-      return false;
-    }
-  }
-
-  private class UpdateUIJob extends UIJob {
-    private boolean fRunning = true;
-
-    public UpdateUIJob(String name) {
-      super(name);
-      setSystem(true);
-    }
-
-    @Override
-    public IStatus runInUIThread(IProgressMonitor monitor) {
-      if (!isDisposed()) {
-        processChangesInUI();
-      }
-      schedule(REFRESH_INTERVAL);
-      return Status.OK_STATUS;
-    }
-
-    public void stop() {
-      fRunning = false;
-    }
-
-    @Override
-    public boolean shouldSchedule() {
-      return fRunning;
-    }
-  }
-
-  private class JUnitIsRunningJob extends Job {
-    public JUnitIsRunningJob(String name) {
-      super(name);
-      setSystem(true);
-    }
-
-    @Override
-    public IStatus run(IProgressMonitor monitor) {
-      // wait until the test run terminates
-      fJUnitIsRunningLock.acquire();
-      return Status.OK_STATUS;
-    }
-
-    @Override
-    public boolean belongsTo(Object family) {
-      return family == TestRunnerViewPart.FAMILY_JUNIT_RUN;
-    }
-  }
-
-  @Getter
-  public class ReportSettings {
-    // TODO В будущем сделать рефакторинг вынеся в самостоятельный класс
-    private static final String TAG_RATIO = "ratio"; //$NON-NLS-1$
-    private static final String TAG_ORIENTATION = "orientation"; //$NON-NLS-1$
-    private static final String TAG_SCROLL = "scroll"; //$NON-NLS-1$
-    private static final String TAG_LAYOUT = "layout"; //$NON-NLS-1$
-    private static final String TAG_FAILURES_ONLY = "failuresOnly"; //$NON-NLS-1$
-    private static final String TAG_IGNORED_ONLY = "ignoredOnly"; //$NON-NLS-1$
-    private static final String TAG_SHOW_TIME = "time"; //$NON-NLS-1$
-    private static final String TAG_SORTING_CRITERION = "sortingCriterion"; //$NON-NLS-1$
-    private static final String TAG_WEB_STACKTRACE = "webStackTrace"; //$NON-NLS-1$
-
-    /**
-     * The current orientation; either <code>VIEW_ORIENTATION_HORIZONTAL</code>
-     * <code>VIEW_ORIENTATION_VERTICAL</code>, or <code>VIEW_ORIENTATION_AUTOMATIC</code>.
-     */
-    private int orientation = VIEW_ORIENTATION_AUTOMATIC;
-
-    /**
-     * The current layout mode (LAYOUT_FLAT or LAYOUT_HIERARCHICAL).
-     */
-    private int layoutMode = LAYOUT_HIERARCHICAL;
-
-    /**
-     * Whether the output scrolls and reveals tests as they are executed.
-     */
-    @Setter
-    boolean autoScroll;
-
-    @Setter
-    boolean showOnErrorOnly;
-
-    /**
-     * The current sorting criterion.
-     */
-    private SortingCriterion sortingCriterion = SortingCriterion.SORT_BY_EXECUTION_ORDER;
-
-    public boolean isShowFailuresOnly() {
-      return fFailuresOnlyFilterAction != null && fFailuresOnlyFilterAction.isChecked();
-    }
-
-    public void setShowFailuresOnly(boolean failuresOnly) {
-      updateFilterAndLayout(failuresOnly, false /*ignoredOnly must be off*/, getLayoutMode());
-    }
-
-    public boolean isShowIgnoredOnly() {
-      return fIgnoredOnlyFilterAction != null && fIgnoredOnlyFilterAction.isChecked();
-    }
-
-    public void setShowIgnoredOnly(boolean ignoredOnly) {
-      updateFilterAndLayout(false, isShowIgnoredOnly(), getLayoutMode());
-    }
-
-    public boolean isScrollLock() {
-      return fScrollLockAction != null && fScrollLockAction.isChecked();
-    }
-
-    public boolean isShowExecutionTime() {
-      return fShowTimeAction != null && fShowTimeAction.isChecked();
-    }
-
-    public boolean isHtmlStackTrace() {
-      return showWebStackTraceAction != null && showWebStackTraceAction.isChecked();
-    }
-
-    public void setHtmlStackTrace(boolean value) {
-      showWebStackTraceAction.setChecked(value);
-      failureViewer.setStacktraceViewer(value);
-    }
-
-    public void setShowExecutionTime(boolean showTime) {
-      fTestViewer.setShowTime(showTime);
-      fShowTimeAction.setChecked(showTime);
-    }
-
-    public int getRatio() {
-      int[] weights = fSashForm.getWeights();
-      return (weights[0] * 1000) / (weights[0] + weights[1]);
-    }
-
-    public void setRation(Integer ratio) {
-      if (ratio != null) {
-        fSashForm.setWeights(ratio, 1000 - ratio);
-      }
-    }
-
-    public void setLayoutMode(int mode) {
-      updateFilterAndLayout(isShowFailuresOnly(), isShowIgnoredOnly(), mode);
-    }
-
-    public void setOrientation(int orientation) {
-      this.orientation = orientation;
-      computeOrientation();
-    }
-
-    public void setSortingCriterion(SortingCriterion sortingCriterion) {
-      this.sortingCriterion = sortingCriterion;
-      if (fTestRunSession != null) {
-        fTestViewer.setSortingCriterion(this.sortingCriterion);
-      }
-    }
-
-    public void saveState(IMemento memento) {
-      if (fSashForm == null) {
-        // part has not been created
-        if (fMemento != null) //Keep the old state;
-          memento.putMemento(fMemento);
-        return;
-      }
-
-      memento.putBoolean(TAG_SCROLL, isScrollLock());
-      memento.putInteger(TAG_RATIO, getRatio());
-      memento.putInteger(TAG_ORIENTATION, getOrientation());
-
-      memento.putBoolean(TAG_FAILURES_ONLY, isShowFailuresOnly());
-      memento.putBoolean(TAG_IGNORED_ONLY, isShowIgnoredOnly());
-      memento.putInteger(TAG_LAYOUT, getLayoutMode());
-      memento.putBoolean(TAG_SHOW_TIME, isShowExecutionTime());
-      memento.putInteger(TAG_SORTING_CRITERION, getSortingCriterion().ordinal());
-      memento.putBoolean(TAG_WEB_STACKTRACE, isHtmlStackTrace());
-    }
-
-    private void restoreLayoutState(IMemento memento) {
-      setRation(memento.getInteger(TAG_RATIO));
-
-      var orientation = memento.getInteger(TAG_ORIENTATION);
-      if (orientation != null) {
-        this.orientation = orientation;
-      }
-      computeOrientation();
-
-      var scrollLock = memento.getBoolean(TAG_SCROLL);
-      if (scrollLock != null) {
-        fScrollLockAction.setChecked(scrollLock);
-        setAutoScroll(!isScrollLock());
-      }
-
-      var layout = memento.getInteger(TAG_LAYOUT);
-      layout = layout == null ? LAYOUT_HIERARCHICAL : layout;
-
-      var failuresOnly = memento.getBoolean(TAG_FAILURES_ONLY);
-      failuresOnly = failuresOnly != null && failuresOnly;
-
-      var ignoredOnly = memento.getBoolean(TAG_IGNORED_ONLY);
-      ignoredOnly = ignoredOnly != null && ignoredOnly;
-
-      var time = memento.getBoolean(TAG_SHOW_TIME);
-      time = time == null || time;
-
-      var webStack = memento.getBoolean(TAG_WEB_STACKTRACE);
-      webStack = webStack == null || webStack; // default - true
-
-      var tagSortingCriterion = memento.getInteger(TAG_SORTING_CRITERION);
-      var sortingCriterion = tagSortingCriterion == null ?
-          TestRunnerViewPart.SortingCriterion.SORT_BY_EXECUTION_ORDER :
-          TestRunnerViewPart.SortingCriterion.values()[tagSortingCriterion];
-
-      setSortingCriterion(sortingCriterion);
-
-      for (var toggleSortingAction : fToggleSortingActions) {
-        toggleSortingAction.update();
-      }
-
-      updateFilterAndLayout(failuresOnly, ignoredOnly, layout);
-      setShowExecutionTime(time);
-      setHtmlStackTrace(webStack);
-    }
-
-    private void updateFilterAndLayout(boolean failuresOnly, boolean ignoredOnly, int layoutMode) {
-      this.layoutMode = layoutMode;
-      fShowTestHierarchyAction.update();
-      fFailuresOnlyFilterAction.setChecked(failuresOnly);
-      fIgnoredOnlyFilterAction.setChecked(ignoredOnly);
-      fTestViewer.setShowFailuresOrIgnoredOnly(failuresOnly, ignoredOnly, layoutMode);
-      updateNextPreviousActions();
-    }
-
-  }
 }

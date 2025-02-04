@@ -17,23 +17,22 @@
 package ru.biatech.edt.junit.ui.report.actions;
 
 import org.eclipse.jface.action.Action;
-import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
+import ru.biatech.edt.junit.ui.report.ReportSettings;
 
-public abstract class SettingsChangeAction extends Action {
-  protected final TestRunnerViewPart.ReportSettings settings;
+public abstract class SettingsChangeAction extends Action implements UpdateAble {
+  protected final ReportSettings settings;
 
-  protected SettingsChangeAction(TestRunnerViewPart.ReportSettings settings, String text, int style) {
+  protected SettingsChangeAction(ReportSettings settings, String text, int style) {
     super(text, style);
     this.settings = settings;
     update();
   }
 
-  protected SettingsChangeAction(TestRunnerViewPart.ReportSettings settings, String text) {
+  protected SettingsChangeAction(ReportSettings settings, String text) {
     super(text);
     this.settings = settings;
     update();
   }
 
-  public void update() {
-  }
+  public abstract void update();
 }

@@ -27,9 +27,9 @@ import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.ViewForm;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.IWorkbenchPage;
-import ru.biatech.edt.junit.model.TestElement;
-import ru.biatech.edt.junit.model.TestErrorInfo;
-import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.model.ITestElement;
+import ru.biatech.edt.junit.model.report.Failure;
+import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
 import ru.biatech.edt.junit.ui.stacktrace.actions.CompareResultsAction;
 import ru.biatech.edt.junit.ui.stacktrace.actions.CopyTraceAction;
@@ -53,7 +53,7 @@ public class FailureViewer {
   private CompareResultsAction compareAction;
   private OpenAction openAction;
 
-  TestElement currentTestElement;
+  ITestElement currentTestElement;
 
   public FailureViewer(TestRunnerViewPart viewPart, ViewForm parent) {
     this.viewPart = viewPart;
@@ -62,7 +62,7 @@ public class FailureViewer {
     createControls();
   }
 
-  public void viewFailure(TestElement testElement) {
+  public void viewFailure(ITestElement testElement) {
     activeViewer.viewFailure(currentTestElement = testElement);
     handleSelected();
   }
@@ -118,7 +118,7 @@ public class FailureViewer {
 
   private void createLabel() {
     CLabel label = new CLabel(parent, SWT.NONE);
-    label.setText(JUnitMessages.TestRunnerViewPart_label_failure);
+    label.setText(UIMessages.TestRunnerViewPart_label_failure);
     label.setImage(viewPart.getImageProvider().getStackViewIcon());
     parent.setTopLeft(label);
   }
@@ -128,7 +128,7 @@ public class FailureViewer {
     if (element == null) {
       return;
     }
-    if (element instanceof TestErrorInfo && ((TestErrorInfo) element).isComparisonFailure()) {
+    if (element instanceof Failure && ((Failure) element).isComparisonFailure()) {
       compareAction.run();
     } else if (element instanceof IStacktraceFrame) {
       openAction.run();

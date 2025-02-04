@@ -19,51 +19,34 @@ package ru.biatech.edt.junit.launcher.v8;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import ru.biatech.edt.junit.TestViewerPlugin;
 
 import java.util.List;
 
+import static ru.biatech.edt.junit.Constants.PLUGIN_ID;
+
 public final class LaunchConfigurationAttributes {
 
-  public static final String USED_LAUNCH_CONFIGURATION = "ru.biatech.edt.junit.launcher.ATTR_USED_LAUNCH_CONFIGURATION"; //$NON-NLS-1$
+  public static final String USED_LAUNCH_CONFIGURATION = PLUGIN_ID + ".launcher.USED_LAUNCH_CONFIGURATION"; //$NON-NLS-1$
 
-  public static final String TEST_EXTENSION = "ru.biatech.edt.junit.launcher.TEST_EXTENSION"; //$NON-NLS-1$
+  public static final String TEST_EXTENSION = PLUGIN_ID + ".launcher.TEST_EXTENSION"; //$NON-NLS-1$
 
-  public static final String TEST_MODULE = "ru.biatech.edt.junit.launcher.TEST_MODULE"; //$NON-NLS-1$
-  public static final String PROJECT_PATH = "ru.biatech.edt.junit.launcher.PROJECT_PATH"; //$NON-NLS-1$
-  public static final String LOGGING_CONSOLE = "ru.biatech.edt.junit.launcher.LOGGING_TO_CONSOLE"; //$NON-NLS-1$
+  public static final String TEST_MODULE = PLUGIN_ID + ".launcher.TEST_MODULE"; //$NON-NLS-1$
 
-  public static final String WORK_PATH = "ru.biatech.edt.junit.launcher.WORK_PATH"; //$NON-NLS-1$
+  public static final String PROJECT_PATH = PLUGIN_ID + ".launcher.PROJECT_PATH"; //$NON-NLS-1$
 
-  public static final String PROJECT = "ru.biatech.edt.junit.launcher.PROJECT"; //$NON-NLS-1$
+  public static final String LOGGING_CONSOLE = PLUGIN_ID + ".launcher.LOGGING_TO_CONSOLE"; //$NON-NLS-1$
 
-  public static final String TEST_FULL_NAME = "ru.biatech.edt.junit.launcher.TEST_FULL_NAME"; //$NON-NLS-1$
+  public static final String WORK_PATH = PLUGIN_ID + ".launcher.WORK_PATH"; //$NON-NLS-1$
 
-  public static final String ATTR_TEST_RUNNER_KIND = "ru.biatech.edt.junit.launcher.TEST_KIND"; //$NON-NLS-1$
+  public static final String PROJECT = PLUGIN_ID + ".launcher.PROJECT"; //$NON-NLS-1$
 
-  public static final String ATTR_PORT = TestViewerPlugin.getPluginId() + ".PORT"; //$NON-NLS-1$
+  public static final String TEST_FULL_NAME = PLUGIN_ID + ".launcher.TEST_FULL_NAME"; //$NON-NLS-1$
 
-  /**
-   * The test method name (followed by a comma-separated list of fully qualified parameter type
-   * names in parentheses, if exists), or "" iff running the whole test type.
-   */
-  public static final String ATTR_TEST_NAME = TestViewerPlugin.getPluginId() + ".TESTNAME"; //$NON-NLS-1$
+  public static final String TEST_RUNNER_KIND = PLUGIN_ID + ".launcher.TEST_KIND"; //$NON-NLS-1$
 
-  public static final String ATTR_KEEPRUNNING = TestViewerPlugin.getPluginId() + ".KEEPRUNNING_ATTR"; //$NON-NLS-1$
-  /**
-   * The launch container, or "" iff running a single test type.
-   */
-  public static final String ATTR_TEST_CONTAINER = TestViewerPlugin.getPluginId() + ".CONTAINER"; //$NON-NLS-1$
+  public static final String USE_REMOTE_LAUNCH = PLUGIN_ID + ".launcher.USE_REMOTE_LAUNCH"; //$NON-NLS-1$
 
-  public static final String ATTR_FAILURES_NAMES = TestViewerPlugin.getPluginId() + ".FAILURENAMES"; //$NON-NLS-1$
-
-  public static final String ATTR_TEST_HAS_INCLUDE_TAGS = TestViewerPlugin.getPluginId() + ".HAS_INCLUDE_TAGS"; //$NON-NLS-1$
-
-  public static final String ATTR_TEST_HAS_EXCLUDE_TAGS = TestViewerPlugin.getPluginId() + ".HAS_EXCLUDE_TAGS"; //$NON-NLS-1$
-
-  public static final String ATTR_TEST_INCLUDE_TAGS = TestViewerPlugin.getPluginId() + ".INCLUDE_TAGS"; //$NON-NLS-1$
-
-  public static final String ATTR_TEST_EXCLUDE_TAGS = TestViewerPlugin.getPluginId() + ".EXCLUDE_TAGS"; //$NON-NLS-1$
+  public static final String RPC_KEY = PLUGIN_ID + ".launcher.RPC_KEY"; //$NON-NLS-1$
 
   public static String getTargetConfigurationName(ILaunchConfiguration configuration) throws CoreException {
     return configuration.getAttribute(USED_LAUNCH_CONFIGURATION, (String) null);
@@ -108,7 +91,7 @@ public final class LaunchConfigurationAttributes {
   }
 
   public static String getTestKind(ILaunchConfiguration configuration) {
-    return getAttribute(configuration, ATTR_TEST_RUNNER_KIND);
+    return getAttribute(configuration, TEST_RUNNER_KIND);
   }
 
   public static String getAttribute(ILaunchConfiguration configuration, String attributeName) {
@@ -133,5 +116,9 @@ public final class LaunchConfigurationAttributes {
 
   public static String getProject(ILaunchConfiguration configuration) {
     return getAttribute(configuration, PROJECT);
+  }
+
+  public static boolean useRemoteLaunch(ILaunchConfiguration configuration) {
+    return getBooleanAttribute(configuration, LaunchConfigurationAttributes.USE_REMOTE_LAUNCH);
   }
 }

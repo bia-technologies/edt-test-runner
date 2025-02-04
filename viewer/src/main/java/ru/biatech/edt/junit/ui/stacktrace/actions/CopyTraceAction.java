@@ -16,33 +16,29 @@
  *******************************************************************************/
 package ru.biatech.edt.junit.ui.stacktrace.actions;
 
-import com.google.common.base.Strings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.SelectionListenerAction;
 import ru.biatech.edt.junit.TestViewerPlugin;
-import ru.biatech.edt.junit.model.ITraceable;
-import ru.biatech.edt.junit.ui.IJUnitHelpContextIds;
-import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.model.ITestElement;
+import ru.biatech.edt.junit.model.report.ErrorInfo;
+import ru.biatech.edt.junit.ui.UIMessages;
+import ru.biatech.edt.junit.ui.utils.ClipboardHelper;
+import ru.biatech.edt.junit.ui.utils.StringUtilities;
 import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
-import ru.biatech.edt.junit.utils.ClipboardHelper;
-import ru.biatech.edt.junit.utils.StringUtilities;
 
 /**
  * Copies a test failure stack trace to the clipboard.
  */
 public class CopyTraceAction extends SelectionListenerAction {
-  private ITraceable testElement;
+  private ITestElement testElement;
+  private ErrorInfo errorInfo;
 
   public CopyTraceAction() {
-    super(JUnitMessages.CopyTrace_action_label);
+    super(UIMessages.CopyTrace_action_label);
     setEnabled(false);
-    IWorkbench workbench = PlatformUI.getWorkbench();
-    workbench.getHelpSystem().setHelp(this, IJUnitHelpContextIds.COPY_TRACE_ACTION);
     setImageDescriptor(ImageProvider.getSharedImage(ISharedImages.IMG_TOOL_COPY));
   }
 
@@ -51,33 +47,44 @@ public class CopyTraceAction extends SelectionListenerAction {
    */
   @Override
   public void run() {
-    if (testElement == null) {
+    if (errorInfo == null && testElement == null) {
       return;
     }
 
-    String trace = StringUtilities.getTrace(testElement);
-    String source = null;
-    if (!Strings.isNullOrEmpty(trace)) {
-      source = trace;
-    } else if (testElement != null) {
-      source = testElement.getTestName();
+    String trace;
+    if (errorInfo != null) {
+      trace = errorInfo.getTrace();
+    } else {
+      trace = StringUtilities.getTrace(testElement);
     }
-    if (Strings.isNullOrEmpty(source)) {
+
+    String source = null;
+    if (!StringUtilities.isNullOrEmpty(trace)) {
+      source = trace;
+    }
+    if (StringUtilities.isNullOrEmpty(source)) {
       return;
     }
 
     try {
       ClipboardHelper.pasteToClipboard(source);
     } catch (SWTError e) {
-      if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD)
-        throw e;
-      if (MessageDialog.openQuestion(TestViewerPlugin.ui().getShell(), JUnitMessages.CopyTraceAction_problem, JUnitMessages.CopyTraceAction_clipboard_busy))
+      if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD) throw e;
+      if (MessageDialog.openQuestion(TestViewerPlugin.ui().getShell(), UIMessages.CopyTraceAction_problem, UIMessages.CopyTraceAction_clipboard_busy)) {
         run();
+      }
     }
   }
 
-  public void handleTestSelected(ITraceable test) {
+  public void handleTestSelected(ErrorInfo error) {
+    testElement = null;
+    errorInfo = error;
+    setEnabled(errorInfo != null);
+  }
+
+  public void handleTestSelected(ITestElement test) {
     testElement = test;
-    setEnabled(testElement != null);
+    errorInfo = null;
+    setEnabled(testElement != null && testElement.getErrorsList().findAny().isPresent());
   }
 }

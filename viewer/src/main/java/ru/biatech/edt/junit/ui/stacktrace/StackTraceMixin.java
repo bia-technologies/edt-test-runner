@@ -16,10 +16,11 @@
 
 package ru.biatech.edt.junit.ui.stacktrace;
 
+import lombok.Getter;
 import org.eclipse.ui.PlatformUI;
 import ru.biatech.edt.junit.TestViewerPlugin;
-import ru.biatech.edt.junit.model.TestElement;
-import ru.biatech.edt.junit.model.TestErrorInfo;
+import ru.biatech.edt.junit.model.ITestElement;
+import ru.biatech.edt.junit.model.report.ErrorInfo;
 import ru.biatech.edt.junit.ui.stacktrace.events.Listener;
 
 import java.util.ArrayList;
@@ -29,8 +30,10 @@ public class StackTraceMixin {
   private final List<Listener> testElementChangedListeners = new ArrayList<>();
   private final List<Listener> openListeners = new ArrayList<>();
   private final List<Listener> selectionChangedListeners = new ArrayList<>();
-  private TestElement testElement;
+  @Getter
+  private ITestElement testElement;
   private final StackTraceTreeBuilder treeBuilder;
+  @Getter
   private StackTraceTreeBuilder.TreeItem selectedItem;
 
   public StackTraceMixin() {
@@ -45,11 +48,7 @@ public class StackTraceMixin {
     return treeBuilder.getTree(testElement);
   }
 
-  public TestElement getTestElement() {
-    return testElement;
-  }
-
-  public void setTestElement(TestElement testElement) {
+  public void setTestElement(ITestElement testElement) {
     if (this.testElement != testElement) {
       this.testElement = testElement;
       rise(testElementChangedListeners);
@@ -57,16 +56,12 @@ public class StackTraceMixin {
     }
   }
 
-  public StackTraceTreeBuilder.TreeItem getSelectedItem() {
-    return selectedItem;
-  }
-
   public Object getSelectedItemData() {
     var item = getSelectedItem();
     return item == null ? null : item.getData();
   }
 
-  public TestErrorInfo getSelectedError() {
+  public ErrorInfo getSelectedError() {
     var item = getSelectedItem();
     return item == null ? null : item.getError();
   }

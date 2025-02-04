@@ -22,15 +22,14 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.model.ILaunchConfigurationDelegate;
 import ru.biatech.edt.junit.kinds.TestKindRegistry;
-import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.UIMessages;
 
 public class LaunchConfigurationDelegate implements ILaunchConfigurationDelegate {
 
   @Override
-  public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor)
-          throws CoreException {
+  public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor) throws CoreException {
 
-    monitor.beginTask(JUnitMessages.LaunchConfigurationDelegate_Launching, 1);
+    monitor.beginTask(UIMessages.LaunchConfigurationDelegate_Launching, 1);
 
     if (monitor.isCanceled())
       return;

@@ -20,7 +20,9 @@ import lombok.Getter;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.DecorationOverlayIcon;
 import org.eclipse.jface.viewers.IDecoration;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
@@ -48,7 +50,6 @@ public class ImageProvider {
   public static final String TEST_FAIL_ICON = "test-state/testFailed.png"; //$NON-NLS-1$
   public static final String TEST_IGNORED_ICON = "test-state/testIgnored.png"; //$NON-NLS-1$
   public static final String TEST_SKIPPED_ICON = "test-state/testSkipped.png"; //$NON-NLS-1$
-  public static final String TEST_ASSUMPTION_FAILURE_ICON = "test-state/testSkipped.png"; //$NON-NLS-1$
 
   // COMMON
   public static final String FAILURES_ICON = "obj16/failures.png"; //$NON-NLS-1$
@@ -92,9 +93,13 @@ public class ImageProvider {
   @Getter(lazy = true)
   private final Image logo = createManagedImage(LOGO);
   @Getter(lazy = true)
+  private final Image inactiveLogo = createGrayManagedImage(getLogo());
+  @Getter(lazy = true)
   private final Image testRunOKIcon = createOverlayIcon(getLogo(), OVERLAY_SUCCESS);
   @Getter(lazy = true)
   private final Image testRunFailIcon = createOverlayIcon(getLogo(), OVERLAY_FAILED);
+  @Getter(lazy = true)
+  private final Image testRunErrorIcon = createOverlayIcon(getLogo(), OVERLAY_ERROR);
   @Getter(lazy = true)
   private final Image testIcon = createManagedImage(TEST_ICON);
   @Getter(lazy = true)
@@ -104,7 +109,7 @@ public class ImageProvider {
   @Getter(lazy = true)
   private final Image testFailIcon = createManagedImage(TEST_FAIL_ICON);
   @Getter(lazy = true)
-  private final Image testAssumptionFailureIcon = createManagedImage(TEST_ASSUMPTION_FAILURE_ICON);
+  private final Image testSkippedIcon = createManagedImage(TEST_SKIPPED_ICON);
   @Getter(lazy = true)
   private final Image testIgnoredIcon = createManagedImage(TEST_IGNORED_ICON);
   @Getter(lazy = true)
@@ -175,6 +180,12 @@ public class ImageProvider {
 
   private Image createManagedImage(String path) {
     return createManagedImage(getImageDescriptor(path));
+  }
+
+  private Image createGrayManagedImage(Image base) {
+    var image = new Image(Display.getDefault(), base, SWT.IMAGE_GRAY);
+    imagesToDispose.add(image);
+    return image;
   }
 
   private Image createOverlayIcon(Image base, String second) {

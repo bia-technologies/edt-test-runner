@@ -33,7 +33,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.kinds.ITestFinder;
 import ru.biatech.edt.junit.launcher.v8.LaunchHelper;
-import ru.biatech.edt.junit.utils.StringUtilities;
+import ru.biatech.edt.junit.ui.utils.StringUtilities;
 import ru.biatech.edt.junit.v8utils.MethodReference;
 import ru.biatech.edt.junit.v8utils.Modules;
 import ru.biatech.edt.junit.v8utils.Projects;

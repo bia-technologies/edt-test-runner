@@ -17,9 +17,9 @@
 package ru.biatech.edt.junit.ui.report.actions;
 
 import ru.biatech.edt.junit.kinds.TestKindRegistry;
-import ru.biatech.edt.junit.model.TestCaseElement;
+import ru.biatech.edt.junit.model.ITestCaseElement;
 import ru.biatech.edt.junit.services.TestsManager;
-import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.ui.editor.ReferencedMethodHelper;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
 import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
@@ -29,8 +29,8 @@ import ru.biatech.edt.junit.ui.viewsupport.ImageProvider;
  */
 public class OpenUnderTestMethodAction extends OpenEditorAction {
 
-  public OpenUnderTestMethodAction(TestRunnerViewPart testRunnerPart, TestCaseElement testCase) {
-    super(JUnitMessages.OpenUnderTestMethodAction_label, ImageProvider.ACTION_GOTO_METHOD, testRunnerPart, testCase.getClassName());
+  public OpenUnderTestMethodAction(TestRunnerViewPart testRunnerPart, ITestCaseElement testCase) {
+    super(UIMessages.OpenUnderTestMethodAction_label, ImageProvider.ACTION_GOTO_METHOD, testRunnerPart, testCase.getClassName());
   }
 
   @Override
@@ -40,6 +40,6 @@ public class OpenUnderTestMethodAction extends OpenEditorAction {
     var methodName = TestsManager.getTestMethodName(fClassName);
 
     var list = testKind.getFinder().findTestedMethod(moduleName, methodName);
-    ReferencedMethodHelper.displayMethod(list, JUnitMessages.OpenUnderTestMethodAction_error_not_found);
+    ReferencedMethodHelper.displayMethod(list, UIMessages.OpenUnderTestMethodAction_error_not_found);
   }
 }

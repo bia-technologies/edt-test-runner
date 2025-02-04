@@ -36,7 +36,8 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import ru.biatech.edt.junit.launcher.lifecycle.LifecycleMonitor;
-import ru.biatech.edt.junit.ui.JUnitUI;
+import ru.biatech.edt.junit.ui.PluginUI;
+import ru.biatech.edt.junit.yaxunit.remote.RemoteLaunchManager;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,19 +45,18 @@ import java.net.URL;
 import java.text.MessageFormat;
 
 public class TestViewerPlugin extends AbstractUIPlugin {
-  public static final String PLUGIN_ID = "ru.biatech.edt.junit"; //$NON-NLS-1$
   private static final IPath ICONS_PATH = new Path("$nl$/icons/full"); //$NON-NLS-1$
   private static TestViewerPlugin plugin;
-  JUnitCore core;
-  JUnitUI ui;
+  Core core;
+  PluginUI ui;
   private BundleContext bundleContext;
   private Injector injector;
   private Logger logger = null;
 
   public TestViewerPlugin() {
     plugin = this;
-    core = new JUnitCore();
-    ui = new JUnitUI();
+    core = new Core();
+    ui = new PluginUI();
   }
 
   public static TestViewerPlugin getDefault() {
@@ -78,16 +78,16 @@ public class TestViewerPlugin extends AbstractUIPlugin {
     return (T) bundleContext.getService(serviceReference);
   }
 
-  public static JUnitCore core() {
+  public static Core core() {
     return getDefault().core;
   }
 
-  public static JUnitUI ui() {
+  public static PluginUI ui() {
     return getDefault().ui;
   }
 
   public static String getPluginId() {
-    return PLUGIN_ID;
+    return Constants.PLUGIN_ID;
   }
 
   public static boolean isStopped() {
@@ -130,14 +130,15 @@ public class TestViewerPlugin extends AbstractUIPlugin {
 
     new InjectorAwareServiceRegistrator(bundleContext, this::getInjector);
     this.bundleContext = bundleContext;
-    core().getModel().start();
+    core().getSessionsManager().start();
     LifecycleMonitor.start();
   }
 
   @Override
   public void stop(BundleContext bundleContext) throws Exception {
     LifecycleMonitor.stop();
-    core().getModel().stop();
+    core().getSessionsManager().stop();
+    RemoteLaunchManager.stop();
     plugin = null;
     super.stop(bundleContext);
   }

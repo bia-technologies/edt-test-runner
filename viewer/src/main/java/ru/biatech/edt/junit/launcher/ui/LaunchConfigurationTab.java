@@ -30,7 +30,9 @@ import org.eclipse.ui.PlatformUI;
 import ru.biatech.edt.junit.TestViewerPlugin;
 import ru.biatech.edt.junit.launcher.v8.LaunchConfigurationAttributes;
 import ru.biatech.edt.junit.launcher.v8.LaunchHelper;
-import ru.biatech.edt.junit.ui.JUnitMessages;
+import ru.biatech.edt.junit.ui.UIMessages;
+
+import java.util.Collections;
 
 public class LaunchConfigurationTab extends AbstractLaunchConfigurationTab {
 
@@ -51,14 +53,14 @@ public class LaunchConfigurationTab extends AbstractLaunchConfigurationTab {
     control.testModuleControl.addSelectionChangedListener(this::selectionChanged);
     control.projectPathControl.addModifyListener(e -> onChanged());
     control.loggingControl.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> onChanged()));
+    control.useRemoteLaunchControl.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> onChanged()));
   }
 
   @Override
   public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
     var configurations = LaunchHelper.getOnecLaunchConfigurations();
     var onecConfiguration = configurations.findFirst();
-    onecConfiguration.ifPresent(launchConfiguration ->
-                                        configuration.setAttribute(LaunchConfigurationAttributes.USED_LAUNCH_CONFIGURATION, launchConfiguration.getName()));
+    onecConfiguration.ifPresent(lc -> configuration.setAttribute(LaunchConfigurationAttributes.USED_LAUNCH_CONFIGURATION, lc.getName()));
 
     var extensions = LaunchHelper.getTestExtensions();
     if (extensions.size() == 1)
@@ -71,10 +73,30 @@ public class LaunchConfigurationTab extends AbstractLaunchConfigurationTab {
 
     control.testExtensionControl.addSelectionChangedListener(event -> {
       var project = UtilsUI.getSelection(control.testExtensionControl, IExtensionProject.class);
-      UtilsUI.setValueSource(control.testModuleControl, project == null ? null : LaunchHelper.getTestModules(project));
+      UtilsUI.setValueSource(control.testModuleControl, project == null ? Collections.emptyList() : LaunchHelper.getTestModules(project));
     });
 
     updateParametersFromConfig(configuration);
+  }
+
+  private void updateParametersFromConfig(ILaunchConfiguration configuration) {
+    try {
+      var usedConfiguration = LaunchHelper.getTargetConfiguration(configuration);
+      var project = LaunchHelper.getTestExtension(configuration);
+      var moduleName = LaunchConfigurationAttributes.getTestModuleName(configuration);
+      var projectPath = LaunchConfigurationAttributes.getProjectPath(configuration);
+      var logging = LaunchConfigurationAttributes.getLoggingToConsole(configuration);
+      var useRemoteLaunch = LaunchConfigurationAttributes.useRemoteLaunch(configuration);
+
+      UtilsUI.setSelection(control.usedLaunchConfigurationControl, usedConfiguration);
+      UtilsUI.setSelection(control.testExtensionControl, project);
+      UtilsUI.setSelection(control.testModuleControl, moduleName);
+      control.projectPathControl.setText(projectPath == null ? "" : projectPath);
+      control.loggingControl.setSelection(logging);
+      control.useRemoteLaunchControl.setSelection(useRemoteLaunch);
+    } catch (CoreException e) {
+      TestViewerPlugin.log().logError(UIMessages.LaunchConfigurationTab_failedRestoreSettings, e);
+    }
   }
 
   @Override
@@ -88,11 +110,12 @@ public class LaunchConfigurationTab extends AbstractLaunchConfigurationTab {
     configuration.setAttribute(LaunchConfigurationAttributes.TEST_MODULE, module);
     configuration.setAttribute(LaunchConfigurationAttributes.PROJECT_PATH, control.projectPathControl.getText());
     configuration.setAttribute(LaunchConfigurationAttributes.LOGGING_CONSOLE, control.loggingControl.getSelection());
+    configuration.setAttribute(LaunchConfigurationAttributes.USE_REMOTE_LAUNCH, control.useRemoteLaunchControl.getSelection());
   }
 
   @Override
   public String getName() {
-    return JUnitMessages.LaunchConfigurationTab_tab_label;
+    return UIMessages.LaunchConfigurationTab_tab_label;
   }
 
   @Override
@@ -107,24 +130,6 @@ public class LaunchConfigurationTab extends AbstractLaunchConfigurationTab {
       success = false;
     }
     return success;
-  }
-
-  private void updateParametersFromConfig(ILaunchConfiguration configuration) {
-    try {
-      var usedConfiguration = LaunchHelper.getTargetConfiguration(configuration);
-      var project = LaunchHelper.getTestExtension(configuration);
-      var moduleName = LaunchConfigurationAttributes.getTestModuleName(configuration);
-      var projectPath = LaunchConfigurationAttributes.getProjectPath(configuration);
-      var logging = LaunchConfigurationAttributes.getLoggingToConsole(configuration);
-
-      UtilsUI.setSelection(control.usedLaunchConfigurationControl, usedConfiguration);
-      UtilsUI.setSelection(control.testExtensionControl, project);
-      UtilsUI.setSelection(control.testModuleControl, moduleName);
-      control.projectPathControl.setText(projectPath == null ? "" : projectPath);
-      control.loggingControl.setSelection(logging);
-    } catch (CoreException e) {
-      TestViewerPlugin.log().logError(JUnitMessages.LaunchConfigurationTab_failedRestoreSettings, e);
-    }
   }
 
   private void selectionChanged(SelectionChangedEvent event) {

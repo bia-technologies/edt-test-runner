@@ -92,7 +92,7 @@ public class RemoteLauncherImpl implements RemoteLauncher, Handler, AutoCloseabl
   }
 
   private void handleReportFile(ReportFileMessage message) {
-    SessionsManager.getInstance().importActiveSession(message.getData().getReportFile().toFile());
+    SessionsManager.getInstance().importActiveSession(message.getData().getReportFile());
   }
 
   private void handleReport(ReportMessage message) {

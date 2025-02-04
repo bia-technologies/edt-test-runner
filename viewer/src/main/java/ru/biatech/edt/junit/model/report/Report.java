@@ -11,6 +11,6 @@ public class Report<T extends TestSuite<?>> {
    * Properties (e.g., environment settings) set during test execution
    */
   @JacksonXmlElementWrapper(useWrapping = true, localName = "properties")
-  Property[] property;
-  T[] testsuite;
+  protected Property[] property;
+  protected T[] testsuite;
 }

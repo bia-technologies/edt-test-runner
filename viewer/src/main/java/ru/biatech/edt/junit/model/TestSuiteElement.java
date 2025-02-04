@@ -17,18 +17,20 @@
 package ru.biatech.edt.junit.model;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import ru.biatech.edt.junit.model.report.ErrorInfo;
 import ru.biatech.edt.junit.model.report.TestSuite;
 
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-@NoArgsConstructor
 public class TestSuiteElement extends TestSuite<TestCaseElement> implements ITestSuiteElement {
   @Getter
   private TestStatus status;
   private TestStatus childrenStatus;
+
+  public TestSuiteElement() {
+    testcase = new TestCaseElement[0];
+  }
 
   @Override
   public ITestSuiteElement getParent() {
@@ -93,7 +95,10 @@ public class TestSuiteElement extends TestSuite<TestCaseElement> implements ITes
     failures = 0;
     errors = 0;
     skipped = 0;
-    tests = testcase.length;
+    tests = getTestcase().length;
+    status = TestStatus.NOT_RUN;
+    childrenStatus = TestStatus.OK;
+
     for (var test : getTestcase()) {
       test.init(this);
       switch (test.getStatus()) {

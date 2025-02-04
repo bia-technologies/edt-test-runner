@@ -26,7 +26,7 @@ import ru.biatech.edt.junit.model.SessionsManager;
 import ru.biatech.edt.junit.ui.UIMessages;
 import ru.biatech.edt.junit.ui.report.TestRunnerViewPart;
 
-import java.io.File;
+import java.nio.file.Path;
 
 /**
  * Команда загрузки отчета о тестировании из файла
@@ -54,7 +54,7 @@ import java.io.File;
     }
 
     //TODO: MULTI: getFileNames()
-    File file = new File(path);
+    var file = Path.of(path);
 
     try {
       SessionsManager.getInstance().importSession(file);

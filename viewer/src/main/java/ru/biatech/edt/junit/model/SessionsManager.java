@@ -37,9 +37,9 @@ import ru.biatech.edt.junit.launcher.v8.LaunchHelper;
 import ru.biatech.edt.junit.model.report.ReportLoader;
 import ru.biatech.edt.junit.ui.UIMessages;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -66,10 +66,17 @@ public final class SessionsManager {
   private LifecycleListener lifecycleListener;
   private Session activeSession;
 
+  private static void dropFile(Path path) {
+    try {
+      Files.deleteIfExists(path);
+    } catch (IOException e) {
+      TestViewerPlugin.log().logError("Не удалось удалить файл: " + path, e);
+    }
+  }
+
   public void importSession(LifecycleItem item) {
     log().debug(UIMessages.JUnitModel_LoadReport);
 
-    try {
       var launch = item.getMainLaunch();
 
       var configuration = launch.getLaunchConfiguration();
@@ -83,20 +90,22 @@ public final class SessionsManager {
       }
 
       log().debug("Импорт отчета о тестировании: " + reportPath.toAbsolutePath());
+    try {
       Session session;
       if (activeSession != null && activeSession.isRunning()) {
-        importActiveSession(reportPath.toFile());
+        importActiveSession(reportPath);
       } else {
-        session = importSession(reportPath.toFile());
+        session = importSession(reportPath);
         if (session == null) {
           log().logError("Session is null after import.");
           return;
         }
         session.setLaunch(item.getTestLaunch());
       }
-      Files.deleteIfExists(reportPath);
-    } catch (CoreException | IOException e) {
+    } catch (CoreException e) {
       log().logError(UIMessages.JUnitModel_UnknownErrorOnReportLoad, e);
+    } finally {
+      dropFile(reportPath);
     }
   }
 
@@ -107,7 +116,7 @@ public final class SessionsManager {
    * @return the imported test run session
    * @throws CoreException if the import failed
    */
-  public Session importSession(File file) throws CoreException {
+  public Session importSession(Path file) throws CoreException {
     Session session;
     try {
       log().debug("Загрузку отчета в новую сессию");
@@ -124,7 +133,7 @@ public final class SessionsManager {
     return session;
   }
 
-  public void importActiveSession(File file) {
+  public void importActiveSession(Path file) {
     log().debug("Загрузку отчета в активную сессию");
     ReportLoader.loadInto(file, activeSession);
     appendSession(activeSession);
@@ -140,6 +149,9 @@ public final class SessionsManager {
 
   private void appendSession(Session session) {
     session.init();
+    if (session.getTestsuite().length == 0) {
+      log().logError("Отчет пуст");
+    }
     instance.addSession(session);
 
     // TODO: Генерировать событие и отображать панель оттуда
@@ -172,7 +184,7 @@ public final class SessionsManager {
     var swapFiles = historyDirectory.listFiles();
     if (swapFiles != null) {
       for (var swapFile : swapFiles) {
-        swapFile.delete();
+        dropFile(swapFile.toPath());
       }
     }
   }

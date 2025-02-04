@@ -20,7 +20,9 @@ import lombok.Getter;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.DecorationOverlayIcon;
 import org.eclipse.jface.viewers.IDecoration;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
@@ -91,9 +93,13 @@ public class ImageProvider {
   @Getter(lazy = true)
   private final Image logo = createManagedImage(LOGO);
   @Getter(lazy = true)
+  private final Image inactiveLogo = createGrayManagedImage(getLogo());
+  @Getter(lazy = true)
   private final Image testRunOKIcon = createOverlayIcon(getLogo(), OVERLAY_SUCCESS);
   @Getter(lazy = true)
   private final Image testRunFailIcon = createOverlayIcon(getLogo(), OVERLAY_FAILED);
+  @Getter(lazy = true)
+  private final Image testRunErrorIcon = createOverlayIcon(getLogo(), OVERLAY_ERROR);
   @Getter(lazy = true)
   private final Image testIcon = createManagedImage(TEST_ICON);
   @Getter(lazy = true)
@@ -174,6 +180,12 @@ public class ImageProvider {
 
   private Image createManagedImage(String path) {
     return createManagedImage(getImageDescriptor(path));
+  }
+
+  private Image createGrayManagedImage(Image base) {
+    var image = new Image(Display.getDefault(), base, SWT.IMAGE_GRAY);
+    imagesToDispose.add(image);
+    return image;
   }
 
   private Image createOverlayIcon(Image base, String second) {

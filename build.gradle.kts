@@ -5,7 +5,7 @@ import java.util.*
 plugins {
     `java-library`
     id("com.github.hierynomus.license") version "0.16.1"
-    id("it.filippor.p2") version "0.0.10"
+    id("it.filippor.p2") version "0.0.13"
 }
 
 group = "ru.biatech.edt.xtest"

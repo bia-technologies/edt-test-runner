@@ -46,8 +46,12 @@ public class TestMethodMarker implements IExternalBslValidator {
     return object instanceof Module && TestsManager.isTestModule((Module) object);
   }
 
+  /**
+   * NORMAL (не EXPENSIVE): иначе маркеры появляются только при Project→Validate,
+   * а при обычной проверке модуля стрелки на ruler нет.
+   */
   @Override
-  @Check(CheckType.EXPENSIVE)
+  @Check(CheckType.NORMAL)
   public void validate(EObject object, CustomValidationMessageAcceptor messageAcceptor, CancelIndicator monitor) {
 
     if (monitor.isCanceled()) {

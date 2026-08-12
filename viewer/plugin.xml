@@ -104,16 +104,30 @@
     </extension>
     <extension
             point="org.eclipse.ui.editors.markerAnnotationSpecification">
+        <!--
+          Eclipse включает тип в Annotations / рисует ruler только если заданы
+          colorPreferenceKey+Value, textPreferenceKey, overviewRulerPreferenceKey.
+          В upstream 25.1 RGB ошибочно положили в colorPreferenceKey — тип отбрасывался.
+        -->
         <specification
                 annotationType="ru.biatech.edt.junit.testMethodAnnotation"
                 label="Тестовый метод"
                 includeOnPreferencePage="true"
-                colorPreferenceKey="30,200,150"
-                textStylePreferenceValue="BOX"
-                textPreferenceValue="true"
-                highlightPreferenceValue="true"
+                colorPreferenceKey="ru.biatech.edt.junit.testMethod.color"
+                colorPreferenceValue="30,200,150"
+                textPreferenceKey="ru.biatech.edt.junit.testMethod.text"
+                textPreferenceValue="false"
+                textStylePreferenceKey="ru.biatech.edt.junit.testMethod.textStyle"
+                textStylePreferenceValue="NONE"
+                highlightPreferenceKey="ru.biatech.edt.junit.testMethod.highlight"
+                highlightPreferenceValue="false"
+                overviewRulerPreferenceKey="ru.biatech.edt.junit.testMethod.overviewRuler"
+                overviewRulerPreferenceValue="false"
+                verticalRulerPreferenceKey="ru.biatech.edt.junit.testMethod.verticalRuler"
+                verticalRulerPreferenceValue="true"
                 icon="icons/full/actions16/run.png"
-                verticalRulerPreferenceValue="true">
+                presentationLayer="5"
+                contributesToHeader="false">
         </specification>
     </extension>
     <extension
